@@ -1,6 +1,5 @@
 package com.example.ejespot.features.auth.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,7 +17,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -27,9 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.ejespot.R
 
 // Colores de la marca EjeSpot
 private val EjeSpotGreen = Color(0xFF2D5A27)
@@ -41,7 +37,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     viewModel: LoginViewModel = viewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(uiState.loginSuccess) {
         if (uiState.loginSuccess) {
@@ -59,14 +55,23 @@ fun LoginScreen(
     ) {
         Spacer(modifier = Modifier.height(60.dp))
 
-        // Logo
-        Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = "Logo EjeSpot",
-            modifier = Modifier.size(100.dp)
-        )
+        // Logo (círculo con iniciales mientras no hay logo real)
+        Surface(
+            shape = RoundedCornerShape(50),
+            color = EjeSpotGreen,
+            modifier = Modifier.size(90.dp)
+        ) {
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Text(
+                    text = "ES",
+                    color = Color.White,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
         // Título
         Text(
@@ -235,23 +240,17 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Botón Google
-        SocialLoginButton(text = "Continuar con Google", iconRes = android.R.drawable.ic_menu_search) {
-            // TODO: Google login
-        }
+        SocialLoginButton(text = "Continuar con Google", emoji = "G") { }
 
         Spacer(modifier = Modifier.height(10.dp))
 
         // Botón Facebook
-        SocialLoginButton(text = "Continuar con Facebook", iconRes = android.R.drawable.ic_menu_share) {
-            // TODO: Facebook login
-        }
+        SocialLoginButton(text = "Continuar con Facebook", emoji = "f") { }
 
         Spacer(modifier = Modifier.height(10.dp))
 
         // Botón Apple
-        SocialLoginButton(text = "Continuar con Apple", iconRes = android.R.drawable.ic_menu_info_details) {
-            // TODO: Apple login
-        }
+        SocialLoginButton(text = "Continuar con Apple", emoji = "") { }
 
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -289,7 +288,7 @@ fun LoginScreen(
 @Composable
 private fun SocialLoginButton(
     text: String,
-    iconRes: Int,
+    emoji: String,
     onClick: () -> Unit
 ) {
     OutlinedButton(
@@ -298,16 +297,11 @@ private fun SocialLoginButton(
             .fillMaxWidth()
             .height(52.dp),
         shape = RoundedCornerShape(28.dp),
-        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White),
-        border = ButtonDefaults.outlinedButtonBorder.copy(
-            width = 1.dp
-        )
+        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White)
     ) {
-        Icon(
-            painter = painterResource(id = iconRes),
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = Color.Unspecified
+        Text(
+            text = emoji,
+            fontSize = 18.sp
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(

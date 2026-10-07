@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Archivos pesados / compilados
+*.dex
+map-clean-base64.txt
+ejespot-mockups-full.html

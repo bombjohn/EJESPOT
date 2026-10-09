@@ -2,26 +2,13 @@ package com.example.ejespot.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.example.ejespot.R
 
-// Tipografía Oficial EjeSpot
-val FrauncesFontFamily = FontFamily(
-    Font(R.font.fraunces, FontWeight.Normal),
-    Font(R.font.fraunces, FontWeight.Medium),
-    Font(R.font.fraunces, FontWeight.SemiBold),
-    Font(R.font.fraunces, FontWeight.Bold)
-)
-
-val ManropeFontFamily = FontFamily(
-    Font(R.font.manrope, FontWeight.Normal),
-    Font(R.font.manrope, FontWeight.Medium),
-    Font(R.font.manrope, FontWeight.SemiBold),
-    Font(R.font.manrope, FontWeight.Bold)
-)
+// Usar fuentes seguras del sistema que renderizan 100% sólidas sin glifos vacíos
+val FrauncesFontFamily = FontFamily.Serif
+val ManropeFontFamily = FontFamily.SansSerif
 
 val Typography = Typography(
     headlineLarge = TextStyle(

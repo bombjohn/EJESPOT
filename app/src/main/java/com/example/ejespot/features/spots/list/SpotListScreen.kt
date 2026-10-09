@@ -314,21 +314,15 @@ fun SpotCard(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Placeholder de imagen de spot con icono de montaña/lugar
-            Box(
+            // Imagen real del spot
+            androidx.compose.foundation.Image(
+                painter = painterResource(id = spot.imageResId),
+                contentDescription = spot.name,
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                 modifier = Modifier
                     .size(76.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(EjeSpotPrimaryContainer),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_logo_ejespot),
-                    contentDescription = null,
-                    tint = Color.Unspecified,
-                    modifier = Modifier.size(54.dp)
-                )
-            }
+            )
 
             Spacer(modifier = Modifier.width(12.dp))
 

@@ -67,18 +67,13 @@ fun SpotDetailScreen(
                 .height(260.dp)
                 .background(EjeSpotPrimaryContainer)
         ) {
-            // Fondo ilustrado
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_logo_ejespot),
-                    contentDescription = null,
-                    tint = Color.Unspecified,
-                    modifier = Modifier.size(140.dp)
-                )
-            }
+            // Fotografía real del spot
+            androidx.compose.foundation.Image(
+                painter = painterResource(id = spot.imageResId),
+                contentDescription = spot.name,
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
 
             // Botón Volver (superior izquierda)
             Surface(

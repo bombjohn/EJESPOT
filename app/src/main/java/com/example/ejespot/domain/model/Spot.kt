@@ -12,5 +12,6 @@ data class Spot(
     val hours: String,
     val description: String,
     val addedBy: String,
+    val imageResId: Int,
     val isPending: Boolean = false
 )

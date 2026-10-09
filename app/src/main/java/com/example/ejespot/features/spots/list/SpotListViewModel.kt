@@ -1,6 +1,7 @@
 package com.example.ejespot.features.spots.list
 
 import androidx.lifecycle.ViewModel
+import com.example.ejespot.R
 import com.example.ejespot.domain.model.Spot
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +22,8 @@ class SpotListViewModel : ViewModel() {
             priceBadge = "Gratuito",
             hours = "6:00 AM - 4:00 PM",
             description = "Hogar de la majestuosa Palma de Cera, el árbol nacional de Colombia. Senderos ecológicos entre montañas nubosas y miradores espectaculares.",
-            addedBy = "@caminante_rosa"
+            addedBy = "@caminante_rosa",
+            imageResId = R.drawable.spot_valle_cocora
         ),
         Spot(
             id = "2",
@@ -34,7 +36,8 @@ class SpotListViewModel : ViewModel() {
             priceBadge = "Moderado",
             hours = "8:00 AM - 7:00 PM",
             description = "Experiencia cafetera integral con barismo profesional, maridajes locales y vista panorámica a la cordillera central.",
-            addedBy = "@barista_juan"
+            addedBy = "@barista_juan",
+            imageResId = R.drawable.spot_cafe_sierra
         ),
         Spot(
             id = "3",
@@ -47,7 +50,8 @@ class SpotListViewModel : ViewModel() {
             priceBadge = "Gratuito",
             hours = "Abierto 24 Horas",
             description = "Centro histórico de la ciudad con la imponente Catedral Basílica y el icónico monumento a Bolívar Cóndor de Rodrigo Arenas.",
-            addedBy = "@manizales_vivo"
+            addedBy = "@manizales_vivo",
+            imageResId = R.drawable.spot_plaza_bolivar
         )
     )
 
@@ -64,6 +68,7 @@ class SpotListViewModel : ViewModel() {
             hours = "7:00 AM - 5:00 PM",
             description = "Caída de agua natural escondida en la reserva La Pastora. Ideal para senderismo y baño recreativo.",
             addedBy = "@caminante_rosa",
+            imageResId = R.drawable.spot_cascada_bosque,
             isPending = true
         )
     )

@@ -34,7 +34,10 @@ fun DashboardNavigation(
             CreateSpotScreen(
                 padding = padding,
                 snackbarHostState = snackbarHostState,
-                onNavigateBack = { activeSubScreen = null }
+                onNavigateBack = { activeSubScreen = null },
+                onSpotCreated = { newSpot ->
+                    spotListViewModel.addPendingSpot(newSpot)
+                }
             )
         }
 

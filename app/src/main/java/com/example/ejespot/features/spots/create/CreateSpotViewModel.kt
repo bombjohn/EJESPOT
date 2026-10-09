@@ -19,8 +19,8 @@ class CreateSpotViewModel : ViewModel() {
         _uiState.update { it.copy(category = category, errorMessage = null) }
     }
 
-    fun onDepartmentChanged(dept: String) {
-        _uiState.update { it.copy(department = dept, errorMessage = null) }
+    fun onLocationChanged(loc: String) {
+        _uiState.update { it.copy(location = loc, errorMessage = null) }
     }
 
     fun onDescriptionChanged(desc: String) {
@@ -35,17 +35,35 @@ class CreateSpotViewModel : ViewModel() {
         _uiState.update { it.copy(priceType = price, errorMessage = null) }
     }
 
-    fun onSubmit() {
+    fun onSubmit(onSuccessSpot: ((name: String, cat: String, loc: String, hours: String, price: String, desc: String) -> Unit)? = null) {
         val state = _uiState.value
-        if (state.name.isBlank() || state.description.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "Por favor completa el nombre y la descripción") }
+        if (state.name.isBlank()) {
+            _uiState.update { it.copy(errorMessage = "Por favor ingresa el nombre del lugar") }
             return
         }
-        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-        _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+        val spotName = state.name.trim()
+        val cat = state.category
+        val loc = state.location
+        val hours = state.hours
+        val price = state.priceType
+        val desc = state.description.ifBlank { "Nuevo punto turístico y cultural sugerido por la comunidad en $loc." }
+
+        onSuccessSpot?.invoke(spotName, cat, loc, hours, price, desc)
+
+        _uiState.update {
+            it.copy(
+                isLoading = false,
+                isSuccess = true,
+                errorMessage = null,
+                submittedSpotName = spotName,
+                submittedCategory = cat,
+                submittedLocation = loc
+            )
+        }
     }
 
     fun resetState() {
         _uiState.update { CreateSpotUiState() }
     }
 }
+

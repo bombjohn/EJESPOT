@@ -298,5 +298,13 @@ class SpotListViewModel : ViewModel() {
             )
         }
     }
+
+    fun addPendingSpot(newSpot: Spot) {
+        val updatedPending = listOf(newSpot) + _allPendingSpots.value
+        _allPendingSpots.value = updatedPending
+        _uiState.update { current ->
+            current.copy(pendingSpots = updatedPending)
+        }
+    }
 }
 

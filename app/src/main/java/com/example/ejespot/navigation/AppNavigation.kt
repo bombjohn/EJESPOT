@@ -5,8 +5,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.ejespot.domain.model.UserRole
+import com.example.ejespot.features.auth.ui.ForgotPasswordScreen
 import com.example.ejespot.features.auth.ui.LoginScreen
 import com.example.ejespot.features.auth.ui.RegisterScreen
+import com.example.ejespot.features.dashboard.MainScreen
 import com.example.ejespot.features.onboarding.ui.OnboardingScreen
 import com.example.ejespot.features.splash.ui.SplashScreen
 
@@ -16,9 +19,7 @@ object Routes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val FORGOT_PASSWORD = "forgot_password"
-    const val FEED = "feed"
-    const val POST_DETAIL = "post_detail/{postId}"
-    const val CREATE_POST = "create_post"
+    const val MAIN = "main"
 }
 
 @Composable
@@ -57,7 +58,9 @@ fun AppNavigation(
         composable(Routes.LOGIN) {
             LoginScreen(
                 onLoginSuccess = {
-                    // Navegación hacia Home/Feed
+                    navController.navigate(Routes.MAIN) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
                 },
                 onNavigateToRegister = {
                     navController.navigate(Routes.REGISTER)
@@ -77,7 +80,7 @@ fun AppNavigation(
                     navController.popBackStack()
                 },
                 onRegisterSuccess = {
-                    navController.navigate(Routes.LOGIN) {
+                    navController.navigate(Routes.MAIN) {
                         popUpTo(Routes.REGISTER) { inclusive = true }
                     }
                 }
@@ -85,12 +88,24 @@ fun AppNavigation(
         }
 
         composable(Routes.FORGOT_PASSWORD) {
-            com.example.ejespot.features.auth.ui.ForgotPasswordScreen(
+            ForgotPasswordScreen(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
                 onNavigateToLogin = {
                     navController.popBackStack()
+                }
+            )
+        }
+
+        // Pantalla Principal (Dashboard con NavigationBar + Nested Navigation)
+        composable(Routes.MAIN) {
+            MainScreen(
+                role = UserRole.USER,
+                onLogout = {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.MAIN) { inclusive = true }
+                    }
                 }
             )
         }

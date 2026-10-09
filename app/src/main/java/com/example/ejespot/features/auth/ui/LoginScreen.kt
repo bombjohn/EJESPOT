@@ -36,6 +36,7 @@ import com.example.ejespot.ui.theme.*
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit = {},
+    onNavigateToForgotPassword: () -> Unit = {},
     viewModel: LoginViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -145,7 +146,7 @@ fun LoginScreen(
                 fontSize = 12.sp,
                 color = EjeSpotPrimary,
                 modifier = Modifier
-                    .clickable { /* TODO */ }
+                    .clickable { onNavigateToForgotPassword() }
                     .padding(vertical = 4.dp)
             )
         }

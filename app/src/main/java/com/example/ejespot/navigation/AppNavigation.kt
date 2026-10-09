@@ -61,6 +61,9 @@ fun AppNavigation(
                 },
                 onNavigateToRegister = {
                     navController.navigate(Routes.REGISTER)
+                },
+                onNavigateToForgotPassword = {
+                    navController.navigate(Routes.FORGOT_PASSWORD)
                 }
             )
         }
@@ -77,6 +80,17 @@ fun AppNavigation(
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.REGISTER) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        composable(Routes.FORGOT_PASSWORD) {
+            com.example.ejespot.features.auth.ui.ForgotPasswordScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onNavigateToLogin = {
+                    navController.popBackStack()
                 }
             )
         }

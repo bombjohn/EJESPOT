@@ -3,23 +3,23 @@ package com.example.ejespot.features.auth.ui
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.Mail
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -53,26 +53,24 @@ fun LoginScreen(
             .padding(horizontal = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(36.dp))
 
         // Logo Oficial EjeSpot
         Image(
             painter = painterResource(id = R.drawable.ic_logo_ejespot),
             contentDescription = "Logo EjeSpot",
-            modifier = Modifier.size(110.dp)
+            modifier = Modifier.size(130.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // Título con tipografía Fraunces Serif
+        // Título con Fraunces Serif
         Text(
             text = "Bienvenido a Eje Spot",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontFamily = FrauncesFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 26.sp,
-                color = EjeSpotText
-            ),
+            fontFamily = FrauncesFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 25.sp,
+            color = EjeSpotText,
             textAlign = TextAlign.Center
         )
 
@@ -81,153 +79,99 @@ fun LoginScreen(
         // Subtítulo con Manrope
         Text(
             text = "Inicia sesión para descubrir y compartir\nlugares",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontFamily = ManropeFontFamily,
-                color = EjeSpotTextMuted,
-                lineHeight = 20.sp
-            ),
-            textAlign = TextAlign.Center
+            fontFamily = ManropeFontFamily,
+            fontWeight = FontWeight.Medium,
+            fontSize = 13.5.sp,
+            color = EjeSpotTextMuted,
+            textAlign = TextAlign.Center,
+            lineHeight = 19.sp
         )
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        // Campo Correo electrónico
+        // Campo 1: Correo electrónico
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "Correo electrónico",
                 fontFamily = ManropeFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 13.sp,
-                color = EjeSpotText
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                color = EjeSpotTextMuted
             )
-            Spacer(modifier = Modifier.height(6.dp))
-            OutlinedTextField(
+            Spacer(modifier = Modifier.height(5.dp))
+            CustomInputBox(
                 value = uiState.email,
                 onValueChange = { viewModel.onEmailChanged(it) },
-                placeholder = {
-                    Text(
-                        "tú@correo.com",
-                        fontFamily = ManropeFontFamily,
-                        color = EjeSpotOutline
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Mail,
-                        contentDescription = null,
-                        tint = EjeSpotTextMuted,
-                        modifier = Modifier.size(20.dp)
-                    )
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White,
-                    unfocusedBorderColor = EjeSpotOutline,
-                    focusedBorderColor = EjeSpotPrimary
-                ),
-                textStyle = LocalTextStyle.current.copy(fontFamily = ManropeFontFamily),
-                modifier = Modifier.fillMaxWidth()
+                placeholder = "tú@correo.com",
+                iconRes = R.drawable.ic_mail_icon,
+                keyboardType = KeyboardType.Email
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-        // Campo Contraseña
+        // Campo 2: Contraseña (sin icono de ojo a la derecha, tal como el mockup original)
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
                 text = "Contraseña",
                 fontFamily = ManropeFontFamily,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 13.sp,
-                color = EjeSpotText
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                color = EjeSpotTextMuted
             )
-            Spacer(modifier = Modifier.height(6.dp))
-            OutlinedTextField(
+            Spacer(modifier = Modifier.height(5.dp))
+            CustomInputBox(
                 value = uiState.password,
                 onValueChange = { viewModel.onPasswordChanged(it) },
-                placeholder = {
-                    Text(
-                        "••••••••••••",
-                        fontFamily = ManropeFontFamily,
-                        color = EjeSpotOutline
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        Icons.Default.Lock,
-                        contentDescription = null,
-                        tint = EjeSpotTextMuted,
-                        modifier = Modifier.size(20.dp)
-                    )
-                },
-                trailingIcon = {
-                    IconButton(onClick = { viewModel.onTogglePasswordVisibility() }) {
-                        Icon(
-                            imageVector = if (uiState.isPasswordVisible)
-                                Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (uiState.isPasswordVisible)
-                                "Ocultar contraseña" else "Mostrar contraseña",
-                            tint = EjeSpotTextMuted,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                },
-                visualTransformation = if (uiState.isPasswordVisible)
-                    VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = Color.White,
-                    focusedContainerColor = Color.White,
-                    unfocusedBorderColor = EjeSpotOutline,
-                    focusedBorderColor = EjeSpotPrimary
-                ),
-                textStyle = LocalTextStyle.current.copy(fontFamily = ManropeFontFamily),
-                modifier = Modifier.fillMaxWidth()
+                placeholder = "••••••••••••",
+                iconRes = R.drawable.ic_lock_icon,
+                isPassword = true,
+                keyboardType = KeyboardType.Password
             )
         }
 
-        // ¿Olvidaste tu contraseña?
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-            TextButton(
-                onClick = { /* TODO */ },
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Text(
-                    text = "¿Olvidaste tu contraseña?",
-                    color = EjeSpotPrimary,
-                    fontFamily = ManropeFontFamily,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 13.sp
-                )
-            }
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // ¿Olvidaste tu contraseña? (derecha, verde oscuro)
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Text(
+                text = "¿Olvidaste tu contraseña?",
+                fontFamily = ManropeFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 12.sp,
+                color = EjeSpotPrimary,
+                modifier = Modifier
+                    .clickable { /* TODO */ }
+                    .padding(vertical = 4.dp)
+            )
         }
 
         // Mensaje de error
         if (uiState.errorMessage != null) {
+            Spacer(modifier = Modifier.height(6.dp))
             Text(
                 text = uiState.errorMessage!!,
                 color = MaterialTheme.colorScheme.error,
                 fontFamily = ManropeFontFamily,
-                fontSize = 13.sp,
-                modifier = Modifier.padding(bottom = 8.dp)
+                fontSize = 12.sp
             )
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-        // Botón Iniciar sesión (Verde Cafetero #3D6B4F con bordes redondeados)
+        // Botón Iniciar sesión (.btn-block del mockup)
         Button(
             onClick = { viewModel.onLogin() },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp),
-            shape = RoundedCornerShape(26.dp),
+                .height(48.dp)
+                .shadow(elevation = 2.dp, shape = RoundedCornerShape(100.dp)),
+            shape = RoundedCornerShape(100.dp),
             colors = ButtonDefaults.buttonColors(containerColor = EjeSpotPrimary),
+            contentPadding = PaddingValues(0.dp),
             enabled = !uiState.isLoading
         ) {
             if (uiState.isLoading) {
@@ -236,16 +180,16 @@ fun LoginScreen(
                 Text(
                     text = "Iniciar sesión",
                     fontFamily = ManropeFontFamily,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.ExtraBold,
                     color = Color.White
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
-        // Separador con texto "o continúa con"
+        // Separador "o continúa con"
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
@@ -254,103 +198,167 @@ fun LoginScreen(
             Text(
                 text = "  o continúa con  ",
                 fontFamily = ManropeFontFamily,
-                fontSize = 13.sp,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold,
                 color = EjeSpotTextMuted
             )
             HorizontalDivider(modifier = Modifier.weight(1f), color = EjeSpotOutline)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-        // Botón Google Oficial
+        // Botón Google (.social-btn)
         SocialLoginButton(
             text = "Continuar con Google",
-            iconDrawable = R.drawable.ic_google_logo
+            iconRes = R.drawable.ic_google_logo
         ) { }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // Botón Facebook Oficial
+        // Botón Facebook (.social-btn)
         SocialLoginButton(
             text = "Continuar con Facebook",
-            iconDrawable = R.drawable.ic_facebook_logo
+            iconRes = R.drawable.ic_facebook_logo
         ) { }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // Botón Apple Oficial
+        // Botón Apple (.social-btn)
         SocialLoginButton(
             text = "Continuar con Apple",
-            iconDrawable = R.drawable.ic_apple_logo
+            iconRes = R.drawable.ic_apple_logo
         ) { }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
-        // Explorar como invitado
+        // Explorar como invitado (verde/marrón subrayado)
         Text(
             text = "Explorar como invitado",
-            color = EjeSpotPrimary,
             fontFamily = ManropeFontFamily,
             fontWeight = FontWeight.Bold,
-            fontSize = 14.sp,
+            fontSize = 12.sp,
+            color = EjeSpotTextMuted,
             textDecoration = TextDecoration.Underline,
             modifier = Modifier
                 .clickable { viewModel.onLoginAsGuest() }
                 .padding(vertical = 4.dp)
         )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        // Footer: ¿No tienes cuenta? Regístrate como Turista
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        // Footer "¿No tienes cuenta? Regístrate como Turista"
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(bottom = 24.dp)
+        ) {
             Text(
                 text = "¿No tienes cuenta? ",
                 fontFamily = ManropeFontFamily,
-                fontSize = 14.sp,
+                fontSize = 12.5.sp,
                 color = EjeSpotTextMuted
             )
             Text(
                 text = "Regístrate como Turista",
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+                fontSize = 12.5.sp,
                 color = EjeSpotPrimary,
                 modifier = Modifier.clickable { /* TODO */ }
             )
         }
+    }
+}
 
-        Spacer(modifier = Modifier.height(32.dp))
+@Composable
+private fun CustomInputBox(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String,
+    iconRes: Int,
+    isPassword: Boolean = false,
+    keyboardType: KeyboardType = KeyboardType.Text
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(46.dp)
+            .shadow(elevation = 1.dp, shape = RoundedCornerShape(14.dp))
+            .background(Color.White, RoundedCornerShape(14.dp))
+            .border(1.dp, EjeSpotOutline, RoundedCornerShape(14.dp))
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            tint = EjeSpotTextMuted,
+            modifier = Modifier.size(16.dp)
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Box(modifier = Modifier.weight(1f)) {
+            if (value.isEmpty()) {
+                Text(
+                    text = placeholder,
+                    fontFamily = ManropeFontFamily,
+                    fontSize = 13.5.sp,
+                    color = EjeSpotOutline
+                )
+            }
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                singleLine = true,
+                visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
+                keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+                textStyle = TextStyle(
+                    fontFamily = ManropeFontFamily,
+                    fontSize = 13.5.sp,
+                    color = EjeSpotText
+                ),
+                cursorBrush = SolidColor(EjeSpotPrimary),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
 @Composable
 private fun SocialLoginButton(
     text: String,
-    iconDrawable: Int,
+    iconRes: Int,
     onClick: () -> Unit
 ) {
-    OutlinedButton(
+    Surface(
         onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
-            .height(52.dp),
-        shape = RoundedCornerShape(26.dp),
-        colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, EjeSpotOutline)
+            .height(44.dp)
+            .shadow(elevation = 0.5.dp, shape = RoundedCornerShape(100.dp)),
+        shape = RoundedCornerShape(100.dp),
+        color = Color.White,
+        border = BorderStroke(1.2.dp, EjeSpotOutline)
     ) {
-        Icon(
-            painter = painterResource(id = iconDrawable),
-            contentDescription = null,
-            modifier = Modifier.size(20.dp),
-            tint = Color.Unspecified
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = text,
-            fontFamily = ManropeFontFamily,
-            fontSize = 15.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = EjeSpotText
-        )
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = null,
+                tint = Color.Unspecified,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = text,
+                fontFamily = ManropeFontFamily,
+                fontSize = 12.5.sp,
+                fontWeight = FontWeight.Bold,
+                color = EjeSpotText
+            )
+        }
     }
 }

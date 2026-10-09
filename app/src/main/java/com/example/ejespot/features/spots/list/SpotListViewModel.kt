@@ -21,23 +21,23 @@ class SpotListViewModel : ViewModel() {
             isVerified = true,
             priceBadge = "Gratuito",
             hours = "6:00 AM - 4:00 PM",
-            description = "Hogar de la majestuosa Palma de Cera, el árbol nacional de Colombia. Senderos ecológicos entre montañas nubosas y miradores espectaculares.",
+            description = "Hogar de la majestuosa Palma de Cera, el árbol nacional de Colombia. Senderos ecológicos entre montañas verdes, miradores espectaculares y mirador de colibríes.",
             addedBy = "@caminante_rosa",
             imageResId = R.drawable.spot_valle_cocora
         ),
         Spot(
             id = "2",
-            name = "Finca Café de la Sierra",
+            name = "Simón Simón Campestre",
             category = "Gastronomía",
-            location = "Filandia, Quindío",
+            location = "Pereira, Risaralda",
             rating = 4.8,
-            distance = "5.4 km",
+            distance = "4.2 km",
             isVerified = true,
             priceBadge = "Moderado",
-            hours = "8:00 AM - 7:00 PM",
-            description = "Experiencia cafetera integral con barismo profesional, maridajes locales y vista panorámica a la cordillera central.",
-            addedBy = "@barista_juan",
-            imageResId = R.drawable.spot_cafe_sierra
+            hours = "11:30 AM - 9:00 PM",
+            description = "Restaurante campestre con arquitectura típica cafetera en guadua, amplias zonas verdes y gastronomía tradicional fusión con hermosa vista panorámica.",
+            addedBy = "@gourmet_pereira",
+            imageResId = R.drawable.spot_simon_simon
         ),
         Spot(
             id = "3",
@@ -49,7 +49,7 @@ class SpotListViewModel : ViewModel() {
             isVerified = true,
             priceBadge = "Gratuito",
             hours = "Abierto 24 Horas",
-            description = "Centro histórico de la ciudad con la imponente Catedral Basílica y el icónico monumento a Bolívar Cóndor de Rodrigo Arenas.",
+            description = "Centro histórico y cultural de Manizales con la imponente Catedral Basílica Metropolitana y el icónico monumento al Bolívar Cóndor de Rodrigo Arenas Betancourt.",
             addedBy = "@manizales_vivo",
             imageResId = R.drawable.spot_plaza_bolivar
         )
@@ -58,17 +58,17 @@ class SpotListViewModel : ViewModel() {
     private val samplePendingSpots = listOf(
         Spot(
             id = "4",
-            name = "Cascada El Bosque, Pereira",
+            name = "Cascada Los Frailes, Pereira",
             category = "Naturaleza",
             location = "Pereira, Risaralda",
-            rating = 4.7,
-            distance = "12 km",
+            rating = 4.8,
+            distance = "15 km",
             isVerified = false,
             priceBadge = "Gratuito",
-            hours = "7:00 AM - 5:00 PM",
-            description = "Caída de agua natural escondida en la reserva La Pastora. Ideal para senderismo y baño recreativo.",
-            addedBy = "@caminante_rosa",
-            imageResId = R.drawable.spot_cascada_bosque,
+            hours = "7:00 AM - 4:00 PM",
+            description = "Impresionante caída de agua natural de más de 70 metros ubicada en la cuenca alta del río Otún, dentro del Santuario de Flora y Fauna Otún Quimbaya.",
+            addedBy = "@eco_explorador",
+            imageResId = R.drawable.spot_cascada_frailes,
             isPending = true
         )
     )

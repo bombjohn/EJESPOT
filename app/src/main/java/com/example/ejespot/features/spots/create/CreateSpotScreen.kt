@@ -117,11 +117,17 @@ fun CreateSpotScreen(
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "Foto del lugar (Automática en Fase 2)",
+                    text = "Adjuntar fotografía del lugar",
                     fontFamily = ManropeFontFamily,
-                    fontSize = 12.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF6E6252)
+                    color = Color(0xFF1F1A15)
+                )
+                Text(
+                    text = "Toca para seleccionar de tu galería (JPG, PNG)",
+                    fontFamily = ManropeFontFamily,
+                    fontSize = 11.sp,
+                    color = Color(0xFF887D70)
                 )
             }
         }

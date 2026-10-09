@@ -80,11 +80,11 @@ fun LoginScreen(
         Text(
             text = "Inicia sesión para descubrir y compartir\nlugares",
             fontFamily = ManropeFontFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 13.5.sp,
-            color = EjeSpotTextMuted,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 14.sp,
+            color = Color(0xFF1F1A15),
             textAlign = TextAlign.Center,
-            lineHeight = 19.sp
+            lineHeight = 20.sp
         )
 
         Spacer(modifier = Modifier.height(28.dp))
@@ -95,8 +95,8 @@ fun LoginScreen(
                 text = "Correo electrónico",
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                color = EjeSpotTextMuted
+                fontSize = 13.sp,
+                color = Color(0xFF1F1A15)
             )
             Spacer(modifier = Modifier.height(5.dp))
             CustomInputBox(
@@ -116,8 +116,8 @@ fun LoginScreen(
                 text = "Contraseña",
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                color = EjeSpotTextMuted
+                fontSize = 13.sp,
+                color = Color(0xFF1F1A15)
             )
             Spacer(modifier = Modifier.height(5.dp))
             CustomInputBox(
@@ -199,8 +199,8 @@ fun LoginScreen(
                 text = "  o continúa con  ",
                 fontFamily = ManropeFontFamily,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = EjeSpotTextMuted
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2E241C)
             )
             HorizontalDivider(modifier = Modifier.weight(1f), color = EjeSpotOutline)
         }
@@ -237,7 +237,7 @@ fun LoginScreen(
             fontFamily = ManropeFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
-            color = EjeSpotTextMuted,
+            color = Color(0xFF2E241C),
             textDecoration = TextDecoration.Underline,
             modifier = Modifier
                 .clickable { viewModel.onLoginAsGuest() }
@@ -254,8 +254,9 @@ fun LoginScreen(
             Text(
                 text = "¿No tienes cuenta? ",
                 fontFamily = ManropeFontFamily,
+                fontWeight = FontWeight.Medium,
                 fontSize = 12.5.sp,
-                color = EjeSpotTextMuted
+                color = Color(0xFF2E241C)
             )
             Text(
                 text = "Regístrate como Turista",

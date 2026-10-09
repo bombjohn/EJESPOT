@@ -21,8 +21,9 @@ val EjeSpotSurface = Color(0xFFFFFFFF)
 val EjeSpotSurfaceVariant = Color(0xFFEFE6D6)
 val EjeSpotOutline = Color(0xFFD8CCB4)
 
-val EjeSpotText = Color(0xFF2B2118)
-val EjeSpotTextMuted = Color(0xFF6E6252)
+val EjeSpotText = Color(0xFF1A1A1A)       // Negro suave nítido
+val EjeSpotTextMuted = Color(0xFF2E241C)  // Café oscuro sólido (sin transparencia ni lavado)
+val EjeSpotPlaceholder = Color(0xFF887D70)
 
 val EjeSpotGold = Color(0xFFF0C868)                // Acento "Spot"
 val EjeSpotSplashDark = Color(0xFF17301F)          // Fondo oscuro splash

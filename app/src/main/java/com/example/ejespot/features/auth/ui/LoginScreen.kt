@@ -35,6 +35,7 @@ import com.example.ejespot.ui.theme.*
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onNavigateToRegister: () -> Unit = {},
     viewModel: LoginViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -264,7 +265,7 @@ fun LoginScreen(
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.5.sp,
                 color = EjeSpotPrimary,
-                modifier = Modifier.clickable { /* TODO */ }
+                modifier = Modifier.clickable { onNavigateToRegister() }
             )
         }
     }

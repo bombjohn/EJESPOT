@@ -6,10 +6,18 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.ejespot.features.auth.ui.LoginScreen
+import com.example.ejespot.features.onboarding.ui.OnboardingScreen
+import com.example.ejespot.features.splash.ui.SplashScreen
 
 object Routes {
+    const val SPLASH = "splash"
+    const val ONBOARDING = "onboarding"
     const val LOGIN = "login"
-    const val HOME = "home"
+    const val REGISTER = "register"
+    const val FORGOT_PASSWORD = "forgot_password"
+    const val FEED = "feed"
+    const val POST_DETAIL = "post_detail/{postId}"
+    const val CREATE_POST = "create_post"
 }
 
 @Composable
@@ -18,17 +26,39 @@ fun AppNavigation(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.LOGIN
+        startDestination = Routes.SPLASH
     ) {
-        composable(Routes.LOGIN) {
-            LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate(Routes.HOME) {
-                        popUpTo(Routes.LOGIN) { inclusive = true }
+        composable(Routes.SPLASH) {
+            SplashScreen(
+                onSplashFinished = {
+                    navController.navigate(Routes.ONBOARDING) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
                     }
                 }
             )
         }
-        // TODO: Fase 3 - Agregar más pantallas aquí
+
+        composable(Routes.ONBOARDING) {
+            OnboardingScreen(
+                onContinue = {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.ONBOARDING) { inclusive = true }
+                    }
+                },
+                onSkip = {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.ONBOARDING) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Routes.LOGIN) {
+            LoginScreen(
+                onLoginSuccess = {
+                    // Navegación hacia Home/Feed
+                }
+            )
+        }
     }
 }

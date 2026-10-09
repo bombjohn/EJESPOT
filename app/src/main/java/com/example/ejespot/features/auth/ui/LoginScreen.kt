@@ -1,8 +1,11 @@
 package com.example.ejespot.features.auth.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.res.painterResource
+import com.example.ejespot.R
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -55,21 +58,12 @@ fun LoginScreen(
     ) {
         Spacer(modifier = Modifier.height(60.dp))
 
-        // Logo (círculo con iniciales mientras no hay logo real)
-        Surface(
-            shape = RoundedCornerShape(50),
-            color = EjeSpotGreen,
-            modifier = Modifier.size(90.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                Text(
-                    text = "ES",
-                    color = Color.White,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
+        // Logo Oficial
+        Image(
+            painter = painterResource(id = R.drawable.ic_logo_ejespot),
+            contentDescription = "Logo EjeSpot",
+            modifier = Modifier.size(110.dp)
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 

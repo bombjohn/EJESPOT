@@ -43,9 +43,13 @@ fun DashboardNavigation(
             SpotDetailScreen(
                 spot = spot,
                 padding = padding,
+                snackbarHostState = snackbarHostState,
                 onNavigateBack = {
                     activeSubScreen = null
                     selectedSpotId = null
+                },
+                onAddReview = { newReview ->
+                    spot?.let { spotListViewModel.addReview(it.id, newReview) }
                 }
             )
         }

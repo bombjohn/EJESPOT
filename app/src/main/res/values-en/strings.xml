@@ -1,0 +1,862 @@
+<resources>
+    <string name="app_name">EjeSpot</string>
+
+    <!-- Common -->
+    <string name="common_cancel">Cancel</string>
+    <string name="common_save">Save</string>
+    <string name="common_accept">Accept</string>
+    <string name="common_close">Close</string>
+    <string name="common_search">Search</string>
+    <string name="common_back">Back</string>
+    <string name="common_continue">Continue</string>
+    <string name="common_visited_badge">✓ Visited</string>
+    <string name="common_favorite_badge">♥ Favorite</string>
+
+    <!-- Splash -->
+    <string name="splash_logo_description">EjeSpot logo</string>
+    <string name="splash_tagline">Discover the Coffee Region with your community</string>
+    <string name="splash_region">CALDAS · QUINDÍO · RISARALDA</string>
+
+    <!-- Image (guide 15) -->
+    <string name="select_image">Select image</string>
+    <string name="take_photo">Take photo</string>
+    <string name="choose_from_gallery">Choose from gallery</string>
+    <string name="camera_permission_required">Camera permission is required to take the photo. You can enable it from your device Settings</string>
+    <string name="location_permission_required">Location permission is required to center the map on you. You can enable it from your device Settings</string>
+    <string name="change_photo">Change photo</string>
+
+    <!-- Login -->
+    <string name="login_welcome">Welcome back</string>
+    <string name="login_subtitle">Sign in to keep discovering the Coffee Region</string>
+    <string name="login_email_label">Email</string>
+    <string name="login_password_label">Password</string>
+    <string name="login_button">Sign in</string>
+    <string name="login_forgot_password">Forgot your password?</string>
+    <string name="login_or_continue_with">or continue with</string>
+    <string name="login_google">Continue with Google</string>
+    <string name="login_facebook">Continue with Facebook</string>
+    <string name="login_no_account">Don\'t have an account?</string>
+    <string name="login_register">Sign up as Tourist</string>
+    <string name="login_guest">Explore as guest</string>
+    <string name="login_apple">Continue with Apple</string>
+    <string name="login_social_google_soon">Google sign-in coming soon</string>
+    <string name="login_social_facebook_soon">Facebook sign-in coming soon</string>
+    <string name="login_social_apple_soon">Apple sign-in coming soon</string>
+
+    <!-- Register -->
+    <string name="register_title">Create account</string>
+    <string name="register_subtitle">Join the EjeSpot community</string>
+    <string name="register_name_label">Full name</string>
+    <string name="register_email_label">Email</string>
+    <string name="register_password_label">Password</string>
+    <string name="register_button">Create account</string>
+    <string name="register_have_account">Already have an account?</string>
+    <string name="register_login">Sign in</string>
+    <string name="register_badge">👢 New Adventurer</string>
+    <string name="register_exit_title">Are you sure you want to leave?</string>
+    <string name="register_exit_message">If you leave now, the data you entered will be lost.</string>
+    <string name="register_exit_confirm">Leave</string>
+    <string name="register_email_placeholder">renata@tourismregion.com</string>
+    <string name="register_department_label">Department of origin / residence</string>
+    <string name="register_department_other">Other department</string>
+    <string name="register_terms_prefix">I accept the\u0020</string>
+    <string name="register_terms_service">Terms of Service</string>
+    <string name="register_terms_mid">\u0020and the\u0020</string>
+    <string name="register_terms_privacy">Eje Spot Privacy Policy</string>
+    <string name="register_terms_suffix">.</string>
+    <string name="register_success">Account created successfully! Welcome to EjeSpot</string>
+
+    <!-- Forgot password -->
+    <string name="forgot_title">Reset password</string>
+    <string name="forgot_subtitle">We will send you a link to reset it</string>
+    <string name="forgot_email_label">Email</string>
+    <string name="forgot_button">Send link</string>
+    <string name="forgot_back_to_login">Back to sign in</string>
+    <string name="forgot_email_placeholder">you@email.com</string>
+    <string name="forgot_email_sent_title">Email sent</string>
+    <string name="forgot_title_alt">Forgot your\npassword?</string>
+    <string name="forgot_check_email_title">Check your email!</string>
+    <string name="forgot_sent_to">We sent a recovery link to:</string>
+    <string name="forgot_expires_prefix">The link expires in\u0020</string>
+    <string name="forgot_expires_bold">30 minutes</string>
+    <string name="forgot_expires_suffix">. If you don\'t see it in your inbox, check your spam folder.</string>
+    <string name="forgot_open_mail_app">Open email app</string>
+    <string name="forgot_resend">Resend email</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title_1">Discover unique places</string>
+    <string name="onboarding_desc_1">Explore the most special corners of the Coffee Region</string>
+    <string name="onboarding_title_2">Save and share</string>
+    <string name="onboarding_desc_2">Build your list of favorite places and share them with the community</string>
+    <string name="onboarding_title_3">Live the experience</string>
+    <string name="onboarding_desc_3">Mark the places you visit and earn rewards</string>
+    <string name="onboarding_start">Get started</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_skip_have_account">I already have an account</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_home">Home</string>
+    <string name="nav_map">Map</string>
+    <string name="nav_visited">Visited</string>
+    <string name="nav_profile">Profile</string>
+
+    <!-- Feed / spot list -->
+    <string name="feed_location_pill">Coffee Region</string>
+    <string name="feed_search_placeholder">Search places, cafés, viewpoints…</string>
+    <string name="feed_banner_title">Found an amazing place?</string>
+    <string name="feed_banner_subtitle">Suggest a new spot and earn +100 XP</string>
+    <string name="feed_banner_button">+ Suggest spot</string>
+    <string name="feed_verified">Verified</string>
+    <string name="feed_category_all">All</string>
+    <string name="feed_notifications">Notifications</string>
+    <string name="feed_no_notifications">You have no pending notifications</string>
+    <string name="feed_section_nearby_verified">Near you · Verified by the community</string>
+    <string name="feed_section_pending">Pending verification (Community)</string>
+    <string name="feed_add_spot">Add spot</string>
+
+    <!-- Map -->
+    <string name="map_search_placeholder">Search places on the map…</string>
+    <string name="map_selected_label">PLACE SELECTED ON THE MAP</string>
+    <string name="map_get_directions">Get directions</string>
+    <string name="map_view_details">View details</string>
+    <string name="map_mark_visited">Mark visited</string>
+    <string name="map_save">Save</string>
+    <string name="map_my_location">My location</string>
+    <string name="map_center_region">Center on the Coffee Region</string>
+    <string name="map_centered_region">🗺️ View centered on the Coffee Region</string>
+    <string name="map_centered_location">📍 Centering on your location</string>
+    <string name="map_visited_snackbar">✓ %1$s marked as visited (+10 XP)</string>
+    <string name="map_unvisited_snackbar">%1$s removed from your visited places</string>
+    <string name="map_saved_snackbar">🤍 %1$s saved to favorites</string>
+    <string name="map_unsaved_snackbar">%1$s removed from favorites</string>
+
+    <!-- Spot detail -->
+    <string name="detail_reviews_title">Reviews</string>
+    <string name="detail_report">Report</string>
+    <string name="detail_share">Share</string>
+    <string name="detail_not_found">Point of interest not found</string>
+    <string name="detail_spot_not_found">Spot not found</string>
+    <string name="detail_verified_by_moderator">Verified by Moderator</string>
+    <string name="detail_rating_reviews">%1$s (%2$d reviews)</string>
+    <string name="detail_hours_label">SUGGESTED HOURS</string>
+    <string name="detail_price_label">PRICE RANGE</string>
+    <string name="detail_about">About this place</string>
+    <string name="detail_technical_default">TECHNICAL DETAILS</string>
+    <string name="detail_specialties_default">🍴 House Specialties</string>
+    <string name="detail_highlights_default">🦅 Featured Attractions</string>
+    <string name="detail_mark_visited">Mark as visited</string>
+    <string name="detail_visited_xp">Visited (+10 XP)</string>
+    <string name="detail_share_message">Check out this amazing place in the Coffee Region! 🌿 %1$s (%2$s). Discover it in the EjeSpot app.</string>
+    <string name="detail_share_chooser">Share place</string>
+    <string name="detail_community_experiences">Community experiences</string>
+    <string name="detail_see_all_count">See all (%1$d)</string>
+    <string name="detail_no_reviews">There are no reviews for this place yet.</string>
+    <string name="detail_first_review">Be the first to share your experience and earn +25 XP!</string>
+    <string name="detail_write_review_xp">Write a review (+25 XP)</string>
+    <string name="detail_directions_gps">🗺️ Get directions (GPS)</string>
+    <string name="detail_report_info">Report inappropriate information or content</string>
+    <string name="detail_review_dialog_title">✍ Write Review</string>
+    <string name="detail_review_question">How was your experience at %1$s?</string>
+    <string name="detail_star_count">%1$d stars</string>
+    <string name="detail_review_author_label">Your name / Nickname</string>
+    <string name="detail_review_author_placeholder">E.g. Juan Pérez</string>
+    <string name="detail_review_comment_label">Your opinion or recommendation</string>
+    <string name="detail_review_comment_placeholder">Share tips on transport, weather, food...</string>
+    <string name="detail_review_publish">Publish (+25 XP)</string>
+    <string name="detail_reviews_count">%1$d reviews</string>
+    <string name="reviews_mock_1_badge">Level 4 · Coffee Explorer</string>
+    <string name="reviews_mock_1_comment">A spectacular place, the trail is very well signposted and the waterfall is totally worth it.</string>
+    <string name="reviews_mock_2_badge">Level 2 · Adventurer</string>
+    <string name="reviews_mock_2_comment">Very beautiful, although in the rainy season the path gets slippery. Bring good footwear.</string>
+    <string name="reviews_mock_3_badge">Level 6 · Local Ambassador</string>
+    <string name="reviews_mock_3_comment">Personally verified by me: the hours and the price are correct. Recommended!</string>
+
+    <!-- Create / edit spot -->
+    <string name="create_title">New place</string>
+    <string name="create_name_label">PLACE NAME</string>
+    <string name="create_name_placeholder">E.g. El Bosque Waterfall</string>
+    <string name="create_category_label">CATEGORY</string>
+    <string name="create_location_label">LOCATION</string>
+    <string name="create_hours_label">SUGGESTED OPENING HOURS</string>
+    <string name="create_hours_placeholder">7:00 a.m. - 5:00 p.m.</string>
+    <string name="create_price_label">ESTIMATED PRICE RANGE</string>
+    <string name="create_photo_label">Place photo</string>
+    <string name="create_add_photos">Add photos of the place</string>
+    <string name="create_select_municipality">Select Municipality</string>
+    <string name="create_coordinates_ready">%1$s · Coordinates ready</string>
+    <string name="create_pending_prefix">This point of interest will stay\u0020</string>
+    <string name="create_pending_bold">pending</string>
+    <string name="create_pending_suffix">\u0020until a moderator confirms it exists and the data is accurate.</string>
+    <string name="create_submit">Submit for review</string>
+    <string name="create_success">Place suggested successfully! (+50 XP)</string>
+    <string name="create_success_cd">Success</string>
+    <string name="create_success_xp_badge">+50 XP Earned · Under review</string>
+    <string name="create_success_title">Place submitted for\nreview!</string>
+    <string name="create_success_desc_prefix">Thanks for enriching tourism in the Coffee Region. A\u0020</string>
+    <string name="create_success_desc_bold1">Local Ambassador</string>
+    <string name="create_success_desc_mid">\u0020will verify that the hours and location are accurate within\u0020</string>
+    <string name="create_success_desc_bold2">24 hours</string>
+    <string name="create_placeholder_name">El Bosque Waterfall</string>
+    <string name="create_back_home">Back to Home</string>
+    <string name="create_view_proposals">View in my suggested spots</string>
+    <string name="create_price_free">Free</string>
+    <string name="create_price_cheap">Cheap</string>
+    <string name="create_price_moderate">Moderate</string>
+    <string name="create_price_expensive">Expensive</string>
+
+    <!-- Visited -->
+    <string name="visited_title">My places</string>
+    <string name="visited_tab_visited">Visited</string>
+    <string name="visited_empty_visited">You haven\'t marked any places as visited yet</string>
+    <string name="visited_progress">You have explored %1$d%% of the EjeSpot catalog.</string>
+    <string name="visited_subtitle_guest">Guest · what you mark lives in this session</string>
+    <string name="visited_subtitle_user">%1$s\'s places</string>
+    <string name="visited_count">%1$d visited</string>
+    <string name="visited_stat_favorites">Favorites</string>
+    <string name="visited_stat_departments">Departments</string>
+    <string name="visited_empty_favorites">You haven\'t saved favorites yet</string>
+    <string name="visited_empty_favorites_hint">Tap the heart on a place in the feed, the map or the detail to keep it handy.</string>
+    <string name="visited_empty_visited_hint">Open a place and tap “Mark as visited” so it shows up here (+10 XP).</string>
+    <string name="visited_saved_pending">💡 You have %1$d favorite(s) you haven\'t visited yet.</string>
+
+    <!-- Profile -->
+    <string name="profile_stats_visited">Visited</string>
+    <string name="profile_stats_reviews">Reviews</string>
+    <string name="profile_logout">Sign out</string>
+    <string name="profile_role_tourist">Tourist</string>
+    <string name="profile_role_moderator">Verified Moderator</string>
+    <string name="profile_role_guest">Guest</string>
+
+    <!-- Edit profile -->
+    <string name="edit_profile_title">Edit profile</string>
+    <string name="edit_profile_save">Save changes</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_app">Application</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_dark_mode">Dark mode</string>
+    <string name="settings_dark_mode_subtitle">Use a warmer, darker appearance.</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_danger_zone">Danger zone</string>
+    <string name="settings_delete_account">Delete account</string>
+
+    <!-- Notifications -->
+    <string name="notifications_title">Notifications</string>
+
+    <!-- Gamification -->
+
+    <!-- My reviews -->
+    <string name="my_reviews_title">My reviews</string>
+
+    <!-- My proposals -->
+    <string name="my_proposals_title">My suggestions</string>
+    <string name="my_proposals_filter_all">All</string>
+    <string name="my_proposals_filter_approved">Approved</string>
+    <string name="my_proposals_filter_pending">Under review</string>
+
+    <!-- Permissions (info screen) -->
+    <string name="permissions_title">Permissions</string>
+
+    <!-- Legal -->
+    <string name="legal_terms">Terms and conditions</string>
+    <string name="legal_privacy">Privacy policy</string>
+
+    <!-- Language -->
+    <string name="language_title">Language</string>
+
+    <!-- Moderation -->
+    <string name="moderation_title">Moderation</string>
+    <string name="moderation_pending">Pending</string>
+    <string name="moderation_subtitle">Community report queue</string>
+    <string name="moderation_empty_title">Moderation queue is empty</string>
+    <string name="moderation_empty_message">There are no pending reports. Great job keeping the community safe!</string>
+    <string name="moderation_reason">Reason: %1$s</string>
+    <string name="moderation_reported_by">Reported by %1$s · %2$s</string>
+
+    <!-- Categories (data identifiers are not translated, the label is) -->
+    <string name="category_all">All</string>
+    <string name="category_naturaleza">Nature</string>
+    <string name="category_cafe">Coffee</string>
+    <string name="category_gastronomia">Gastronomy</string>
+    <string name="category_historia">History</string>
+    <string name="category_cultura">Culture</string>
+    <string name="category_ocio">Leisure</string>
+
+    <!-- Community levels (the identifier is not translated, the label is) -->
+    <string name="level_turista">Tourist</string>
+    <string name="level_aventurero">Adventurer</string>
+    <string name="level_explorador_cafetero">Coffee Explorer</string>
+    <string name="level_embajador_local">Local Ambassador</string>
+    <string name="level_leyenda_eje">Legend of the Region</string>
+
+    <!-- Auth errors (guide 14: ViewModels read the texts here) -->
+    <string name="error_empty_fields">Please fill in all the fields</string>
+    <string name="error_empty_email">Please enter your email</string>
+    <string name="error_invalid_email">Enter a valid email</string>
+    <string name="error_generic_login">Could not sign in.</string>
+    <string name="error_terms_required">You must accept the Terms and the Privacy Policy</string>
+    <string name="error_name_required">Please enter the place name</string>
+
+    <!-- ViewModel messages -->
+    <string name="vm_saved_to_favorites">Saved to your favorites!</string>
+    <string name="vm_removed_from_favorites">Removed from favorites</string>
+    <string name="vm_marked_visited">✓ Marked as visited! It now appears in My Places (+10 XP)</string>
+    <string name="vm_unmarked_visited">Place unmarked from your visited list</string>
+    <string name="vm_default_review_author">EjeSpot Explorer</string>
+    <string name="vm_default_review_comment">Amazing place, highly recommended to visit in the Coffee Region!</string>
+    <string name="vm_review_published">🎉 Review published! You earned +25 XP</string>
+    <string name="vm_explorer_badge">🌟 Explorer</string>
+    <string name="vm_guide_badge">🧭 %1$s</string>
+    <string name="vm_default_description">New tourist and cultural point suggested by the community in %1$s.</string>
+    <string name="session_default_user_name">User</string>
+
+    <!-- Report -->
+    <string name="report_submit">Send report</string>
+    <string name="report_success">Report sent. Thanks for helping!</string>
+    <string name="report_reason_header">REASON</string>
+    <string name="report_what">WHAT DO YOU WANT TO REPORT?</string>
+    <string name="report_spot_subtitle">Point of interest · %1$s</string>
+    <string name="report_details_label">TELL US MORE (OPTIONAL)</string>
+    <string name="report_details_placeholder">Describe the problem in more detail...</string>
+    <string name="report_ambassador_note">A Local Ambassador will review your report within the next 24 hours.</string>
+    <string name="report_reason_wrong_info">Incorrect information (hours, price, location)</string>
+    <string name="report_reason_gone">The place no longer exists</string>
+    <string name="report_reason_inappropriate">Inappropriate photos or reviews</string>
+    <string name="report_reason_duplicate">Duplicate content</string>
+    <string name="report_reason_other">Other</string>
+
+    <!-- Profile (screen) -->
+    <string name="profile_level_pill">🥾 Level %1$d · %2$s</string>
+    <string name="profile_location_username">📍 %1$s · %2$s</string>
+    <string name="profile_xp_progress">%1$s / %2$s XP</string>
+    <string name="profile_xp_to_next">to reach %1$s</string>
+    <string name="profile_xp_hint">Earn +25 XP per review and +100 XP when a point you suggest is approved.</string>
+    <string name="profile_stat_proposals">Contributions</string>
+    <string name="profile_section_levels">Community Levels</string>
+    <string name="profile_level_achieved">Level achieved</string>
+    <string name="profile_level_current">Current</string>
+    <string name="profile_level_locked">Level locked</string>
+    <string name="profile_section_activity">My Activity</string>
+    <string name="profile_section_role">Role and Special Permissions</string>
+    <string name="profile_role_label">🛡️ Role: %1$s</string>
+    <string name="profile_role_active">ACTIVE</string>
+    <string name="profile_role_description">Your account has Administration and Content Moderation permissions. You help verify spots and approve community contributions.</string>
+    <string name="profile_open_moderation">Open Moderation Panel</string>
+    <string name="profile_section_account">Preferences and Account</string>
+    <string name="profile_notifications_center">Notification center</string>
+    <string name="profile_notifications_new">%1$d new</string>
+    <string name="profile_notifications_up_to_date">Up to date</string>
+    <string name="profile_settings_privacy">Settings and Privacy</string>
+    <string name="profile_logo_description">EjeSpot</string>
+    <string name="profile_tagline">Discover the Coffee Region</string>
+    <string name="profile_version">Version %1$s · Made with ♥ in the Coffee Region</string>
+    <string name="profile_logout_question">Are you sure you want to sign out of your account? Your contributions and reviews will stay saved.</string>
+    <string name="profile_logout_confirm">Yes, sign out</string>
+    <string name="profile_moderation_title">Moderation Panel</string>
+    <string name="profile_moderation_subtitle">Pending community reports</string>
+    <string name="profile_moderation_empty">🎉 There are no pending reports. The community is up to date!</string>
+    <string name="profile_moderation_resolve">Resolve</string>
+    <string name="profile_edit_avatar_description">Edit profile</string>
+    <string name="profile_moderation_resolved_snackbar">Report for \"%1$s\" resolved successfully</string>
+
+    <!-- Edit profile (screen) -->
+    <string name="edit_profile_reset">Reset</string>
+    <string name="edit_profile_photo_description">Change profile photo</string>
+    <string name="edit_profile_photo_snackbar">Image uploading will be available in a future phase. Your initials update with your name.</string>
+    <string name="edit_profile_photo_hint">Tap the camera to update your photo</string>
+    <string name="edit_profile_name_label">FULL NAME</string>
+    <string name="edit_profile_name_placeholder">Your first and last name</string>
+    <string name="edit_profile_username_label">USERNAME</string>
+    <string name="edit_profile_username_placeholder">@yourname</string>
+    <string name="edit_profile_location_label">LOCATION</string>
+    <string name="edit_profile_location_hint">Select your municipality</string>
+    <string name="edit_profile_location_open_description">Open locations</string>
+    <string name="edit_profile_bio_label">SHORT DESCRIPTION (OPTIONAL)</string>
+    <string name="edit_profile_bio_placeholder">Tell the community what you like to discover...</string>
+    <string name="edit_profile_error_prefix">⚠️ %1$s</string>
+    <string name="edit_profile_save_snackbar">Profile updated successfully</string>
+    <string name="edit_profile_memory_note">The data in this phase is stored in memory for the session.</string>
+    <string name="edit_profile_location_dialog_title">Select location</string>
+    <string name="edit_profile_location_selected_description">Selected</string>
+
+    <!-- Gamification (screen) -->
+    <string name="gamification_progress_title">My Progress</string>
+    <string name="gamification_level_label">LEVEL %1$d</string>
+    <string name="gamification_xp_para">%1$s / %2$s XP to %3$s</string>
+    <string name="gamification_stat_places_visited">Places\nvisited</string>
+    <string name="gamification_stat_reviews_written">Reviews\nwritten</string>
+    <string name="gamification_stat_points_proposed">Points\nproposed</string>
+    <string name="gamification_badges_unlocked">Unlocked Badges</string>
+    <string name="gamification_section_next_level">Next Level</string>
+    <string name="gamification_xp_missing">You need %1$s more XP</string>
+    <string name="gamification_explore">Keep exploring</string>
+    <string name="gamification_section_earn_xp">How to earn XP</string>
+    <string name="gamification_xp_review">Write a review</string>
+    <string name="gamification_xp_review_amount">+25 XP</string>
+    <string name="gamification_xp_propose">Suggest an approved point</string>
+    <string name="gamification_xp_propose_amount">+100 XP</string>
+    <string name="gamification_xp_visited">Mark a place as visited</string>
+    <string name="gamification_xp_visited_amount">+10 XP</string>
+    <string name="gamification_badge_unlocked">✓ Achieved</string>
+    <string name="gamification_badge_locked_progress">🔒 %1$s</string>
+    <string name="gamification_badge_in_progress">In progress</string>
+    <string name="gamification_badge_achieved">Achieved</string>
+    <string name="gamification_badge_locked_description">Locked</string>
+
+    <!-- My reviews (screen) -->
+    <string name="my_reviews_published_by">Published by %1$s</string>
+    <string name="my_reviews_average">Average ★</string>
+    <string name="my_reviews_xp_earned">XP earned</string>
+    <string name="my_reviews_filter_all">All</string>
+    <string name="my_reviews_filter_5">5 stars</string>
+    <string name="my_reviews_filter_4">4 stars</string>
+    <string name="my_reviews_empty_filter_title">No reviews match that filter</string>
+    <string name="my_reviews_empty_filter_message">Change the selected filter to see the rest of your published opinions.</string>
+    <string name="my_reviews_helpful_description">Mark as helpful</string>
+    <string name="my_reviews_helpful_votes">%1$d helpful votes</string>
+    <string name="my_reviews_xp_earned_badge">+%1$d XP earned</string>
+    <string name="my_reviews_view_spot">View place</string>
+
+    <!-- My proposals (screen) -->
+    <string name="my_proposals_subtitle">Places you suggested to the community</string>
+    <string name="my_proposals_stat_proposals">Suggestions</string>
+    <string name="my_proposals_stat_approved">Approved</string>
+    <string name="my_proposals_stat_xp">XP earned</string>
+    <string name="my_proposals_empty_filter_title">No suggestions match this filter</string>
+    <string name="my_proposals_empty_filter_message">Change the filter or suggest a new point of interest in the Coffee Region to earn +100 XP.</string>
+    <string name="my_proposals_propose_new">Suggest a new point</string>
+    <string name="my_proposals_status_approved">Approved</string>
+    <string name="my_proposals_status_pending">Under Review</string>
+    <string name="my_proposals_location">📍 %1$s · %2$s</string>
+    <string name="my_proposals_xp_earned">+%1$d XP earned</string>
+    <string name="my_proposals_xp_pending">Earn +100 XP when approved</string>
+    <string name="my_proposals_view_map">🗺️ View on map</string>
+
+    <!-- Settings (screen) -->
+    <string name="settings_section_privacy">Privacy</string>
+    <string name="settings_notif_nearby_title">New points near me</string>
+    <string name="settings_notif_nearby_subtitle">Alerts about suggested places within 5 km.</string>
+    <string name="settings_notif_proposal_title">Approval of my points</string>
+    <string name="settings_notif_proposal_subtitle">Know when a moderator validates your contributions.</string>
+    <string name="settings_notif_reward_title">Rewards and XP</string>
+    <string name="settings_notif_reward_subtitle">New levels, badges and available missions.</string>
+    <string name="settings_privacy_policy">Privacy policy</string>
+    <string name="settings_terms">Terms and conditions</string>
+    <string name="settings_app_permissions">App permissions</string>
+    <string name="settings_app_version">App version</string>
+    <string name="settings_dark_mode_enabled">Dark mode enabled</string>
+    <string name="settings_dark_mode_disabled">Dark mode disabled</string>
+    <string name="settings_delete_subtitle">Deletes your profile, reviews and suggested points.</string>
+    <string name="settings_footer">EjeSpot · Phase 2\nThis demo\'s data is managed in memory.</string>
+    <string name="settings_delete_message">This action is irreversible. Your profile, your %1$d reviews and your %2$d suggested points will be deleted. Do you want to continue?</string>
+
+    <!-- Legal (screen) -->
+    <string name="legal_last_update">Last updated: September 15, 2026</string>
+    <string name="legal_terms_intro">These terms govern the use of the EjeSpot community platform and the content you share with other travelers.</string>
+    <string name="legal_privacy_intro">We want you to know what information we use to personalize your experience and how you can control it.</string>
+    <string name="legal_terms_sec1_heading">Use of the EjeSpot Platform</string>
+    <string name="legal_terms_sec1_body">EjeSpot is a community network aimed at promoting responsible and inclusive tourism in the Coffee Region. By creating an account you agree to use the app respectfully toward other users, local communities and the environment.</string>
+    <string name="legal_terms_sec2_heading">User-generated content</string>
+    <string name="legal_terms_sec2_body">By posting reviews, photos or suggestions you guarantee that the information is truthful and that you have the rights to share it. EjeSpot may moderate or remove posts that violate community rules or contain misleading information.</string>
+    <string name="legal_terms_sec3_heading">Gamification system and XP points</string>
+    <string name="legal_terms_sec3_body">XP points, medals and levels are symbolic acknowledgements within the platform. They do not represent real money and cannot be transferred, sold or redeemed for cash. Rewards may be adjusted to keep things fair among users.</string>
+    <string name="legal_terms_sec4_heading">Responsibility on trails and routes</string>
+    <string name="legal_terms_sec4_body">Information about schedules, prices and locations is for reference and may change. Each user is responsible for verifying the conditions of the place, carrying the right equipment and respecting the environmental rules of each destination.</string>
+    <string name="legal_terms_sec5_heading">Changes and contact</string>
+    <string name="legal_terms_sec5_body">EjeSpot may update these terms to reflect service improvements. We will notify relevant changes within the app. If you have questions, write to us at hola@ejespot.co.</string>
+    <string name="legal_privacy_sec1_heading">Information we collect</string>
+    <string name="legal_privacy_sec1_body">We collect your name, username, email, approximate location and the content you share (reviews, photos and suggested points). In this academic phase the data is managed only in memory during the session.</string>
+    <string name="legal_privacy_sec2_heading">Use of the information</string>
+    <string name="legal_privacy_sec2_body">We use your data to personalize recommendations, show nearby spots, calculate your progress in the community and keep a safe environment for all travelers.</string>
+    <string name="legal_privacy_sec3_heading">Location data</string>
+    <string name="legal_privacy_sec3_body">Location is used only while you use the app to show nearby places and calculate routes. You can disable this permission from your device settings or from the App Permissions section.</string>
+    <string name="legal_privacy_sec4_heading">Content and visibility</string>
+    <string name="legal_privacy_sec4_body">Your reviews and suggestions are visible to the community. You can delete your account and your content from the danger zone in settings. Uploaded photos will be associated with the places you visited.</string>
+    <string name="legal_privacy_sec5_heading">Your rights and control</string>
+    <string name="legal_privacy_sec5_body">You can request access, correction or deletion of your data by writing to privacidad@ejespot.co. We will handle your request within a maximum of 15 business days and at no cost.</string>
+    <string name="legal_help_title">Need help?</string>
+    <string name="legal_help_message">Write to us at hola@ejespot.co and our team will reply within 48 hours.</string>
+    <string name="legal_understood">Understood</string>
+    <string name="legal_footer">EjeSpot · Discover the Coffee Region</string>
+
+    <!-- Permissions (screen) -->
+    <string name="permissions_info">These permissions let EjeSpot suggest nearby places and receive your contributions. You can enable or disable them at any time.</string>
+    <string name="permissions_enabled_snackbar">Permission \"%1$s\" enabled</string>
+    <string name="permissions_disabled_snackbar">Permission \"%1$s\" disabled</string>
+    <string name="permissions_open_android_settings">Open Android settings</string>
+    <string name="permissions_note">Changes made here store the preference for the demo session.</string>
+    <string name="permissions_granted">● Allowed</string>
+    <string name="permissions_not_granted">○ Not allowed</string>
+
+    <!-- Notifications (screen) -->
+    <string name="notifications_mark_all_description">Mark all as read</string>
+    <string name="notifications_mark_all_snackbar">All notifications were marked as read</string>
+    <string name="notifications_all_count">All (%1$d)</string>
+    <string name="notifications_unread_count">Unread (%1$d)</string>
+    <string name="notifications_unread_summary">You have %1$d unread notifications.</string>
+    <string name="notifications_summary_up_to_date">You are up to date with community news.</string>
+    <string name="notifications_empty_title">You\'re up to date!</string>
+    <string name="notifications_empty_message">You have no unread notifications. Keep exploring the Coffee Region to get new updates.</string>
+
+    <!-- Language (screen) -->
+    <string name="language_choose">Choose the app language</string>
+    <string name="language_selected_snackbar">Language selected: %1$s</string>
+    <string name="language_selected_description">Selected language</string>
+    <string name="language_note">Your selection is saved in the app and applied the next time you open EjeSpot.</string>
+
+    <!-- Tiempos relativos (contenido de la demo) -->
+    <string name="time_yesterday">Yesterday</string>
+    <string name="time_yesterday_1022">Yesterday · 10:22 a.m.</string>
+    <string name="time_yesterday_0805">Yesterday · 8:05 a.m.</string>
+    <string name="time_yesterday_0740">Yesterday · 7:40 a.m.</string>
+    <string name="time_ago_20_min">20 min ago</string>
+    <string name="time_ago_55_min">55 min ago</string>
+    <string name="time_ago_1_hour">1 h ago</string>
+    <string name="time_ago_2_hours">2 h ago</string>
+    <string name="time_ago_3_hours">3 h ago</string>
+    <string name="time_ago_5_hours">5 h ago</string>
+    <string name="time_ago_2_days">2 days ago</string>
+    <string name="time_ago_1_week">1 week ago</string>
+    <string name="time_ago_2_weeks">2 weeks ago</string>
+    <string name="time_ago_3_weeks">3 weeks ago</string>
+    <string name="time_ago_1_month">1 month ago</string>
+    <string name="time_ago_2_months">2 months ago</string>
+    <string name="time_ago_3_months">3 months ago</string>
+    <string name="time_ago_4_months">4 months ago</string>
+
+    <!-- Contenido de la demo: perfiles -->
+    <string name="profile_bio_renata">I love discovering new places and trying single-origin coffee.</string>
+    <string name="profile_bio_mateo">Verified moderator. I help make sure every point in the Coffee Region is well documented.</string>
+    <string name="profile_bio_camila">Nature photographer. I live among the mountains and grow my own coffee.</string>
+    <string name="profile_bio_invitado">Exploring the Coffee Region without an account. Sign in to save your places.</string>
+    <string name="profile_member_since_renata">March 2024</string>
+    <string name="profile_member_since_mateo">January 2023</string>
+    <string name="profile_member_since_camila">July 2025</string>
+    <string name="profile_member_since_invitado">Today</string>
+    <string name="profile_activity_visited">Places marked as visited</string>
+    <string name="profile_activity_reviews">My completed reviews</string>
+    <string name="profile_activity_proposals">Points I have suggested</string>
+    <string name="profile_activity_progress">My progress and achievements</string>
+    <string name="profile_activity_progress_value">Level %1$d</string>
+    <string name="profile_level_range_turista">0 - 200 XP</string>
+    <string name="profile_level_range_aventurero">200 - 500 XP</string>
+    <string name="profile_level_range_explorador">500 - 1,200 XP</string>
+    <string name="profile_level_range_embajador">1,200+ XP</string>
+
+    <!-- Contenido de la demo: insignias -->
+    <string name="profile_badge_coffee_title">Coffee Lover</string>
+    <string name="profile_badge_coffee_description">Visited 5 coffee farms and completed the tasting route.</string>
+    <string name="profile_badge_hiker_title">Hiker</string>
+    <string name="profile_badge_hiker_description">Covered 100 km on trails in the Coffee Region.</string>
+    <string name="profile_badge_photographer_title">Photographer of the Region</string>
+    <string name="profile_badge_photographer_description">Shares 10 photos of the places they visit.</string>
+    <string name="profile_badge_photographer_progress">6 / 10 photos</string>
+    <string name="profile_badge_ambassador_title">Ambassador of the Region</string>
+    <string name="profile_badge_ambassador_description">Reaches the Local Ambassador level and helps verify 10 spots.</string>
+    <string name="profile_badge_ambassador_progress">820 / 1,200 XP</string>
+
+    <!-- Contenido de la demo: notificaciones -->
+    <string name="notifications_group_today">TODAY</string>
+    <string name="notifications_group_yesterday">YESTERDAY</string>
+    <string name="profile_notification_1_title">Your point was approved!</string>
+    <string name="profile_notification_1_message">Cascada La Cristalina is now visible to everyone. You earned +100 XP!</string>
+    <string name="profile_notification_2_title">+50 XP for your review</string>
+    <string name="profile_notification_2_message">Your \"Valle de Cocora\" review received 12 helpful votes. Well done!</string>
+    <string name="profile_notification_3_title">New comment on your spot</string>
+    <string name="profile_notification_3_message">@javimar: \"Amazing place, I went over the weekend and loved it.\"</string>
+    <string name="profile_notification_4_title">New level unlocked!</string>
+    <string name="profile_notification_4_message">You are now a Coffee Explorer. You have access to new missions and rewards.</string>
+    <string name="profile_notification_5_title">New spot near you</string>
+    <string name="profile_notification_5_message">\"Mirador del Café\" was added 2 km from your location.</string>
+    <string name="profile_notification_6_title">Your review received a new helpful vote</string>
+    <string name="profile_notification_6_message">The community found your experience at Termales Santa Rosa de Cabal helpful.</string>
+
+    <!-- Contenido de la demo: permisos -->
+    <string name="profile_permission_location_title">Location (GPS)</string>
+    <string name="profile_permission_location_description">To show nearby spots and calculate walking routes.</string>
+    <string name="profile_permission_camera_title">Camera and Photos</string>
+    <string name="profile_permission_camera_description">To upload images of the places you visit and review.</string>
+    <string name="profile_permission_notifications_title">Push Notifications</string>
+    <string name="profile_permission_notifications_description">To receive approvals and XP for your contributions.</string>
+    <string name="profile_permission_microphone_title">Microphone</string>
+    <string name="profile_permission_microphone_description">It is not required to use the app.</string>
+
+    <!-- Contenido de la demo: propuestas -->
+    <string name="profile_proposal_1_submitted">Suggested on September 12</string>
+    <string name="profile_proposal_1_note">Verified by a Local Ambassador. It is now visible to the whole community.</string>
+    <string name="profile_proposal_2_submitted">Suggested 2 hours ago</string>
+    <string name="profile_proposal_2_note">Pending approval by a moderator.</string>
+    <string name="profile_proposal_3_submitted">Suggested on September 5</string>
+    <string name="profile_proposal_3_note">Verified by a Local Ambassador. It is one of the most visited trails.</string>
+
+    <!-- Contenido de la demo: moderación -->
+    <string name="profile_moderation_1_reason">Possible duplicate location</string>
+    <string name="profile_moderation_2_reason">Missing hours and price details</string>
+    <string name="profile_moderation_3_reason">Unclear cover photo</string>
+    <string name="profile_moderation_4_reason">Outdated information</string>
+    <string name="profile_moderation_5_reason">Reported offensive comment</string>
+    <string name="profile_moderation_6_reason">Incorrect entry price</string>
+
+    <!-- Contenido de la demo: insignias de las reseñas -->
+    <string name="review_badge_ambassador_local_f">👑 Local Ambassador</string>
+    <string name="review_badge_adventurer">🥾 Adventurer</string>
+    <string name="review_badge_explorer_f">🧭 Coffee Explorer</string>
+    <string name="review_badge_coffee_lover">☕ Coffee Lover</string>
+    <string name="review_badge_gourmand">🍲 Caldense Gourmet</string>
+    <string name="review_badge_heritage_guide">🏛️ Heritage Guide</string>
+    <string name="review_badge_family_tourist">🎢 Family Tourist</string>
+    <string name="review_badge_theatre_lover">🎭 Theatre Lover</string>
+    <string name="review_badge_history_fan">🏺 History Enthusiast</string>
+    <string name="review_badge_local_artist">🎨 Local Artist</string>
+    <string name="review_badge_family_plan">🎠 Family Plan</string>
+    <string name="review_badge_night_plan">🌙 Night Plan</string>
+    <string name="review_badge_hiker">🌿 Hiker</string>
+    <string name="review_badge_foodie">🍽️ Caldense Foodie</string>
+
+    <!-- Contenido de la demo: comentarios de las reseñas -->
+    <string name="review_comment_1">The sunrise among the wax palms is unbeatable. I went early (6:30 a.m.) and there were hardly any tourists. The light over the mountain range is magical.</string>
+    <string name="review_comment_2">The full trail takes almost 5 hours up to the hummingbird house. Definitely bring mountain boots and local cash.</string>
+    <string name="review_comment_3">The trout with patacón is incredible and the view of the coffee plantations is unbeatable. The single-origin coffee at the end was the perfect finish.</string>
+    <string name="review_comment_4" formatted="false">Very good customer service, generous and fresh food. A 100% country-style atmosphere, ideal for going with family.</string>
+    <string name="review_comment_5">Climbing the Polish Corridor of the Cathedral is a must-do. The panorama of Manizales and the snow-capped peaks is beyond compare.</string>
+    <string name="review_comment_6">The sound of the water along the whole trail connects you with nature. Wear footwear with good grip because there are wet rocks.</string>
+    <string name="review_comment_8">The tour is very complete and the guide explains with a lot of passion. The final tasting is of the highest quality.</string>
+    <string name="review_comment_9">The cold water cascades next to the thermal pools create a truly unique contrast.</string>
+    <string name="review_comment_10">The Filandia viewpoint at sunset is one of the prettiest plans in the Coffee Region.</string>
+    <string name="review_comment_11">Ideal for going with family. The butterfly house and the palm trail are very educational.</string>
+    <string name="review_comment_12">The night view of Manizales from Chipre is spectacular. Bring a jacket for the cold.</string>
+    <string name="review_comment_13">The best single-origin coffee I tried on the trip. The V60 preparation is flawless.</string>
+    <string name="review_comment_14">The colorful houses and the village atmosphere are perfect for a relaxed walk.</string>
+    <string name="review_comment_15">It is worth spending the whole day there. The coffee show is very pretty and the rides for kids are well taken care of.</string>
+    <string name="review_comment_16">A quiet viewpoint to watch the sunset. Getting there by car is the most comfortable option.</string>
+    <string name="review_comment_17">A great half-day plan among the coffee plantations. The host farm treated us wonderfully.</string>
+    <string name="review_comment_18">An entertaining tour to understand the coffee process and the history of the region.</string>
+    <string name="review_comment_19">The waterfall is gorgeous and the trail is well marked. Hopefully they verify it soon.</string>
+    <string name="review_comment_20">The acoustics are excellent and the program very varied. A perfect plan for a cultural night in Manizales.</string>
+    <string name="review_comment_21">Amazing pieces, very well cared for. The free entry makes it a must-do plan in Armenia.</string>
+    <string name="review_comment_22">The weaving workshops are great and very affordable. A good way to get to know the local culture.</string>
+    <string name="review_comment_23">Perfect for going with kids. The lake and the picnic areas are very well maintained and it is affordable.</string>
+    <string name="review_comment_24">The canopy is spectacular and the guides very professional. The adrenaline and the scenery are worth every peso.</string>
+    <string name="review_comment_25">The night view is very pretty and the live music gives it a special atmosphere. Get there early to get a table.</string>
+    <string name="review_comment_26">The dishes are generous and full of local flavor. The view of the snow-capped peaks from the table is a huge plus.</string>
+    <string name="review_comment_renata_1">An unforgettable experience. The landscape of the wax palms is impressive. I recommend going early in the morning.</string>
+    <string name="review_comment_renata_2">The trout with patacón and the single-origin coffee are the perfect combination. Very friendly service.</string>
+    <string name="review_comment_renata_3">The Polish Corridor of the Cathedral offers an incredible panorama of the city and the snow-capped peaks.</string>
+    <string name="review_comment_renata_4">A short but demanding trail because of the humidity. The 70-meter waterfall is worth every step.</string>
+    <string name="review_comment_r2">The coffee tour is very easy to follow and the final tasting is of the highest quality. A must.</string>
+
+    <!-- Contenido de la demo: lugares (precios y medidas) -->
+    <string name="spot_distance">%1$s away</string>
+    <string name="spot_price_badge_free">Free</string>
+    <string name="spot_price_badge_cheap">Cheap ($)</string>
+    <string name="spot_price_badge_moderate">Moderate ($$)</string>
+    <string name="spot_price_range_free">Free</string>
+    <string name="spot_price_range_15000_45000">$15,000 - $45,000</string>
+    <string name="spot_price_range_20000_45000">$20,000 - $45,000</string>
+    <string name="spot_price_range_30000_60000">$30,000 - $60,000</string>
+    <string name="spot_price_range_12000_18000">$12,000 - $18,000</string>
+    <string name="spot_price_range_6000_18000">$6,000 - $18,000</string>
+    <string name="spot_price_range_45000_120000">$45,000 - $120,000</string>
+    <string name="spot_price_range_18000_35000">$18,000 - $35,000</string>
+    <string name="spot_price_range_10000_15000">$10,000 - $15,000</string>
+    <string name="spot_price_range_25000_60000">$25,000 - $60,000</string>
+    <string name="spot_price_range_25000_70000">$25,000 - $70,000</string>
+    <string name="spot_price_range_8000_20000">$8,000 - $20,000</string>
+    <string name="spot_price_range_40000_90000">$40,000 - $90,000</string>
+    <string name="spot_price_range_10000_30000">$10,000 - $30,000</string>
+    <string name="spot_price_9000">$9,000</string>
+    <string name="spot_price_16000">$16,000</string>
+    <string name="spot_price_25000">$25,000</string>
+    <string name="spot_price_32000">$32,000</string>
+    <string name="spot_price_38000">$38,000</string>
+    <string name="spot_price_42000">$42,000</string>
+    <string name="spot_price_45000">$45,000</string>
+    <string name="spot_price_65000">$65,000</string>
+
+    <!-- Contenido de la demo: lugares (horarios) -->
+    <string name="spot_hours_24h">Open 24 hours</string>
+    <string name="spot_hours_by_schedule">By schedule</string>
+    <string name="spot_hours_9am_6pm">9:00 a.m. - 6:00 p.m.</string>
+    <string name="spot_hours_9am_5pm">9:00 a.m. - 5:00 p.m.</string>
+    <string name="spot_hours_8am_5pm">8:00 a.m. - 5:00 p.m.</string>
+    <string name="spot_hours_8am_7pm">8:00 a.m. - 7:00 p.m.</string>
+    <string name="spot_1_hours">6:00 a.m. - 4:00 p.m.</string>
+    <string name="spot_2_hours">8:00 AM - 7:00 PM</string>
+    <string name="spot_6_hours">9:00 a.m. - 10:00 p.m.</string>
+    <string name="spot_7_hours">8:00 a.m. - 8:00 p.m.</string>
+    <string name="spot_13_hours">5:30 a.m. - 7:00 p.m.</string>
+    <string name="spot_18_hours">8:30 a.m. - 5:00 p.m.</string>
+    <string name="spot_20_hours">8:00 a.m. - 6:00 p.m.</string>
+    <string name="spot_22_hours">4:00 p.m. - 11:00 p.m.</string>
+    <string name="spot_23_hours">12:00 p.m. - 10:00 p.m.</string>
+    <string name="spot_4_hours">7:00 AM - 4:00 PM</string>
+    <string name="spot_16_hours">7:00 a.m. - 5:00 p.m.</string>
+
+    <!-- Contenido de la demo: lugares (descripciones) -->
+    <string name="spot_1_description">An 11 km trail among the tallest wax palms in the world, a symbol of the Coffee Region. Ideal for a medium-difficulty hike. Bring warm and waterproof clothing for the fog.</string>
+    <string name="spot_2_description">A complete gastronomic and coffee experience. Enjoy typical Quindío cuisine with local ingredients and a guided single-origin coffee tasting.</string>
+    <string name="spot_3_description">The historic and cultural center of Manizales with the imposing Metropolitan Cathedral Basilica (the tallest in Colombia at 106 m) and the iconic Bolívar Cóndor monument by Rodrigo Arenas Betancourt.</string>
+    <string name="spot_5_description">A traditional coffee farm with a walk through the plantation, the processing area, the butterfly house and a final tasting. The tour explains the whole process from bean to cup.</string>
+    <string name="spot_6_description">Natural thermal waters surrounded by cloud forest, with pools at different temperatures and cold water cascades. An ideal plan to rest after hiking.</string>
+    <string name="spot_7_description">The most photogenic viewpoint in Quindío: a wooden tower on the hill with a 360° view of the coffee plantations and the mountain range. A must at sunset.</string>
+    <string name="spot_8_description">An educational reserve with a butterfly house, a wax palm trail and a fern collection. An excellent short plan for going with family.</string>
+    <string name="spot_9_description">A natural balcony over Manizales with the best night view of the lit-up city. Bring a jacket: the temperature drops a lot.</string>
+    <string name="spot_10_description">A specialty coffee shop renowned in Salento. Its V60 preparation and its single-origin coffee are a reference for coffee lovers.</string>
+    <string name="spot_11_description">Cobbled streets, colorful houses with wooden balconies and the coffee street. The base town for exploring the Cocora Valley.</string>
+    <string name="spot_12_description">A theme park dedicated to coffee with mechanical rides, a coffee show, a museum and gardens. The most complete plan for a full day.</string>
+    <string name="spot_13_description">A quiet viewpoint on the outskirts of Pereira with views of the valley and the snow-capped peaks in the background. A good spot to watch the sunset without crowds.</string>
+    <string name="spot_14_description">A half-day tour through coffee plantations with host farms that teach harvesting, pulping and traditional drying of the bean.</string>
+    <string name="spot_15_description">An interactive museum about the history of coffee in Quindío, with a guided tour, a model of the process and a coffee shop at the end of the visit.</string>
+    <string name="spot_17_description">One of the most iconic cultural venues in Manizales: theater, concerts and festivals all year round. A varied program and great acoustics.</string>
+    <string name="spot_18_description">An archaeological collection of the Quimbaya culture with pieces in gold, pottery and silverwork. Free entry and guided tours that explain the pre-Columbian history of the region.</string>
+    <string name="spot_19_description">A cultural center with local art exhibitions, weaving workshops and folk performances. A meeting point for artisans and artists from Quindío.</string>
+    <string name="spot_20_description">A family park with green areas, playgrounds, a lake and a bike path. Ideal for a weekend plan with recreational activities and picnics.</string>
+    <string name="spot_21_description">An adventure park with canopy, suspension bridges, zipline and horseback rides among the mountains. An adrenaline plan for groups and adventurous families.</string>
+    <string name="spot_22_description">A night plan with a panoramic view of the valley, live music on weekends and hot drinks. Ideal to end a day of exploring.</string>
+    <string name="spot_23_description">Author cuisine with ingredients from the Coffee Region: trout, plantain, beans and coffee desserts. A country-style atmosphere and a view of the snow-capped peaks.</string>
+    <string name="spot_4_description">A protected nature reserve with an ecological hiking trail through cloud forest that ends at an impressive 70-meter natural waterfall.</string>
+    <string name="spot_16_description">A 40-meter waterfall in the middle of the humid forest, suggested by the community and pending verification by a moderator.</string>
+
+    <!-- Contenido de la demo: lugares (ficha técnica) -->
+    <string name="spot_technical_title_hiking">HIKING TECHNICAL SHEET</string>
+    <string name="spot_technical_title_gastronomy">GASTRONOMIC INFORMATION</string>
+    <string name="spot_technical_title_heritage">HERITAGE INFORMATION</string>
+    <string name="spot_technical_title_farm">FARM INFORMATION</string>
+    <string name="spot_technical_title_general">GENERAL INFORMATION</string>
+    <string name="spot_technical_title_cultural">CULTURAL INFORMATION</string>
+    <string name="spot_technical_title_museum">MUSEUM INFORMATION</string>
+    <string name="spot_technical_title_recreational">RECREATIONAL INFORMATION</string>
+    <string name="spot_technical_title_adventure">ADVENTURE INFORMATION</string>
+    <string name="spot_tech_label_difficulty">Difficulty</string>
+    <string name="spot_tech_label_altitude">Altitude</string>
+    <string name="spot_tech_label_climate">Climate</string>
+    <string name="spot_tech_label_gear">Gear</string>
+    <string name="spot_tech_label_schedule">Schedule</string>
+    <string name="spot_tech_label_range">Range</string>
+    <string name="spot_tech_label_type">Type</string>
+    <string name="spot_tech_label_booking">Booking</string>
+    <string name="spot_tech_label_style">Style</string>
+    <string name="spot_tech_label_access">Access</string>
+    <string name="spot_tech_label_duration">Duration</string>
+    <string name="spot_tech_label_includes">Includes</string>
+    <string name="spot_tech_label_temperature">Temperature</string>
+    <string name="spot_tech_label_services">Services</string>
+    <string name="spot_tech_label_recommendation">Recommendation</string>
+    <string name="spot_tech_label_area">Area</string>
+    <string name="spot_tech_label_guide">Guide</string>
+    <string name="spot_tech_label_cuisine">Cuisine</string>
+    <string name="spot_tech_label_atmosphere">Atmosphere</string>
+    <string name="spot_tech_label_capacity">Capacity</string>
+    <string name="spot_tech_label_ticketing">Ticketing</string>
+    <string name="spot_tech_label_parking">Parking</string>
+    <string name="spot_tech_label_collection">Collection</string>
+    <string name="spot_tech_label_entry">Entry</string>
+    <string name="spot_tech_label_guided_tours">Guided tours</string>
+    <string name="spot_tech_label_activities">Activities</string>
+    <string name="spot_tech_label_suitable_for">Suitable for</string>
+    <string name="spot_tech_label_food">Food</string>
+    <string name="spot_tech_label_minimum_age">Minimum age</string>
+    <string name="spot_tech_label_attractions">Attractions</string>
+    <string name="spot_tech_label_best_time">Best time</string>
+    <string name="spot_tech_value_medium_11km">Medium (11 km)</string>
+    <string name="spot_tech_value_moderate_25km">Moderate (2.5 km)</string>
+    <string name="spot_tech_value_alt_2400">2,400 m.s.n.m.</string>
+    <string name="spot_tech_value_alt_2150">2,150 m.s.n.m.</string>
+    <string name="spot_tech_value_alt_1890">1,890 m.s.n.m.</string>
+    <string name="spot_tech_value_alt_2000">2,000 m.s.n.m.</string>
+    <string name="spot_tech_value_alt_1923">1,923 m.s.n.m.</string>
+    <string name="spot_tech_value_alt_1520">1,520 m.s.n.m.</string>
+    <string name="spot_tech_value_alt_1450">1,450 m.s.n.m.</string>
+    <string name="spot_tech_value_alt_1850">1,850 m.s.n.m.</string>
+    <string name="spot_tech_value_mild_15">Mild (15°C)</string>
+    <string name="spot_tech_value_mild_19">Mild (19°C)</string>
+    <string name="spot_tech_value_mild_cold_17">Mild-Cold (17°C)</string>
+    <string name="spot_tech_value_boots_raincoat">Boots and raincoat</string>
+    <string name="spot_tech_value_grippy_footwear_water">Grippy footwear and water</string>
+    <string name="spot_tech_value_schedule_8am_7pm">8:00 AM - 7:00 PM</string>
+    <string name="spot_tech_value_traditional_coffee">Traditional &amp; Coffee</string>
+    <string name="spot_tech_value_recommended">Recommended</string>
+    <string name="spot_tech_value_neogothic_republican">Neogothic and Republican</string>
+    <string name="spot_tech_value_central_pedestrian">Central pedestrian street</string>
+    <string name="spot_tech_value_pedestrian_town">Pedestrian street in town</string>
+    <string name="spot_tech_value_1h30">1 h 30 min</string>
+    <string name="spot_tech_value_tasting">Tasting</string>
+    <string name="spot_tech_value_not_required">Not required</string>
+    <string name="spot_tech_value_temp_38_42">38 - 42 °C</string>
+    <string name="spot_tech_value_changing_rooms">Changing rooms and lockers</string>
+    <string name="spot_tech_value_bring_towel">Bring a towel</string>
+    <string name="spot_tech_value_viewpoint_architecture">Viewpoint + architecture</string>
+    <string name="spot_tech_value_5pm_6pm">5:00 - 6:00 p.m.</string>
+    <string name="spot_tech_value_area_14ha">14 hectares</string>
+    <string name="spot_tech_value_area_126ha">126 hectares</string>
+    <string name="spot_tech_value_area_12ha">12 hectares</string>
+    <string name="spot_tech_value_2hours">2 hours</string>
+    <string name="spot_tech_value_1hour">1 hour</string>
+    <string name="spot_tech_value_every_2hours">Every 2 hours</string>
+    <string name="spot_tech_value_full_day">Full day</string>
+    <string name="spot_tech_value_half_day">Half day</string>
+    <string name="spot_tech_value_guide_included">Included in the ticket</string>
+    <string name="spot_tech_value_included_ticket">Included in the ticket</string>
+    <string name="spot_tech_value_regional_cuisine">Regional fine dining</string>
+    <string name="spot_tech_value_family_country">Family-friendly country style</string>
+    <string name="spot_tech_value_capacity_1100">1,100 people</string>
+    <string name="spot_tech_value_theater_concerts">Theater and concerts</string>
+    <string name="spot_tech_value_box_office_online">Box office and online</string>
+    <string name="spot_tech_value_nearby_zones">Nearby areas</string>
+    <string name="spot_tech_value_quimbaya_silver">Quimbaya silverwork</string>
+    <string name="spot_tech_value_free_entry">Free</string>
+    <string name="spot_tech_value_canopy_zipline">Canopy and zipline</string>
+    <string name="spot_tech_value_8years">8 years</string>
+    <string name="spot_tech_value_playground_lake_bike">Playground, lake, bike path</string>
+    <string name="spot_tech_value_families_kids">Families and kids</string>
+    <string name="spot_tech_value_food_court">Food court</string>
+
+    <!-- Contenido de la demo: lugares (especialidades y atractivos) -->
+    <string name="spot_specialties_title_house">House Specialties</string>
+    <string name="spot_specialties_title_farm">Farm Plans</string>
+    <string name="spot_specialties_title_recommended">Recommended</string>
+    <string name="spot_specialties_title_adventure">Adventure Plans</string>
+    <string name="spot_highlights_title_featured">Featured Attractions</string>
+    <string name="spot_highlights_title_surroundings">Surrounding Attractions</string>
+    <string name="spot_highlights_title_venue">Venue Attractions</string>
+    <string name="spot_highlights_title_activities">Featured Activities</string>
+    <string name="spot_2_specialty_1_name">Ajillo-style Trout with Giant Patacón</string>
+    <string name="spot_2_specialty_1_description">Signature dish of the area · Salento &amp; Pereira</string>
+    <string name="spot_2_specialty_2_name">Tour + Special Coffee Tasting</string>
+    <string name="spot_2_specialty_2_description">45-minute walk through the coffee plantation with a barista</string>
+    <string name="spot_5_specialty_1_name">Full Coffee Tour</string>
+    <string name="spot_5_specialty_1_description">Plantation, processing, butterfly house and tasting</string>
+    <string name="spot_10_specialty_1_name">Single-origin V60 Coffee</string>
+    <string name="spot_10_specialty_1_description">Manual brewing with a tasting note</string>
+    <string name="spot_23_specialty_1_name">Grilled Trout with Patacón</string>
+    <string name="spot_23_specialty_1_description">Signature dish with local ingredients from the Region</string>
+    <string name="spot_23_specialty_2_name">Coffee and Panela Dessert</string>
+    <string name="spot_23_specialty_2_description">Single-origin coffee mousse with panela crunch</string>
+    <string name="spot_21_specialty_1_name">Canopy + Zipline Combo</string>
+    <string name="spot_21_specialty_1_description">7 cables and 2 suspension bridges between the mountains</string>
+    <string name="spot_21_specialty_2_name">Horseback Ride to the Viewpoint</string>
+    <string name="spot_21_specialty_2_description">Guided 1-hour ride along the trails</string>
+    <string name="spot_1_highlight_1_title">Wax Palm Forest</string>
+    <string name="spot_1_highlight_1_subtitle">Palms up to 60m tall on green slopes</string>
+    <string name="spot_1_highlight_2_title">Casa de los Colibríes (Acaime)</string>
+    <string name="spot_1_highlight_2_subtitle">Wild bird sanctuary and hot chocolate</string>
+    <string name="spot_3_highlight_1_title">Catedral Basílica Metropolitana</string>
+    <string name="spot_3_highlight_1_subtitle">Tour of the Polish Corridor, more than 100 meters high</string>
+    <string name="spot_3_highlight_2_title">Monumento Bolívar Cóndor</string>
+    <string name="spot_3_highlight_2_subtitle">A bronze masterpiece by sculptor Rodrigo Arenas Betancourt</string>
+    <string name="spot_6_highlight_1_title">Natural Thermal Pools</string>
+    <string name="spot_6_highlight_1_subtitle">Several pools with different temperatures</string>
+    <string name="spot_17_highlight_1_title">Annual Cultural Program</string>
+    <string name="spot_17_highlight_1_subtitle">Theater festival and concert seasons</string>
+    <string name="spot_17_highlight_2_title">Republican Architecture</string>
+    <string name="spot_17_highlight_2_subtitle">Restored heritage facade in the city center</string>
+    <string name="spot_20_highlight_1_title">Lake and Picnic Area</string>
+    <string name="spot_20_highlight_1_subtitle">Boat rental and family tables</string>
+    <string name="spot_20_highlight_2_title">Bike Path and Trails</string>
+    <string name="spot_20_highlight_2_subtitle">Flat routes for bikes and skates</string>
+    <string name="spot_4_highlight_1_title">Waterfall &amp; Natural Pool</string>
+    <string name="spot_4_highlight_1_subtitle">Suitable for supervised recreational bathing</string>
+    <string name="spot_4_highlight_2_title">Native Bird Watching</string>
+    <string name="spot_4_highlight_2_subtitle">Habitat of the Emerald Toucan and hummingbirds</string>
+</resources>

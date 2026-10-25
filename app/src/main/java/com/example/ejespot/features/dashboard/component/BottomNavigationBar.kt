@@ -9,28 +9,33 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import com.example.ejespot.features.dashboard.navigation.DashboardDestination
-import com.example.ejespot.ui.theme.EjeSpotPrimary
-import com.example.ejespot.ui.theme.EjeSpotPrimaryContainer
-import com.example.ejespot.ui.theme.ManropeFontFamily
+import com.example.ejespot.ui.theme.*
 
 @Composable
 fun BottomNavigationBar(
     items: List<DashboardDestination>,
-    currentRoute: String,
+    currentDestination: NavDestination?,
     onItemSelected: (DashboardDestination) -> Unit
 ) {
+    val c = ejeSpotColors()
     NavigationBar(
         modifier = Modifier.fillMaxWidth(),
-        containerColor = Color.White
+        containerColor = c.surface
     ) {
         items.forEach { destination ->
-            val isSelected = currentRoute == destination.routeKey
+            val isSelected = currentDestination?.hierarchy?.any {
+                it.hasRoute(destination.route::class)
+            } == true
 
             NavigationBarItem(
                 label = {
                     Text(
-                        text = destination.label,
+                        text = stringResource(destination.label),
                         fontFamily = ManropeFontFamily
                     )
                 },
@@ -39,17 +44,59 @@ fun BottomNavigationBar(
                 icon = {
                     Icon(
                         imageVector = destination.icon,
-                        contentDescription = destination.label
+                        contentDescription = stringResource(destination.label)
                     )
                 },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = EjeSpotPrimary,
                     selectedTextColor = EjeSpotPrimary,
-                    indicatorColor = EjeSpotPrimaryContainer,
-                    unselectedIconColor = Color(0xFF6E6252),
-                    unselectedTextColor = Color(0xFF6E6252)
+                    indicatorColor = c.primaryContainer,
+                    unselectedIconColor = c.textSoft,
+                    unselectedTextColor = c.textSoft
                 )
             )
         }
     }
 }
+
+@Composable
+fun BottomNavigationBar(
+    items: List<DashboardDestination>,
+    currentRoute: String,
+    onItemSelected: (DashboardDestination) -> Unit
+) {
+    val c = ejeSpotColors()
+    NavigationBar(
+        modifier = Modifier.fillMaxWidth(),
+        containerColor = c.surface
+    ) {
+        items.forEach { destination ->
+            val isSelected = currentRoute == destination.routeKey
+
+            NavigationBarItem(
+                label = {
+                    Text(
+                        text = stringResource(destination.label),
+                        fontFamily = ManropeFontFamily
+                    )
+                },
+                selected = isSelected,
+                onClick = { onItemSelected(destination) },
+                icon = {
+                    Icon(
+                        imageVector = destination.icon,
+                        contentDescription = stringResource(destination.label)
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = EjeSpotPrimary,
+                    selectedTextColor = EjeSpotPrimary,
+                    indicatorColor = c.primaryContainer,
+                    unselectedIconColor = c.textSoft,
+                    unselectedTextColor = c.textSoft
+                )
+            )
+        }
+    }
+}
+

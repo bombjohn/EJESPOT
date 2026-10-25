@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -45,6 +46,7 @@ fun ForgotPasswordScreen(
     onNavigateToLogin: () -> Unit,
     viewModel: ForgotPasswordViewModel = viewModel()
 ) {
+    val c = ejeSpotColors()
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -57,7 +59,7 @@ fun ForgotPasswordScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = EjeSpotBackground
+        containerColor = c.background
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -84,13 +86,13 @@ fun ForgotPasswordScreen(
                     },
                     modifier = Modifier.size(40.dp),
                     shape = CircleShape,
-                    color = Color(0xFFEFE6D6)
+                    color = c.surfaceVariant
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color(0xFF1F1A15),
+                            contentDescription = stringResource(R.string.common_back),
+                            tint = c.text,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -99,11 +101,11 @@ fun ForgotPasswordScreen(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
-                    text = if (uiState.isSuccess) "Correo enviado" else "Recuperar acceso",
+                    text = if (uiState.isSuccess) stringResource(R.string.forgot_email_sent_title) else stringResource(R.string.forgot_title),
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 )
             }
 
@@ -113,7 +115,7 @@ fun ForgotPasswordScreen(
             Box(
                 modifier = Modifier
                     .size(100.dp)
-                    .background(EjeSpotPrimaryContainer, CircleShape),
+                    .background(c.primaryContainer, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -129,11 +131,11 @@ fun ForgotPasswordScreen(
             if (!uiState.isSuccess) {
                 // ================= PANTALLA 2.4: RECUPERAR CONTRASEÑA =================
                 Text(
-                    text = "¿Olvidaste tu\ncontraseña?",
+                    text = stringResource(R.string.forgot_title_alt),
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 26.sp,
-                    color = Color(0xFF1F1A15),
+                    color = c.text,
                     textAlign = TextAlign.Center,
                     lineHeight = 32.sp
                 )
@@ -141,11 +143,11 @@ fun ForgotPasswordScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text(
-                    text = "Escribe el correo que usaste al registrarte y te enviaremos un enlace para restablecer tu contraseña.",
+                    text = stringResource(R.string.forgot_subtitle),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.5.sp,
-                    color = Color(0xFF2E241C),
+                    color = c.textMuted,
                     textAlign = TextAlign.Center,
                     lineHeight = 20.sp,
                     modifier = Modifier.padding(horizontal = 8.dp)
@@ -156,12 +158,12 @@ fun ForgotPasswordScreen(
                 // Campo Correo electrónico
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Text(
-                        text = "CORREO ELECTRÓNICO",
+                        text = stringResource(R.string.forgot_email_label).uppercase(),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 11.5.sp,
                         letterSpacing = 0.5.sp,
-                        color = Color(0xFF1F1A15)
+                        color = c.text
                     )
                     Spacer(modifier = Modifier.height(6.dp))
 
@@ -170,25 +172,25 @@ fun ForgotPasswordScreen(
                             .fillMaxWidth()
                             .height(46.dp)
                             .shadow(elevation = 1.dp, shape = RoundedCornerShape(14.dp))
-                            .background(Color.White, RoundedCornerShape(14.dp))
-                            .border(1.dp, EjeSpotOutline, RoundedCornerShape(14.dp))
+                            .background(c.surface, RoundedCornerShape(14.dp))
+                            .border(1.dp, c.outline, RoundedCornerShape(14.dp))
                             .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_mail_icon),
                             contentDescription = null,
-                            tint = Color(0xFF1F1A15),
+                            tint = c.text,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
                         Box(modifier = Modifier.weight(1f)) {
                             if (uiState.email.isEmpty()) {
                                 Text(
-                                    text = "tú@correo.com",
+                                    text = stringResource(R.string.forgot_email_placeholder),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 13.5.sp,
-                                    color = EjeSpotOutline
+                                    color = c.placeholder
                                 )
                             }
                             BasicTextField(
@@ -199,7 +201,7 @@ fun ForgotPasswordScreen(
                                 textStyle = TextStyle(
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 13.5.sp,
-                                    color = Color(0xFF1F1A15)
+                                    color = c.text
                                 ),
                                 cursorBrush = SolidColor(EjeSpotPrimary),
                                 modifier = Modifier.fillMaxWidth()
@@ -225,7 +227,7 @@ fun ForgotPasswordScreen(
                         CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
                     } else {
                         Text(
-                            text = "Enviar enlace de recuperación",
+                            text = stringResource(R.string.forgot_button),
                             fontFamily = ManropeFontFamily,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.ExtraBold,
@@ -238,7 +240,7 @@ fun ForgotPasswordScreen(
 
                 // Volver al inicio de sesión
                 Text(
-                    text = "Volver al inicio de sesión",
+                    text = stringResource(R.string.forgot_back_to_login),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
@@ -251,22 +253,22 @@ fun ForgotPasswordScreen(
             } else {
                 // ================= PANTALLA 2.5: CORREO ENVIADO =================
                 Text(
-                    text = "¡Revisa tu correo!",
+                    text = stringResource(R.string.forgot_check_email_title),
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 26.sp,
-                    color = Color(0xFF1F1A15),
+                    color = c.text,
                     textAlign = TextAlign.Center
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
-                    text = "Enviamos un enlace de recuperación a:",
+                    text = stringResource(R.string.forgot_sent_to),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 13.5.sp,
-                    color = Color(0xFF2E241C),
+                    color = c.textMuted,
                     textAlign = TextAlign.Center
                 )
 
@@ -286,15 +288,15 @@ fun ForgotPasswordScreen(
 
                 Text(
                     text = buildAnnotatedString {
-                        append("El enlace expira en ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color(0xFF1F1A15))) {
-                            append("30 minutos")
+                        append(stringResource(R.string.forgot_expires_prefix))
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = c.text)) {
+                            append(stringResource(R.string.forgot_expires_bold))
                         }
-                        append(". Si no lo ves en tu bandeja, revisa la carpeta de spam.")
+                        append(stringResource(R.string.forgot_expires_suffix))
                     },
                     fontFamily = ManropeFontFamily,
                     fontSize = 12.sp,
-                    color = Color(0xFF2E241C),
+                    color = c.textMuted,
                     textAlign = TextAlign.Center,
                     lineHeight = 18.sp,
                     modifier = Modifier.padding(horizontal = 14.dp)
@@ -324,7 +326,7 @@ fun ForgotPasswordScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = EjeSpotPrimary)
                 ) {
                     Text(
-                        text = "Abrir aplicación de correo",
+                        text = stringResource(R.string.forgot_open_mail_app),
                         fontFamily = ManropeFontFamily,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -343,15 +345,15 @@ fun ForgotPasswordScreen(
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(100.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color(0xFFFBF6EE)),
-                    border = BorderStroke(1.2.dp, EjeSpotOutline)
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = c.surfaceVariant),
+                    border = BorderStroke(1.2.dp, c.outline)
                 ) {
                     Text(
-                        text = "Reenviar correo",
+                        text = stringResource(R.string.forgot_resend),
                         fontFamily = ManropeFontFamily,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1F1A15)
+                        color = c.text
                     )
                 }
 
@@ -359,7 +361,7 @@ fun ForgotPasswordScreen(
 
                 // Enlace Volver al inicio de sesión
                 Text(
-                    text = "Volver al inicio de sesión",
+                    text = stringResource(R.string.forgot_back_to_login),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,

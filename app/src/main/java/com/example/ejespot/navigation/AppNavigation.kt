@@ -1,11 +1,14 @@
 package com.example.ejespot.navigation
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.ejespot.domain.model.UserRole
+import com.example.ejespot.core.session.SessionManager
 import com.example.ejespot.features.auth.ui.ForgotPasswordScreen
 import com.example.ejespot.features.auth.ui.LoginScreen
 import com.example.ejespot.features.auth.ui.RegisterScreen
@@ -13,101 +16,119 @@ import com.example.ejespot.features.dashboard.MainScreen
 import com.example.ejespot.features.onboarding.ui.OnboardingScreen
 import com.example.ejespot.features.splash.ui.SplashScreen
 
-object Routes {
-    const val SPLASH = "splash"
-    const val ONBOARDING = "onboarding"
-    const val LOGIN = "login"
-    const val REGISTER = "register"
-    const val FORGOT_PASSWORD = "forgot_password"
-    const val MAIN = "main"
-}
-
+/**
+ * Contenedor principal de la navegación (guía 10).
+ *
+ * Aquí se asocian cada ruta con su pantalla mediante `composable`. Quien
+ * decide a dónde lleva cada botón es este archivo: las pantallas solo avisan
+ * qué se presionó mediante funciones `onNavigateTo...`.
+ *
+ * Las rutas están en [MainRoutes]; las del panel interno, en
+ * `features/dashboard/navigation/DashboardRoutes.kt` (NavHost anidado).
+ */
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController()
 ) {
-    NavHost(
-        navController = navController,
-        startDestination = Routes.SPLASH
+    // El Surface toma el color de fondo del tema, así las pantallas se ven
+    // bien en modo claro y oscuro.
+    Surface(
+        modifier = Modifier.fillMaxSize()
     ) {
-        composable(Routes.SPLASH) {
-            SplashScreen(
-                onSplashFinished = {
-                    navController.navigate(Routes.ONBOARDING) {
-                        popUpTo(Routes.SPLASH) { inclusive = true }
+        NavHost(
+            navController = navController,
+            startDestination = MainRoutes.Splash
+        ) {
+            composable<MainRoutes.Splash> {
+                SplashScreen(
+                    onSplashFinished = {
+                        // Si Data Store restauró una sesión, entramos directo al
+                        // dashboard; si no, pasamos por el onboarding y el login.
+                        val nextRoute = if (SessionManager.currentUser != null) {
+                            MainRoutes.Main
+                        } else {
+                            MainRoutes.Onboarding
+                        }
+                        navController.navigate(nextRoute) {
+                            popUpTo(MainRoutes.Splash) { inclusive = true }
+                        }
                     }
-                }
-            )
-        }
+                )
+            }
 
-        composable(Routes.ONBOARDING) {
-            OnboardingScreen(
-                onContinue = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.ONBOARDING) { inclusive = true }
+            composable<MainRoutes.Onboarding> {
+                OnboardingScreen(
+                    onContinue = {
+                        navController.navigate(MainRoutes.Login) {
+                            popUpTo(MainRoutes.Onboarding) { inclusive = true }
+                        }
+                    },
+                    onSkip = {
+                        navController.navigate(MainRoutes.Login) {
+                            popUpTo(MainRoutes.Onboarding) { inclusive = true }
+                        }
                     }
-                },
-                onSkip = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.ONBOARDING) { inclusive = true }
-                    }
-                }
-            )
-        }
+                )
+            }
 
-        composable(Routes.LOGIN) {
-            LoginScreen(
-                onLoginSuccess = {
-                    navController.navigate(Routes.MAIN) {
-                        popUpTo(Routes.LOGIN) { inclusive = true }
+            composable<MainRoutes.Login> {
+                LoginScreen(
+                    onLoginSuccess = { user ->
+                        SessionManager.signIn(user)
+                        navController.navigate(MainRoutes.Main) {
+                            popUpTo(MainRoutes.Login) { inclusive = true }
+                        }
+                    },
+                    onNavigateToRegister = {
+                        navController.navigate(MainRoutes.Register)
+                    },
+                    onNavigateToForgotPassword = {
+                        navController.navigate(MainRoutes.ForgotPassword)
                     }
-                },
-                onNavigateToRegister = {
-                    navController.navigate(Routes.REGISTER)
-                },
-                onNavigateToForgotPassword = {
-                    navController.navigate(Routes.FORGOT_PASSWORD)
-                }
-            )
-        }
+                )
+            }
 
-        composable(Routes.REGISTER) {
-            RegisterScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onNavigateToLogin = {
-                    navController.popBackStack()
-                },
-                onRegisterSuccess = {
-                    navController.navigate(Routes.MAIN) {
-                        popUpTo(Routes.REGISTER) { inclusive = true }
+            composable<MainRoutes.Register> {
+                RegisterScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onNavigateToLogin = {
+                        navController.popBackStack()
+                    },
+                    onRegisterSuccess = { user ->
+                        // La cuenta creada inicia sesión y queda persistida en Data Store.
+                        SessionManager.signIn(user)
+                        navController.navigate(MainRoutes.Main) {
+                            popUpTo(MainRoutes.Register) { inclusive = true }
+                        }
                     }
-                }
-            )
-        }
+                )
+            }
 
-        composable(Routes.FORGOT_PASSWORD) {
-            ForgotPasswordScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onNavigateToLogin = {
-                    navController.popBackStack()
-                }
-            )
-        }
-
-        // Pantalla Principal (Dashboard con NavigationBar + Nested Navigation)
-        composable(Routes.MAIN) {
-            MainScreen(
-                role = UserRole.USER,
-                onLogout = {
-                    navController.navigate(Routes.LOGIN) {
-                        popUpTo(Routes.MAIN) { inclusive = true }
+            composable<MainRoutes.ForgotPassword> {
+                ForgotPasswordScreen(
+                    onNavigateBack = {
+                        navController.popBackStack()
+                    },
+                    onNavigateToLogin = {
+                        navController.popBackStack()
                     }
-                }
-            )
+                )
+            }
+
+            // Pantalla Principal (Dashboard con NavigationBar + Nested Navigation)
+            composable<MainRoutes.Main> {
+                MainScreen(
+                    role = SessionManager.role,
+                    onLogout = {
+                        SessionManager.signOut()
+                        navController.navigate(MainRoutes.Login) {
+                            popUpTo(MainRoutes.Main) { inclusive = true }
+                        }
+                    }
+                )
+            }
         }
     }
 }

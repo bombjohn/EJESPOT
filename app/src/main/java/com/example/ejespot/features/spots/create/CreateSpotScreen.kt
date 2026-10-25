@@ -1,10 +1,18 @@
 package com.example.ejespot.features.spots.create
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,12 +28,17 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -34,8 +47,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejespot.R
+import com.example.ejespot.core.component.ImagePickerBottomSheet
+import com.example.ejespot.core.util.createTempImageUri
+import com.example.ejespot.core.util.toImageBitmap
+import com.example.ejespot.domain.model.Location
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.ui.theme.*
 import kotlinx.coroutines.launch
@@ -50,6 +68,12 @@ fun CreateSpotScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+
+    // URI de la foto elegida para el lugar (galería o cámara).
+    var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
+
+    // Mensaje de éxito tomado de strings.xml.
+    val successMessage = stringResource(R.string.create_success)
 
     LaunchedEffect(uiState.errorMessage) {
         uiState.errorMessage?.let {
@@ -87,17 +111,22 @@ fun CreateSpotScreen(
         onHoursChanged = viewModel::onHoursChanged,
         onPriceTypeChanged = viewModel::onPriceTypeChanged,
         onDescriptionChanged = viewModel::onDescriptionChanged,
+        imageUri = imageUri,
+        onImagePicked = { imageUri = it },
         onSubmit = {
             viewModel.onSubmit { name, cat, loc, hours, price, desc ->
-                // Generar spot pendiente para el feed
+                // Generar spot pendiente para el feed.
+                // Las coordenadas se derivan del municipio elegido para que el
+                // marcador aparezca en el lugar correcto del mapa real.
+                val (lat, lng) = coordinatesFor(loc)
                 val newSpot = Spot(
                     id = "spot_${System.currentTimeMillis()}",
                     name = name,
                     category = cat,
-                    location = loc,
+                    municipality = loc,
                     rating = 5.0,
                     reviewCount = 0,
-                    distance = "A 1.0 km",
+                    distance = "1.0 km",
                     isVerified = false,
                     priceBadge = price,
                     hours = hours,
@@ -105,15 +134,33 @@ fun CreateSpotScreen(
                     description = desc,
                     addedBy = "@tú",
                     imageResId = R.drawable.spot_cascada_frailes,
+                    location = Location(lat, lng),
                     isPending = true
                 )
                 onSpotCreated?.invoke(newSpot)
+                imageUri = null
                 coroutineScope.launch {
-                    snackbarHostState.showSnackbar("¡Punto propuesto con éxito! (+50 XP)")
+                    snackbarHostState.showSnackbar(successMessage)
                 }
             }
         }
     )
+}
+
+/**
+ * Coordenadas aproximadas por municipio del Eje Cafetero.
+ *
+ * Se usan para ubicar en el mapa real el lugar que propone la comunidad,
+ * ya que la demo no tiene geocodificación ni permisos de ubicación reales.
+ */
+private fun coordinatesFor(location: String): Pair<Double, Double> = when {
+    location.startsWith("Pereira") -> 4.8143 to -75.6946
+    location.startsWith("Salento") -> 4.6370 to -75.5700
+    location.startsWith("Manizales") -> 5.0683 to -75.5177
+    location.startsWith("Filandia") -> 4.6750 to -75.6380
+    location.startsWith("Santa Rosa") -> 4.8650 to -75.6100
+    location.startsWith("Armenia") -> 4.5340 to -75.6810
+    else -> 4.8087 to -75.6903
 }
 
 @Composable
@@ -127,9 +174,52 @@ private fun CreateSpotFormScreen(
     onHoursChanged: (String) -> Unit,
     onPriceTypeChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
+    imageUri: Uri?,
+    onImagePicked: (Uri?) -> Unit,
     onSubmit: () -> Unit
 ) {
+    val c = ejeSpotColors()
+    val context = LocalContext.current
     var showLocationSelector by remember { mutableStateOf(false) }
+
+    // --- Selector de imagen (guía 15) ---
+    // `GetContent` abre la galería sin necesidad de permisos: el usuario elige
+    // el archivo y la app recibe acceso solo a esa imagen.
+    var showImagePicker by remember { mutableStateOf(false) }
+
+    // URI temporal donde la cámara escribirá la foto (se recuerda si hay rotación).
+    var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        if (uri != null) onImagePicked(uri)
+    }
+
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success) onImagePicked(tempCameraUri)
+    }
+
+    // La cámara sí requiere permiso explícito en tiempo de ejecución.
+    val cameraPermissionMessage = stringResource(R.string.camera_permission_required)
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            val uri = createTempImageUri(context)
+            tempCameraUri = uri
+            cameraLauncher.launch(uri)
+        } else {
+            android.widget.Toast.makeText(
+                context,
+                cameraPermissionMessage,
+                android.widget.Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
     val availableLocations = listOf(
         "Pereira, Risaralda",
         "Salento, Quindío",
@@ -139,20 +229,19 @@ private fun CreateSpotFormScreen(
         "Armenia, Quindío"
     )
 
-    val categories = listOf(
-        "Gastronomía" to "🍕",
-        "Naturaleza" to "🏞️",
-        "Cultura" to "🎭",
-        "Ocio" to "⏹️",
-        "Historia" to "🏛️"
+    val categories = com.example.ejespot.domain.model.SpotCategories.all
+        .map { it to com.example.ejespot.domain.model.SpotCategories.emoji(it) }
+    val priceTypes = listOf(
+        stringResource(R.string.create_price_free),
+        stringResource(R.string.create_price_cheap),
+        stringResource(R.string.create_price_moderate),
+        stringResource(R.string.create_price_expensive)
     )
-
-    val priceTypes = listOf("Gratuito", "Económico", "Moderado", "Costoso")
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(bottom = padding.calculateBottomPadding())
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
@@ -168,14 +257,14 @@ private fun CreateSpotFormScreen(
                 onClick = onNavigateBack,
                 modifier = Modifier.size(40.dp),
                 shape = CircleShape,
-                color = Color(0xFFF0E7D8),
-                border = BorderStroke(1.dp, Color(0xFFDFD4C2))
+                color = c.surfaceVariant,
+                border = BorderStroke(1.dp, c.outline)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Volver",
-                        tint = Color(0xFF1F1A15),
+                        contentDescription = stringResource(R.string.common_back),
+                        tint = c.text,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -184,105 +273,118 @@ private fun CreateSpotFormScreen(
             Spacer(modifier = Modifier.width(16.dp))
 
             Text(
-                text = "Nuevo lugar",
+                text = stringResource(R.string.create_title),
                 fontFamily = FrauncesFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 22.sp,
-                color = Color(0xFF1F1A15)
+                color = c.text
             )
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Caja de Fotografía
+        // Caja de Fotografía: muestra la imagen elegida o el placeholder.
         Surface(
+            onClick = { showImagePicker = true },
             shape = RoundedCornerShape(16.dp),
-            color = Color(0xFFFAF6EE),
-            border = BorderStroke(1.2.dp, Color(0xFFDCCFBD)),
+            color = c.surfaceRaised,
+            border = BorderStroke(1.2.dp, c.outline),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(130.dp)
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.PhotoCamera,
-                    contentDescription = null,
-                    tint = Color(0xFF4A3E31),
-                    modifier = Modifier.size(32.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Añadir fotografías del lugar",
-                    fontFamily = ManropeFontFamily,
-                    fontSize = 12.5.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF5A4833)
-                )
+            if (imageUri != null) {
+                // Se decodifica el URI a Bitmap para poder mostrarlo con Image().
+                val bitmap = remember(imageUri) { imageUri.toImageBitmap(context) }
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (bitmap != null) {
+                        Image(
+                            bitmap = bitmap.asImageBitmap(),
+                            contentDescription = stringResource(R.string.create_photo_label),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+                    // Texto para indicar que se puede cambiar la foto.
+                    Surface(
+                        shape = RoundedCornerShape(100.dp),
+                        color = Color.Black.copy(alpha = 0.55f),
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.change_photo),
+                            fontFamily = ManropeFontFamily,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                        )
+                    }
+                }
+            } else {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.PhotoCamera,
+                        contentDescription = null,
+                        tint = c.textMuted,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.create_add_photos),
+                        fontFamily = ManropeFontFamily,
+                        fontSize = 12.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = c.textSoft
+                    )
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(20.dp))
 
         // NOMBRE DEL LUGAR
-        FieldLabel("NOMBRE DEL LUGAR")
+        FieldLabel(stringResource(R.string.create_name_label))
         Spacer(modifier = Modifier.height(6.dp))
         InputBox(
             value = uiState.name,
             onValueChange = onNameChanged,
-            placeholder = "Ej. Cascada El Bosque"
+            placeholder = stringResource(R.string.create_name_placeholder)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // CATEGORÍA
-        FieldLabel("CATEGORÍA")
+        FieldLabel(stringResource(R.string.create_category_label))
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
+        @OptIn(ExperimentalLayoutApi::class)
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            categories.take(2).forEach { (cat, emoji) ->
+            categories.forEach { (cat, emoji) ->
                 val isSelected = uiState.category == cat
                 Surface(
                     shape = RoundedCornerShape(100.dp),
-                    color = if (isSelected) EjeSpotPrimary else Color.White,
-                    border = BorderStroke(1.dp, if (isSelected) EjeSpotPrimary else Color(0xFFDECFC0)),
+                    color = if (isSelected) c.primary else c.chipIdle,
+                    border = BorderStroke(1.dp, if (isSelected) c.primary else c.outline),
                     modifier = Modifier.clickable { onCategoryChanged(cat) }
                 ) {
                     Text(
-                        text = "$emoji $cat",
+                        text = "$emoji ${stringResource(
+                            com.example.ejespot.domain.model.SpotCategories.labelRes(cat)
+                        )}",
                         fontFamily = ManropeFontFamily,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isSelected) Color.White else Color(0xFF1F1A15),
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
-                    )
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            categories.drop(2).forEach { (cat, emoji) ->
-                val isSelected = uiState.category == cat
-                Surface(
-                    shape = RoundedCornerShape(100.dp),
-                    color = if (isSelected) EjeSpotPrimary else Color.White,
-                    border = BorderStroke(1.dp, if (isSelected) EjeSpotPrimary else Color(0xFFDECFC0)),
-                    modifier = Modifier.clickable { onCategoryChanged(cat) }
-                ) {
-                    Text(
-                        text = "$emoji $cat",
-                        fontFamily = ManropeFontFamily,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isSelected) Color.White else Color(0xFF1F1A15),
+                        color = if (isSelected) Color.White else c.text,
                         modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
                     )
                 }
@@ -292,7 +394,7 @@ private fun CreateSpotFormScreen(
         Spacer(modifier = Modifier.height(18.dp))
 
         // RANGO DE PRECIO ESTIMADO
-        FieldLabel("RANGO DE PRECIO ESTIMADO")
+        FieldLabel(stringResource(R.string.create_price_label))
         Spacer(modifier = Modifier.height(8.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -302,8 +404,8 @@ private fun CreateSpotFormScreen(
                 val isSelected = uiState.priceType == price
                 Surface(
                     shape = RoundedCornerShape(100.dp),
-                    color = if (isSelected) Color(0xFFB5652F) else Color.White,
-                    border = BorderStroke(1.dp, if (isSelected) Color(0xFFB5652F) else Color(0xFFDECFC0)),
+                    color = if (isSelected) c.secondary else c.chipIdle,
+                    border = BorderStroke(1.dp, if (isSelected) c.secondary else c.outline),
                     modifier = Modifier.clickable { onPriceTypeChanged(price) }
                 ) {
                     Text(
@@ -311,7 +413,7 @@ private fun CreateSpotFormScreen(
                         fontFamily = ManropeFontFamily,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
-                        color = if (isSelected) Color.White else Color(0xFF1F1A15),
+                        color = if (isSelected) Color.White else c.text,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                     )
                 }
@@ -321,14 +423,14 @@ private fun CreateSpotFormScreen(
         Spacer(modifier = Modifier.height(18.dp))
 
         // HORARIO DE ATENCIÓN SUGERIDO
-        FieldLabel("HORARIO DE ATENCIÓN SUGERIDO")
+        FieldLabel(stringResource(R.string.create_hours_label))
         Spacer(modifier = Modifier.height(6.dp))
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
-                .background(Color.White, RoundedCornerShape(14.dp))
-                .border(1.dp, Color(0xFFE5DDD0), RoundedCornerShape(14.dp))
+                .background(c.surface, RoundedCornerShape(14.dp))
+                .border(1.dp, c.outlineSoft, RoundedCornerShape(14.dp))
                 .padding(horizontal = 14.dp),
             contentAlignment = Alignment.CenterStart
         ) {
@@ -339,10 +441,10 @@ private fun CreateSpotFormScreen(
                 Box(modifier = Modifier.weight(1f)) {
                     if (uiState.hours.isEmpty()) {
                         Text(
-                            text = "7:00 a.m. - 5:00 p.m.",
+                            text = stringResource(R.string.create_hours_placeholder),
                             fontFamily = ManropeFontFamily,
                             fontSize = 13.sp,
-                            color = Color(0xFFA59787)
+                            color = c.placeholder
                         )
                     }
                     BasicTextField(
@@ -352,16 +454,16 @@ private fun CreateSpotFormScreen(
                         textStyle = TextStyle(
                             fontFamily = ManropeFontFamily,
                             fontSize = 13.sp,
-                            color = Color(0xFF1F1A15)
+                            color = c.text
                         ),
-                        cursorBrush = SolidColor(EjeSpotPrimary),
+                        cursorBrush = SolidColor(c.primary),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
                 Icon(
                     imageVector = Icons.Default.AccessTime,
                     contentDescription = null,
-                    tint = Color(0xFF887D70),
+                    tint = c.placeholder,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -370,12 +472,12 @@ private fun CreateSpotFormScreen(
         Spacer(modifier = Modifier.height(18.dp))
 
         // UBICACIÓN
-        FieldLabel("UBICACIÓN")
+        FieldLabel(stringResource(R.string.create_location_label))
         Spacer(modifier = Modifier.height(6.dp))
         Surface(
             onClick = { showLocationSelector = true },
             shape = RoundedCornerShape(14.dp),
-            color = Color(0xFFDCEAD9),
+            color = c.successBg,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -389,16 +491,16 @@ private fun CreateSpotFormScreen(
                 Icon(
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = null,
-                    tint = Color(0xFF2C5640),
+                    tint = c.successText,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "${uiState.location} · Coordenadas listas",
+                    text = stringResource(R.string.create_coordinates_ready, uiState.location),
                     fontFamily = ManropeFontFamily,
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF2C5640)
+                    color = c.successText
                 )
             }
         }
@@ -408,8 +510,8 @@ private fun CreateSpotFormScreen(
         // Tarjeta Informativa / Estado Pendiente
         Surface(
             shape = RoundedCornerShape(14.dp),
-            color = Color(0xFFF3ECE0),
-            border = BorderStroke(1.dp, Color(0xFFE5DDD0)),
+            color = c.surfaceVariant,
+            border = BorderStroke(1.dp, c.outlineSoft),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -421,7 +523,7 @@ private fun CreateSpotFormScreen(
                 Icon(
                     imageVector = Icons.Default.VerifiedUser,
                     contentDescription = null,
-                    tint = Color(0xFF3D6B4F),
+                    tint = c.successText,
                     modifier = Modifier
                         .size(18.dp)
                         .padding(top = 2.dp)
@@ -429,15 +531,17 @@ private fun CreateSpotFormScreen(
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = buildAnnotatedString {
-                        append("Este punto de interés quedará como ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color(0xFF1F1A15))) {
-                            append("pendiente")
+                        val prefix = stringResource(R.string.create_pending_prefix)
+                        val suffix = stringResource(R.string.create_pending_suffix)
+                        append(prefix)
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = c.text)) {
+                            append(stringResource(R.string.create_pending_bold))
                         }
-                        append(" hasta que un moderador confirme que existe y que los datos son precisos.")
+                        append(suffix)
                     },
                     fontFamily = ManropeFontFamily,
                     fontSize = 12.sp,
-                    color = Color(0xFF5A4833),
+                    color = c.textSoft,
                     lineHeight = 17.sp
                 )
             }
@@ -456,7 +560,7 @@ private fun CreateSpotFormScreen(
             colors = ButtonDefaults.buttonColors(containerColor = EjeSpotPrimary)
         ) {
             Text(
-                text = "Enviar para revisión",
+                text = stringResource(R.string.create_submit),
                 fontFamily = ManropeFontFamily,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
@@ -473,7 +577,7 @@ private fun CreateSpotFormScreen(
             onDismissRequest = { showLocationSelector = false },
             title = {
                 Text(
-                    text = "Seleccionar Municipio",
+                    text = stringResource(R.string.create_select_municipality),
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
@@ -486,7 +590,7 @@ private fun CreateSpotFormScreen(
                             text = loc,
                             fontFamily = ManropeFontFamily,
                             fontWeight = if (loc == uiState.location) FontWeight.Bold else FontWeight.Normal,
-                            color = if (loc == uiState.location) EjeSpotPrimary else Color(0xFF1F1A15),
+                            color = if (loc == uiState.location) c.primary else c.text,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
@@ -501,6 +605,32 @@ private fun CreateSpotFormScreen(
             confirmButton = {}
         )
     }
+
+    // Selector de imagen (cámara o galería).
+    if (showImagePicker) {
+        ImagePickerBottomSheet(
+            onCameraClick = {
+                showImagePicker = false
+                // La cámara necesita permiso; la galería (GetContent) no.
+                val granted = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.CAMERA
+                ) == PackageManager.PERMISSION_GRANTED
+                if (granted) {
+                    val uri = createTempImageUri(context)
+                    tempCameraUri = uri
+                    cameraLauncher.launch(uri)
+                } else {
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                }
+            },
+            onGalleryClick = {
+                showImagePicker = false
+                galleryLauncher.launch("image/*")
+            },
+            onDismiss = { showImagePicker = false }
+        )
+    }
 }
 
 @Composable
@@ -512,10 +642,11 @@ private fun CreateSpotSuccessScreen(
     onBackToHome: () -> Unit,
     onViewProposedSpots: () -> Unit
 ) {
+    val c = ejeSpotColors()
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(bottom = padding.calculateBottomPadding())
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp),
@@ -529,13 +660,13 @@ private fun CreateSpotSuccessScreen(
             modifier = Modifier
                 .size(80.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFD6EAD8)),
+                .background(c.successBg),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Check,
-                contentDescription = "Éxito",
-                tint = Color(0xFF2C5640),
+                contentDescription = stringResource(R.string.create_success_cd),
+                tint = c.successText,
                 modifier = Modifier.size(38.dp)
             )
         }
@@ -545,14 +676,14 @@ private fun CreateSpotSuccessScreen(
         // Badge XP
         Surface(
             shape = RoundedCornerShape(100.dp),
-            color = Color(0xFFCFE8D6)
+            color = c.successBg
         ) {
             Text(
-                text = "+50 XP Ganados · En revisión",
+                text = stringResource(R.string.create_success_xp_badge),
                 fontFamily = ManropeFontFamily,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF2C5640),
+                color = c.successText,
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
             )
         }
@@ -561,11 +692,11 @@ private fun CreateSpotSuccessScreen(
 
         // Título de Éxito
         Text(
-            text = "¡Punto enviado para\nrevisión!",
+            text = stringResource(R.string.create_success_title),
             fontFamily = FrauncesFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 26.sp,
-            color = Color(0xFF1F1A15),
+            color = c.text,
             textAlign = TextAlign.Center,
             lineHeight = 32.sp
         )
@@ -575,19 +706,19 @@ private fun CreateSpotSuccessScreen(
         // Mensaje Descriptivo
         Text(
             text = buildAnnotatedString {
-                append("Gracias por enriquecer el turismo del Eje Cafetero. Un ")
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color(0xFF1F1A15))) {
-                    append("Embajador Local")
+                append(stringResource(R.string.create_success_desc_prefix))
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = c.text)) {
+                    append(stringResource(R.string.create_success_desc_bold1))
                 }
-                append(" verificará que los horarios y la ubicación sean exactos en menos de ")
-                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color(0xFF1F1A15))) {
-                    append("24 horas")
+                append(stringResource(R.string.create_success_desc_mid))
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = c.text)) {
+                    append(stringResource(R.string.create_success_desc_bold2))
                 }
                 append(".")
             },
             fontFamily = ManropeFontFamily,
             fontSize = 13.5.sp,
-            color = Color(0xFF6E6252),
+            color = c.textSoft,
             textAlign = TextAlign.Center,
             lineHeight = 20.sp
         )
@@ -597,8 +728,8 @@ private fun CreateSpotSuccessScreen(
         // Tarjeta resumen del spot enviado
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = Color.White,
-            border = BorderStroke(1.dp, Color(0xFFE5DDD0)),
+            color = c.surface,
+            border = BorderStroke(1.dp, c.outlineSoft),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row(
@@ -612,13 +743,13 @@ private fun CreateSpotSuccessScreen(
                     modifier = Modifier
                         .size(46.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFFDCEAD9)),
+                        .background(c.successBg),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.Landscape,
                         contentDescription = null,
-                        tint = Color(0xFF2C5640),
+                        tint = c.successText,
                         modifier = Modifier.size(24.dp)
                     )
                 }
@@ -627,18 +758,18 @@ private fun CreateSpotSuccessScreen(
 
                 Column {
                     Text(
-                        text = spotName.ifBlank { "Cascada El Bosque" },
+                        text = spotName.ifBlank { stringResource(R.string.create_placeholder_name) },
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.5.sp,
-                        color = Color(0xFF1F1A15)
+                        color = c.text
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "$location · $category",
                         fontFamily = ManropeFontFamily,
                         fontSize = 12.sp,
-                        color = Color(0xFF6E6252)
+                        color = c.textSoft
                     )
                 }
             }
@@ -656,7 +787,7 @@ private fun CreateSpotSuccessScreen(
             colors = ButtonDefaults.buttonColors(containerColor = EjeSpotPrimary)
         ) {
             Text(
-                text = "Volver al Inicio",
+                text = stringResource(R.string.create_back_home),
                 fontFamily = ManropeFontFamily,
                 fontSize = 13.5.sp,
                 fontWeight = FontWeight.Bold,
@@ -673,19 +804,19 @@ private fun CreateSpotSuccessScreen(
                 .fillMaxWidth()
                 .height(48.dp),
             shape = RoundedCornerShape(100.dp),
-            color = Color(0xFFF7F2E9),
-            border = BorderStroke(1.dp, Color(0xFFDECFC0))
+            color = c.surfaceRaised,
+            border = BorderStroke(1.dp, c.outline)
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Ver en mis puntos propuestos",
+                    text = stringResource(R.string.create_view_proposals),
                     fontFamily = ManropeFontFamily,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 )
             }
         }
@@ -696,12 +827,13 @@ private fun CreateSpotSuccessScreen(
 
 @Composable
 private fun FieldLabel(text: String) {
+    val c = ejeSpotColors()
     Text(
         text = text,
         fontFamily = ManropeFontFamily,
         fontSize = 10.sp,
         fontWeight = FontWeight.ExtraBold,
-        color = Color(0xFF887D70),
+        color = c.placeholder,
         letterSpacing = 0.5.sp
     )
 }
@@ -712,12 +844,13 @@ private fun InputBox(
     onValueChange: (String) -> Unit,
     placeholder: String
 ) {
+    val c = ejeSpotColors()
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(48.dp)
-            .background(Color.White, RoundedCornerShape(14.dp))
-            .border(1.dp, Color(0xFFE5DDD0), RoundedCornerShape(14.dp))
+            .background(c.surface, RoundedCornerShape(14.dp))
+            .border(1.dp, c.outlineSoft, RoundedCornerShape(14.dp))
             .padding(horizontal = 14.dp),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -726,7 +859,7 @@ private fun InputBox(
                 text = placeholder,
                 fontFamily = ManropeFontFamily,
                 fontSize = 13.sp,
-                color = Color(0xFFA59787)
+                color = c.placeholder
             )
         }
         BasicTextField(
@@ -736,9 +869,9 @@ private fun InputBox(
             textStyle = TextStyle(
                 fontFamily = ManropeFontFamily,
                 fontSize = 13.5.sp,
-                color = Color(0xFF1F1A15)
+                color = c.text
             ),
-            cursorBrush = SolidColor(EjeSpotPrimary),
+            cursorBrush = SolidColor(c.primary),
             modifier = Modifier.fillMaxWidth()
         )
     }

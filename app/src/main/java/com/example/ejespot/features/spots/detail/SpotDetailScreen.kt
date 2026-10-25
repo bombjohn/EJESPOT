@@ -3,7 +3,6 @@ package com.example.ejespot.features.spots.detail
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,14 +19,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejespot.R
+import com.example.ejespot.core.ui.SpotImage
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.domain.model.SpotReview
 import com.example.ejespot.ui.theme.*
@@ -39,8 +38,11 @@ fun SpotDetailScreen(
     snackbarHostState: SnackbarHostState? = null,
     onNavigateBack: () -> Unit,
     onAddReview: ((SpotReview) -> Unit)? = null,
+    onNavigateToReviews: ((String) -> Unit)? = null,
+    onNavigateToReport: ((String) -> Unit)? = null,
     viewModel: SpotDetailViewModel = viewModel()
 ) {
+    val c = ejeSpotColors()
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
 
@@ -65,9 +67,9 @@ fun SpotDetailScreen(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "Punto de interés no encontrado",
+                text = stringResource(R.string.detail_not_found),
                 fontFamily = ManropeFontFamily,
-                color = Color(0xFF1F1A15)
+                color = c.text
             )
         }
         return
@@ -87,13 +89,11 @@ fun SpotDetailScreen(
                 .height(280.dp)
                 .background(EjeSpotPrimaryContainer)
         ) {
-            Image(
-                painter = painterResource(id = currentSpot.imageResId),
-                contentDescription = currentSpot.name,
-                contentScale = ContentScale.Crop,
+            SpotImage(
+                spot = currentSpot,
+                emojiSize = 78.dp,
                 modifier = Modifier.fillMaxSize()
             )
-
             // Botón Volver
             Surface(
                 onClick = onNavigateBack,
@@ -102,15 +102,36 @@ fun SpotDetailScreen(
                     .size(42.dp)
                     .align(Alignment.TopStart),
                 shape = CircleShape,
-                color = Color.White.copy(alpha = 0.92f),
+                color = c.surface.copy(alpha = 0.92f),
                 shadowElevation = 3.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Volver",
-                        tint = Color(0xFF1F1A15),
+                        contentDescription = stringResource(R.string.common_back),
+                        tint = c.text,
                         modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+
+            // Botón Reportar flotante (Pantalla 4.6)
+            Surface(
+                onClick = { onNavigateToReport?.invoke(currentSpot.id) },
+                modifier = Modifier
+                    .padding(end = 66.dp, top = 40.dp)
+                    .size(42.dp)
+                    .align(Alignment.TopEnd),
+                shape = CircleShape,
+                color = c.surface.copy(alpha = 0.92f),
+                shadowElevation = 3.dp
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Flag,
+                        contentDescription = stringResource(R.string.detail_report),
+                        tint = c.dangerText,
+                        modifier = Modifier.size(19.dp)
                     )
                 }
             }
@@ -123,14 +144,14 @@ fun SpotDetailScreen(
                     .size(42.dp)
                     .align(Alignment.TopEnd),
                 shape = CircleShape,
-                color = Color.White.copy(alpha = 0.92f),
+                color = c.surface.copy(alpha = 0.92f),
                 shadowElevation = 3.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = if (uiState.isSaved) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        contentDescription = "Guardar",
-                        tint = if (uiState.isSaved) EjeSpotSecondary else Color(0xFF1F1A15),
+                        contentDescription = stringResource(R.string.common_save),
+                        tint = if (uiState.isSaved) EjeSpotSecondary else c.text,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -153,20 +174,18 @@ fun SpotDetailScreen(
             ) {
                 Surface(
                     shape = RoundedCornerShape(100.dp),
-                    color = Color(0xFFF3ECE0),
-                    border = BorderStroke(1.dp, Color(0xFFDECFC0))
+                    color = c.surfaceVariant,
+                    border = BorderStroke(1.dp, c.outline)
                 ) {
                     Text(
-                        text = when (currentSpot.category) {
-                            "Naturaleza" -> "🏕️ Naturaleza"
-                            "Gastronomía" -> "☕ Gastronomía"
-                            "Historia" -> "🏛️ Historia"
-                            else -> "📍 ${currentSpot.category}"
-                        },
+                        text = "${com.example.ejespot.domain.model.SpotCategories.emoji(currentSpot.category)} " +
+                            stringResource(
+                                com.example.ejespot.domain.model.SpotCategories.labelRes(currentSpot.category)
+                            ),
                         fontFamily = ManropeFontFamily,
                         fontSize = 11.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6E563B),
+                        color = c.textSoft,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
                 }
@@ -176,7 +195,7 @@ fun SpotDetailScreen(
                     color = EjeSpotPrimaryContainer
                 ) {
                     Text(
-                        text = currentSpot.priceBadge,
+                        text = currentSpot.priceBadgeRes?.let { stringResource(it) } ?: currentSpot.priceBadge,
                         fontFamily = ManropeFontFamily,
                         fontSize = 11.5.sp,
                         fontWeight = FontWeight.Bold,
@@ -197,7 +216,7 @@ fun SpotDetailScreen(
                             modifier = Modifier.size(13.dp)
                         )
                         Text(
-                            text = "Verificado por Moderador",
+                            text = stringResource(R.string.detail_verified_by_moderator),
                             fontFamily = ManropeFontFamily,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Bold,
@@ -215,7 +234,7 @@ fun SpotDetailScreen(
                 fontFamily = FrauncesFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 24.sp,
-                color = Color(0xFF1F1A15),
+                color = c.text,
                 lineHeight = 30.sp
             )
 
@@ -233,23 +252,27 @@ fun SpotDetailScreen(
                     modifier = Modifier.size(15.dp)
                 )
                 Text(
-                    text = "${currentSpot.rating} (${currentSpot.reviewCount} reseñas)",
+                    text = stringResource(
+                        R.string.detail_rating_reviews,
+                        "${currentSpot.rating}",
+                        currentSpot.reviewCount
+                    ),
                     fontFamily = ManropeFontFamily,
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 )
                 Text(
                     text = "·",
                     fontFamily = ManropeFontFamily,
                     fontSize = 12.5.sp,
-                    color = Color(0xFF887D70)
+                    color = c.placeholder
                 )
                 Text(
-                    text = "${currentSpot.location} · ${currentSpot.distance}",
+                    text = "${currentSpot.municipality} · ${stringResource(R.string.spot_distance, currentSpot.distance)}",
                     fontFamily = ManropeFontFamily,
                     fontSize = 12.5.sp,
-                    color = Color(0xFF6E6252)
+                    color = c.textSoft
                 )
             }
 
@@ -263,25 +286,25 @@ fun SpotDetailScreen(
                 Surface(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(14.dp),
-                    color = Color.White,
-                    border = BorderStroke(1.dp, Color(0xFFE5DDD0))
+                    color = c.surface,
+                    border = BorderStroke(1.dp, c.outlineSoft)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text(
-                            text = "HORARIO SUGERIDO",
+                            text = stringResource(R.string.detail_hours_label),
                             fontFamily = ManropeFontFamily,
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFF887D70),
+                            color = c.placeholder,
                             letterSpacing = 0.5.sp
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = currentSpot.hours,
+                            text = currentSpot.hoursRes?.let { stringResource(it) } ?: currentSpot.hours,
                             fontFamily = ManropeFontFamily,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1F1A15)
+                            color = c.text
                         )
                     }
                 }
@@ -289,25 +312,25 @@ fun SpotDetailScreen(
                 Surface(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(14.dp),
-                    color = Color.White,
-                    border = BorderStroke(1.dp, Color(0xFFE5DDD0))
+                    color = c.surface,
+                    border = BorderStroke(1.dp, c.outlineSoft)
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {
                         Text(
-                            text = "RANGO DE PRECIO",
+                            text = stringResource(R.string.detail_price_label),
                             fontFamily = ManropeFontFamily,
                             fontSize = 9.5.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFF887D70),
+                            color = c.placeholder,
                             letterSpacing = 0.5.sp
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = currentSpot.priceRange,
+                            text = currentSpot.priceRangeRes?.let { stringResource(it) } ?: currentSpot.priceRange,
                             fontFamily = ManropeFontFamily,
                             fontSize = 13.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1F1A15)
+                            color = c.text
                         )
                     }
                 }
@@ -317,18 +340,18 @@ fun SpotDetailScreen(
 
             // Sección: Sobre este lugar
             Text(
-                text = "Sobre este lugar",
+                text = stringResource(R.string.detail_about),
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
-                color = Color(0xFF1F1A15)
+                color = c.text
             )
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = currentSpot.description,
+                text = currentSpot.descriptionRes?.let { stringResource(it) } ?: currentSpot.description,
                 fontFamily = ManropeFontFamily,
                 fontSize = 13.5.sp,
-                color = Color(0xFF3E352B),
+                color = c.textMuted,
                 lineHeight = 21.sp
             )
 
@@ -338,16 +361,17 @@ fun SpotDetailScreen(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    color = Color.White,
-                    border = BorderStroke(1.dp, Color(0xFFE5DDD0))
+                    color = c.surface,
+                    border = BorderStroke(1.dp, c.outlineSoft)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = currentSpot.technicalTitle ?: "FICHA TÉCNICA",
+                            text = currentSpot.technicalTitleRes?.let { stringResource(it) }
+                                ?: stringResource(R.string.detail_technical_default),
                             fontFamily = ManropeFontFamily,
                             fontSize = 10.5.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFF887D70),
+                            color = c.placeholder,
                             letterSpacing = 0.5.sp
                         )
                         Spacer(modifier = Modifier.height(12.dp))
@@ -356,32 +380,32 @@ fun SpotDetailScreen(
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = currentSpot.technicalInfo.item1Label,
+                                    text = stringResource(currentSpot.technicalInfo.item1Label),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF1F1A15)
+                                    color = c.text
                                 )
                                 Text(
-                                    text = currentSpot.technicalInfo.item1Value,
+                                    text = stringResource(currentSpot.technicalInfo.item1Value),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 12.sp,
-                                    color = Color(0xFF6E6252)
+                                    color = c.textSoft
                                 )
                             }
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = currentSpot.technicalInfo.item2Label,
+                                    text = stringResource(currentSpot.technicalInfo.item2Label),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF1F1A15)
+                                    color = c.text
                                 )
                                 Text(
-                                    text = currentSpot.technicalInfo.item2Value,
+                                    text = stringResource(currentSpot.technicalInfo.item2Value),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 12.sp,
-                                    color = Color(0xFF6E6252)
+                                    color = c.textSoft
                                 )
                             }
                         }
@@ -391,32 +415,32 @@ fun SpotDetailScreen(
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = currentSpot.technicalInfo.item3Label,
+                                    text = stringResource(currentSpot.technicalInfo.item3Label),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF1F1A15)
+                                    color = c.text
                                 )
                                 Text(
-                                    text = currentSpot.technicalInfo.item3Value,
+                                    text = stringResource(currentSpot.technicalInfo.item3Value),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 12.sp,
-                                    color = Color(0xFF6E6252)
+                                    color = c.textSoft
                                 )
                             }
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = currentSpot.technicalInfo.item4Label,
+                                    text = stringResource(currentSpot.technicalInfo.item4Label),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF1F1A15)
+                                    color = c.text
                                 )
                                 Text(
-                                    text = currentSpot.technicalInfo.item4Value,
+                                    text = stringResource(currentSpot.technicalInfo.item4Value),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 12.sp,
-                                    color = Color(0xFF6E6252)
+                                    color = c.textSoft
                                 )
                             }
                         }
@@ -428,11 +452,12 @@ fun SpotDetailScreen(
             if (currentSpot.specialties.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = currentSpot.specialtiesTitle ?: "🍴 Especialidades de la Casa",
+                    text = currentSpot.specialtiesTitleRes?.let { stringResource(it) }
+                        ?: stringResource(R.string.detail_specialties_default),
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 )
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -442,8 +467,8 @@ fun SpotDetailScreen(
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
                         shape = RoundedCornerShape(14.dp),
-                        color = Color.White,
-                        border = BorderStroke(1.dp, Color(0xFFE5DDD0))
+                        color = c.surface,
+                        border = BorderStroke(1.dp, c.outlineSoft)
                     ) {
                         Row(
                             modifier = Modifier
@@ -453,22 +478,22 @@ fun SpotDetailScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = spec.name,
+                                    text = stringResource(spec.nameRes),
                                     fontFamily = ManropeFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.5.sp,
-                                    color = Color(0xFF1F1A15)
+                                    color = c.text
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = spec.description,
+                                    text = stringResource(spec.descriptionRes),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 11.5.sp,
-                                    color = Color(0xFF6E6252)
+                                    color = c.textSoft
                                 )
                             }
                             Text(
-                                text = spec.price,
+                                text = stringResource(spec.priceRes),
                                 fontFamily = ManropeFontFamily,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 14.sp,
@@ -483,11 +508,12 @@ fun SpotDetailScreen(
             if (currentSpot.highlights.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = currentSpot.highlightsTitle ?: "🦅 Atractivos Destacados",
+                    text = currentSpot.highlightsTitleRes?.let { stringResource(it) }
+                        ?: stringResource(R.string.detail_highlights_default),
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 )
                 Spacer(modifier = Modifier.height(10.dp))
 
@@ -497,8 +523,8 @@ fun SpotDetailScreen(
                             .fillMaxWidth()
                             .padding(vertical = 4.dp),
                         shape = RoundedCornerShape(14.dp),
-                        color = Color.White,
-                        border = BorderStroke(1.dp, Color(0xFFE5DDD0))
+                        color = c.surface,
+                        border = BorderStroke(1.dp, c.outlineSoft)
                     ) {
                         Row(
                             modifier = Modifier
@@ -513,18 +539,18 @@ fun SpotDetailScreen(
                             )
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = hl.title,
+                                    text = stringResource(hl.titleRes),
                                     fontFamily = ManropeFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.5.sp,
-                                    color = Color(0xFF1F1A15)
+                                    color = c.text
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
-                                    text = hl.subtitle,
+                                    text = stringResource(hl.subtitleRes),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 11.5.sp,
-                                    color = Color(0xFF6E6252)
+                                    color = c.textSoft
                                 )
                             }
                         }
@@ -557,7 +583,8 @@ fun SpotDetailScreen(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = if (uiState.isVisited) "Visitado (+10 XP)" else "Marcar como visitado",
+                        text = if (uiState.isVisited) stringResource(R.string.detail_visited_xp)
+                        else stringResource(R.string.detail_mark_visited),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.5.sp,
@@ -565,38 +592,45 @@ fun SpotDetailScreen(
                     )
                 }
 
+                // Mensaje de compartir, resuelto aquí (contexto @Composable).
+                val shareMessage = stringResource(
+                    R.string.detail_share_message,
+                    currentSpot.name,
+                    currentSpot.municipality
+                )
+                val shareChooserTitle = stringResource(R.string.detail_share_chooser)
+
                 OutlinedButton(
                     onClick = {
                         val sendIntent = Intent().apply {
                             action = Intent.ACTION_SEND
-                            putExtra(
-                                Intent.EXTRA_TEXT,
-                                "¡Mira este increíble lugar en el Eje Cafetero! 🌿 ${currentSpot.name} (${currentSpot.location}). Descúbrelo en la app EjeSpot."
-                            )
+                            putExtra(Intent.EXTRA_TEXT, shareMessage)
                             type = "text/plain"
                         }
-                        context.startActivity(Intent.createChooser(sendIntent, "Compartir lugar"))
+                        context.startActivity(
+                            Intent.createChooser(sendIntent, shareChooserTitle)
+                        )
                     },
                     modifier = Modifier
                         .weight(1f)
                         .height(48.dp),
                     shape = RoundedCornerShape(100.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = Color(0xFFF3ECE0)),
-                    border = BorderStroke(1.dp, Color(0xFFDECFC0))
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = c.surfaceVariant),
+                    border = BorderStroke(1.dp, c.outline)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Share,
                         contentDescription = null,
-                        tint = Color(0xFF6E563B),
+                        tint = c.textSoft,
                         modifier = Modifier.size(15.dp)
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Compartir",
+                        text = stringResource(R.string.detail_share),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.5.sp,
-                        color = Color(0xFF6E563B)
+                        color = c.textSoft
                     )
                 }
             }
@@ -604,13 +638,28 @@ fun SpotDetailScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             // --- 7. EXPERIENCIAS DE LA COMUNIDAD (RESEÑAS REALES) ---
-            Text(
-                text = "Experiencias de la comunidad",
-                fontFamily = FrauncesFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 17.sp,
-                color = Color(0xFF1F1A15)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.detail_community_experiences),
+                    fontFamily = FrauncesFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 17.sp,
+                    color = c.text
+                )
+
+                Text(
+                    text = stringResource(R.string.detail_see_all_count, currentSpot.reviewCount),
+                    fontFamily = ManropeFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.5.sp,
+                    color = EjeSpotPrimary,
+                    modifier = Modifier.clickable { onNavigateToReviews?.invoke(currentSpot.id) }
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -618,21 +667,21 @@ fun SpotDetailScreen(
                 Surface(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    color = Color.White,
-                    border = BorderStroke(1.dp, Color(0xFFE5DDD0))
+                    color = c.surface,
+                    border = BorderStroke(1.dp, c.outlineSoft)
                 ) {
                     Column(
                         modifier = Modifier.padding(20.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "Aún no hay reseñas para este lugar.",
+                            text = stringResource(R.string.detail_no_reviews),
                             fontFamily = ManropeFontFamily,
                             fontSize = 13.sp,
-                            color = Color(0xFF887D70)
+                            color = c.placeholder
                         )
                         Text(
-                            text = "¡Sé el primero en compartir tu experiencia y gana +25 XP!",
+                            text = stringResource(R.string.detail_first_review),
                             fontFamily = ManropeFontFamily,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.Bold,
@@ -656,8 +705,8 @@ fun SpotDetailScreen(
                     .fillMaxWidth()
                     .height(48.dp),
                 shape = RoundedCornerShape(100.dp),
-                color = Color(0xFFF7F2E9),
-                border = BorderStroke(1.dp, Color(0xFFDCCFBD))
+                color = c.surfaceRaised,
+                border = BorderStroke(1.dp, c.outline)
             ) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
@@ -667,16 +716,16 @@ fun SpotDetailScreen(
                     Icon(
                         imageVector = Icons.Default.RateReview,
                         contentDescription = null,
-                        tint = Color(0xFF5A4833),
+                        tint = c.textSoft,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Escribir una reseña (+25 XP)",
+                        text = stringResource(R.string.detail_write_review_xp),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.sp,
-                        color = Color(0xFF5A4833)
+                        color = c.textSoft
                     )
                 }
             }
@@ -686,7 +735,7 @@ fun SpotDetailScreen(
             // Botón GPS / Cómo llegar
             OutlinedButton(
                 onClick = {
-                    val gmmIntentUri = Uri.parse("geo:0,0?q=${Uri.encode(currentSpot.name + ", " + currentSpot.location)}")
+                    val gmmIntentUri = Uri.parse("geo:0,0?q=${Uri.encode(currentSpot.name + ", " + currentSpot.municipality)}")
                     val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
                     mapIntent.setPackage("com.google.android.apps.maps")
                     if (mapIntent.resolveActivity(context.packageManager) != null) {
@@ -694,7 +743,7 @@ fun SpotDetailScreen(
                     } else {
                         val webIntent = Intent(
                             Intent.ACTION_VIEW,
-                            Uri.parse("https://www.google.com/maps/search/?api=1&query=${Uri.encode(currentSpot.name + ", " + currentSpot.location)}")
+                            Uri.parse("https://www.google.com/maps/search/?api=1&query=${Uri.encode(currentSpot.name + ", " + currentSpot.municipality)}")
                         )
                         context.startActivity(webIntent)
                     }
@@ -703,15 +752,42 @@ fun SpotDetailScreen(
                     .fillMaxWidth()
                     .height(46.dp),
                 shape = RoundedCornerShape(100.dp),
-                colors = ButtonDefaults.outlinedButtonColors(containerColor = Color.White),
-                border = BorderStroke(1.dp, Color(0xFFDECFC0))
+                colors = ButtonDefaults.outlinedButtonColors(containerColor = c.surface),
+                border = BorderStroke(1.dp, c.outline)
             ) {
                 Text(
-                    text = "🗺️ Cómo llegar (GPS)",
+                    text = stringResource(R.string.detail_directions_gps),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
-                    color = Color(0xFF2C5640)
+                    color = c.successText
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // Botón / Enlace: Reportar o denunciar contenido (Pantalla 4.6)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToReport?.invoke(currentSpot.id) }
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Flag,
+                    contentDescription = null,
+                    tint = c.dangerText,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = stringResource(R.string.detail_report_info),
+                    fontFamily = ManropeFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    color = c.dangerText
                 )
             }
         }
@@ -723,20 +799,20 @@ fun SpotDetailScreen(
             onDismissRequest = { viewModel.setReviewDialogVisible(false) },
             title = {
                 Text(
-                    text = "✍ Escribir Reseña",
+                    text = stringResource(R.string.detail_review_dialog_title),
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 19.sp,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 )
             },
             text = {
                 Column {
                     Text(
-                        text = "¿Cómo fue tu experiencia en ${currentSpot.name}?",
+                        text = stringResource(R.string.detail_review_question, currentSpot.name),
                         fontFamily = ManropeFontFamily,
                         fontSize = 13.sp,
-                        color = Color(0xFF6E6252)
+                        color = c.textSoft
                     )
                     Spacer(modifier = Modifier.height(12.dp))
 
@@ -748,8 +824,8 @@ fun SpotDetailScreen(
                         (1..5).forEach { starIndex ->
                             Icon(
                                 imageVector = if (starIndex <= uiState.reviewRating) Icons.Default.Star else Icons.Default.StarBorder,
-                                contentDescription = "$starIndex estrellas",
-                                tint = if (starIndex <= uiState.reviewRating) Color(0xFFF0C868) else Color(0xFFC7BCAB),
+                                contentDescription = stringResource(R.string.detail_star_count, starIndex),
+                                tint = if (starIndex <= uiState.reviewRating) Color(0xFFF0C868) else c.starIdle,
                                 modifier = Modifier
                                     .size(34.dp)
                                     .clickable { viewModel.onReviewRatingChanged(starIndex) }
@@ -763,8 +839,8 @@ fun SpotDetailScreen(
                     OutlinedTextField(
                         value = uiState.reviewAuthor,
                         onValueChange = { viewModel.onReviewAuthorChanged(it) },
-                        label = { Text("Tu nombre / Apodo") },
-                        placeholder = { Text("Ej. Juan Pérez") },
+                        label = { Text(stringResource(R.string.detail_review_author_label)) },
+                        placeholder = { Text(stringResource(R.string.detail_review_author_placeholder)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -774,8 +850,8 @@ fun SpotDetailScreen(
                     OutlinedTextField(
                         value = uiState.reviewComment,
                         onValueChange = { viewModel.onReviewCommentChanged(it) },
-                        label = { Text("Tu opinión o recomendación") },
-                        placeholder = { Text("Comparte tips de transporte, clima, comida...") },
+                        label = { Text(stringResource(R.string.detail_review_comment_label)) },
+                        placeholder = { Text(stringResource(R.string.detail_review_comment_placeholder)) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(110.dp),
@@ -793,7 +869,7 @@ fun SpotDetailScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = EjeSpotPrimary)
                 ) {
                     Text(
-                        text = "Publicar (+25 XP)",
+                        text = stringResource(R.string.detail_review_publish),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.Bold
                     )
@@ -802,9 +878,9 @@ fun SpotDetailScreen(
             dismissButton = {
                 TextButton(onClick = { viewModel.setReviewDialogVisible(false) }) {
                     Text(
-                        text = "Cancelar",
+                        text = stringResource(R.string.common_cancel),
                         fontFamily = ManropeFontFamily,
-                        color = Color(0xFF6E6252)
+                        color = c.textSoft
                     )
                 }
             }
@@ -814,11 +890,12 @@ fun SpotDetailScreen(
 
 @Composable
 private fun ReviewCard(review: SpotReview) {
+    val c = ejeSpotColors()
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        color = Color.White,
-        border = BorderStroke(1.dp, Color(0xFFE5DDD0))
+        color = c.surface,
+        border = BorderStroke(1.dp, c.outlineSoft)
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             // Fila de Encabezado: Avatar + Nombre + Insignia + Estrellas
@@ -831,7 +908,7 @@ private fun ReviewCard(review: SpotReview) {
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(Color(0xFFE8DFD0)),
+                        .background(c.avatarBg),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -839,7 +916,7 @@ private fun ReviewCard(review: SpotReview) {
                         fontFamily = ManropeFontFamily,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF634E35)
+                        color = c.successText
                     )
                 }
 
@@ -851,13 +928,13 @@ private fun ReviewCard(review: SpotReview) {
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 13.5.sp,
-                        color = Color(0xFF1F1A15)
+                        color = c.text
                     )
                     Text(
-                        text = review.authorBadge,
+                        text = review.authorBadgeRes?.let { stringResource(it) } ?: review.authorBadge,
                         fontFamily = ManropeFontFamily,
                         fontSize = 11.sp,
-                        color = Color(0xFF887D70)
+                        color = c.placeholder
                     )
                 }
 
@@ -867,7 +944,7 @@ private fun ReviewCard(review: SpotReview) {
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
-                            tint = if (star <= review.rating) Color(0xFFF0C868) else Color(0xFFE0D8CB),
+                            tint = if (star <= review.rating) Color(0xFFF0C868) else c.starIdle,
                             modifier = Modifier.size(13.dp)
                         )
                     }
@@ -878,10 +955,10 @@ private fun ReviewCard(review: SpotReview) {
 
             // Comentario
             Text(
-                text = review.comment,
+                text = review.commentRes?.let { stringResource(it) } ?: review.comment,
                 fontFamily = ManropeFontFamily,
                 fontSize = 12.5.sp,
-                color = Color(0xFF3E352B),
+                color = c.textMuted,
                 lineHeight = 18.sp
             )
         }

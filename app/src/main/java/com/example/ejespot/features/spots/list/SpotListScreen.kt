@@ -23,29 +23,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejespot.R
+import com.example.ejespot.core.session.SessionManager
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.ui.theme.*
+
+import androidx.compose.material3.SnackbarHostState
+import kotlinx.coroutines.launch
 
 @Composable
 fun SpotListScreen(
     padding: PaddingValues = PaddingValues(),
+    snackbarHostState: SnackbarHostState? = null,
     onNavigateToSpotDetail: (String) -> Unit,
     onNavigateToCreateSpot: () -> Unit,
+    onNavigateToNotifications: (() -> Unit)? = null,
     viewModel: SpotListViewModel = viewModel()
 ) {
+    val c = ejeSpotColors()
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
-    val categories = listOf("Todos", "Naturaleza", "Café", "Gastronomía", "Historia")
+    val visitedIds by viewModel.visitedSpotIds.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+    val categories = com.example.ejespot.domain.model.SpotCategories.filterOptions
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -71,21 +83,21 @@ fun SpotListScreen(
                                 fontFamily = FrauncesFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 28.sp,
-                                color = Color(0xFF1F1A15)
+                                color = c.text
                             )
                             Text(
                                 text = "Spot",
                                 fontFamily = FrauncesFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 28.sp,
-                                color = EjeSpotSecondary
+                                color = c.secondary
                             )
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         // Pill Ubicación
                         Surface(
                             shape = RoundedCornerShape(100.dp),
-                            color = EjeSpotPrimaryContainer
+                            color = c.primaryContainer
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
@@ -94,32 +106,42 @@ fun SpotListScreen(
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_location_icon),
                                     contentDescription = null,
-                                    tint = EjeSpotPrimary,
+                                    tint = c.primary,
                                     modifier = Modifier.size(12.dp)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = "Salento, Quindío · Eje Cafetero",
+                                    text = stringResource(R.string.feed_location_pill),
                                     fontFamily = ManropeFontFamily,
                                     fontSize = 11.5.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = EjeSpotPrimary
+                                    color = c.primary
                                 )
                             }
                         }
                     }
 
                     // Botón de notificaciones
+                    val noNotificationsMessage = stringResource(R.string.feed_no_notifications)
                     Surface(
                         modifier = Modifier.size(42.dp),
                         shape = CircleShape,
-                        color = Color(0xFFEFE6D6)
+                        color = c.surfaceVariant,
+                        onClick = {
+                            if (onNavigateToNotifications != null) {
+                                onNavigateToNotifications()
+                            } else {
+                                coroutineScope.launch {
+                                    snackbarHostState?.showSnackbar(noNotificationsMessage)
+                                }
+                            }
+                        }
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
                                 imageVector = Icons.Default.Notifications,
-                                contentDescription = "Notificaciones",
-                                tint = Color(0xFF1F1A15),
+                                contentDescription = stringResource(R.string.feed_notifications),
+                                tint = c.text,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -134,25 +156,25 @@ fun SpotListScreen(
                         .fillMaxWidth()
                         .height(46.dp)
                         .shadow(elevation = 1.dp, shape = RoundedCornerShape(100.dp))
-                        .background(Color.White, RoundedCornerShape(100.dp))
-                        .border(1.dp, EjeSpotOutline, RoundedCornerShape(100.dp))
+                        .background(c.surface, RoundedCornerShape(100.dp))
+                        .border(1.dp, c.outline, RoundedCornerShape(100.dp))
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = null,
-                        tint = Color(0xFF6E6252),
+                        tint = c.textSoft,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Box(modifier = Modifier.weight(1f)) {
                         if (uiState.searchQuery.isEmpty()) {
                             Text(
-                                text = "Buscar miradores, cafés, senderos...",
+                                text = stringResource(R.string.feed_search_placeholder),
                                 fontFamily = ManropeFontFamily,
                                 fontSize = 13.sp,
-                                color = Color(0xFF887D70)
+                                color = c.placeholder
                             )
                         }
                         BasicTextField(
@@ -162,7 +184,7 @@ fun SpotListScreen(
                             textStyle = LocalTextStyle.current.copy(
                                 fontFamily = ManropeFontFamily,
                                 fontSize = 13.sp,
-                                color = Color(0xFF1F1A15)
+                                color = c.text
                             ),
                             modifier = Modifier.fillMaxWidth()
                         )
@@ -179,19 +201,21 @@ fun SpotListScreen(
                         val isSelected = uiState.selectedCategory == category
                         Surface(
                             shape = RoundedCornerShape(100.dp),
-                            color = if (isSelected) EjeSpotPrimary else Color.White,
+                            color = if (isSelected) c.primary else c.chipIdle,
                             border = androidx.compose.foundation.BorderStroke(
                                 1.dp,
-                                if (isSelected) EjeSpotPrimary else EjeSpotOutline
+                                if (isSelected) c.primary else c.outline
                             ),
                             modifier = Modifier.clickable { viewModel.onCategorySelected(category) }
                         ) {
                             Text(
-                                text = category,
+                                text = stringResource(
+                                    com.example.ejespot.domain.model.SpotCategories.labelRes(category)
+                                ),
                                 fontFamily = ManropeFontFamily,
                                 fontSize = 12.5.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isSelected) Color.White else Color(0xFF2E241C),
+                                color = if (isSelected) Color.White else c.textMuted,
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
                             )
                         }
@@ -203,16 +227,20 @@ fun SpotListScreen(
             item {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Cerca de ti · Verificados por la comunidad",
+                    text = stringResource(R.string.feed_section_nearby_verified),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 13.sp,
-                    color = Color(0xFF2E241C)
+                    color = c.textMuted
                 )
             }
 
             items(uiState.spots) { spot ->
-                SpotCard(spot = spot, onClick = { onNavigateToSpotDetail(spot.id) })
+                SpotCard(
+                    spot = spot,
+                    isVisited = spot.id in visitedIds,
+                    onClick = { onNavigateToSpotDetail(spot.id) }
+                )
             }
 
             // Sección 2: Pendientes por verificar
@@ -220,16 +248,20 @@ fun SpotListScreen(
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Pendientes por verificar (Comunidad)",
+                        text = stringResource(R.string.feed_section_pending),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 13.sp,
-                        color = Color(0xFF2E241C)
+                        color = c.textMuted
                     )
                 }
 
                 items(uiState.pendingSpots) { spot ->
-                    SpotCard(spot = spot, onClick = { onNavigateToSpotDetail(spot.id) })
+                    SpotCard(
+                        spot = spot,
+                        isVisited = spot.id in visitedIds,
+                        onClick = { onNavigateToSpotDetail(spot.id) }
+                    )
                 }
             }
 
@@ -247,7 +279,7 @@ fun SpotListScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "¿Descubriste un\nlugar increíble?",
+                                text = stringResource(R.string.feed_banner_title),
                                 fontFamily = FrauncesFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 17.sp,
@@ -256,7 +288,7 @@ fun SpotListScreen(
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Propón un nuevo spot y gana +100 XP",
+                                text = stringResource(R.string.feed_banner_subtitle),
                                 fontFamily = ManropeFontFamily,
                                 fontSize = 11.5.sp,
                                 color = Color.White.copy(alpha = 0.85f)
@@ -269,7 +301,7 @@ fun SpotListScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                         ) {
                             Text(
-                                text = "+ Propón Spot",
+                                text = stringResource(R.string.feed_banner_button),
                                 fontFamily = ManropeFontFamily,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 12.5.sp,
@@ -292,7 +324,7 @@ fun SpotListScreen(
                 .padding(bottom = padding.calculateBottomPadding() + 16.dp, end = 16.dp)
                 .size(54.dp)
         ) {
-            Icon(Icons.Default.Add, contentDescription = "Agregar Spot", modifier = Modifier.size(24.dp))
+            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.feed_add_spot), modifier = Modifier.size(24.dp))
         }
     }
 }
@@ -300,13 +332,18 @@ fun SpotListScreen(
 @Composable
 fun SpotCard(
     spot: Spot,
+    isVisited: Boolean = false,
     onClick: () -> Unit
 ) {
+    val c = ejeSpotColors()
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(16.dp),
-        color = Color.White,
-        border = androidx.compose.foundation.BorderStroke(1.dp, EjeSpotOutline),
+        color = c.surface,
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            if (isVisited) c.successBg else c.outline
+        ),
         shadowElevation = 1.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -314,15 +351,35 @@ fun SpotCard(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Imagen real del spot
-            androidx.compose.foundation.Image(
-                painter = painterResource(id = spot.imageResId),
-                contentDescription = spot.name,
-                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                modifier = Modifier
-                    .size(76.dp)
-                    .clip(RoundedCornerShape(12.dp))
-            )
+            // Imagen real o cabecera ilustrada del spot
+            Box(modifier = Modifier.size(76.dp)) {
+                com.example.ejespot.core.ui.SpotImage(
+                    spot = spot,
+                    emojiSize = 28.dp,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(12.dp))
+                )
+
+                if (isVisited) {
+                    Surface(
+                        shape = RoundedCornerShape(100.dp),
+                        color = Color(0xFF2C5640),
+                        modifier = Modifier
+                            .align(Alignment.BottomStart)
+                            .padding(4.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.common_visited_badge),
+                            fontFamily = ManropeFontFamily,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 8.sp,
+                            color = Color.White,
+                            modifier = Modifier.padding(horizontal = 5.dp, vertical = 1.dp)
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -332,7 +389,7 @@ fun SpotCard(
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 )
 
                 Spacer(modifier = Modifier.height(3.dp))
@@ -347,11 +404,11 @@ fun SpotCard(
                     )
                     Spacer(modifier = Modifier.width(2.dp))
                     Text(
-                        text = "${spot.rating} · ${spot.distance}",
+                        text = "${spot.rating} · ${stringResource(R.string.spot_distance, spot.distance)}",
                         fontFamily = ManropeFontFamily,
                         fontSize = 11.5.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2E241C)
+                        color = c.textMuted
                     )
 
                     if (spot.isVerified) {
@@ -359,15 +416,15 @@ fun SpotCard(
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = EjeSpotPrimary,
+                            tint = c.primary,
                             modifier = Modifier.size(12.dp)
                         )
                         Text(
-                            text = "Verificado",
+                            text = stringResource(R.string.feed_verified),
                             fontFamily = ManropeFontFamily,
                             fontSize = 10.5.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = EjeSpotPrimary
+                            color = c.primary
                         )
                     }
                 }
@@ -381,37 +438,39 @@ fun SpotCard(
                 ) {
                     Surface(
                         shape = RoundedCornerShape(100.dp),
-                        color = EjeSpotSecondaryContainer
+                        color = c.secondaryContainer
                     ) {
                         Text(
-                            text = spot.category,
+                            text = stringResource(
+                                com.example.ejespot.domain.model.SpotCategories.labelRes(spot.category)
+                            ),
                             fontFamily = ManropeFontFamily,
                             fontSize = 10.5.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = EjeSpotSecondary,
+                            color = c.secondary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                         )
                     }
 
                     Surface(
                         shape = RoundedCornerShape(100.dp),
-                        color = EjeSpotPrimaryContainer
+                        color = c.primaryContainer
                     ) {
                         Text(
-                            text = spot.priceBadge,
+                            text = spot.priceBadgeRes?.let { stringResource(it) } ?: spot.priceBadge,
                             fontFamily = ManropeFontFamily,
                             fontSize = 10.5.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = EjeSpotPrimary,
+                            color = c.primary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
                         )
                     }
 
                     Text(
-                        text = spot.hours,
+                        text = spot.hoursRes?.let { stringResource(it) } ?: spot.hours,
                         fontFamily = ManropeFontFamily,
                         fontSize = 10.sp,
-                        color = Color(0xFF6E6252)
+                        color = c.textSoft
                     )
                 }
             }

@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -50,22 +51,23 @@ data class OnboardingStep(
     val accentColor: Color
 )
 
-private val onboardingSteps = listOf(
+@Composable
+private fun rememberOnboardingSteps(): List<OnboardingStep> = listOf(
     OnboardingStep(
-        title = "Descubre Joyas\nOcultas",
-        description = "Explora el Eje Cafetero y encuentra lugares recomendados por la comunidad, desde miradores hasta cafés secretos.",
+        title = stringResource(R.string.onboarding_title_1),
+        description = stringResource(R.string.onboarding_desc_1),
         useLogo = true,
         accentColor = EjeSpotPrimary
     ),
     OnboardingStep(
-        title = "Comparte tus\nLugares Favoritos",
-        description = "¿Conoces un rincón mágico en Caldas, Quindío o Risaralda? Publica fotos, recomendaciones y guía a otros viajeros.",
+        title = stringResource(R.string.onboarding_title_2),
+        description = stringResource(R.string.onboarding_desc_2),
         icon = Icons.Rounded.AddLocationAlt,
         accentColor = EjeSpotSecondary
     ),
     OnboardingStep(
-        title = "Únete a la\nComunidad Cafetera",
-        description = "Deja reseñas auténticas, guarda tus spots preferidos y suma puntos de experiencia como explorador local.",
+        title = stringResource(R.string.onboarding_title_3),
+        description = stringResource(R.string.onboarding_desc_3),
         icon = Icons.Rounded.Stars,
         accentColor = EjeSpotTertiary
     )
@@ -77,6 +79,7 @@ fun OnboardingScreen(
     onContinue: () -> Unit,
     onSkip: () -> Unit
 ) {
+    val onboardingSteps = rememberOnboardingSteps()
     val pagerState = rememberPagerState(pageCount = { onboardingSteps.size })
     val coroutineScope = rememberCoroutineScope()
     val isLastPage = pagerState.currentPage == onboardingSteps.size - 1
@@ -114,7 +117,7 @@ fun OnboardingScreen(
                     if (step.useLogo) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_logo_ejespot),
-                            contentDescription = "Logo EjeSpot",
+                            contentDescription = stringResource(R.string.splash_logo_description),
                             modifier = Modifier
                                 .size(190.dp)
                                 .clip(CircleShape),
@@ -199,7 +202,7 @@ fun OnboardingScreen(
             )
         ) {
             Text(
-                text = if (isLastPage) "Comenzar ahora" else "Continuar",
+                text = if (isLastPage) stringResource(R.string.onboarding_start) else stringResource(R.string.common_continue),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = Color.White
@@ -210,7 +213,7 @@ fun OnboardingScreen(
 
         // Enlace "Omitir tutorial"
         Text(
-            text = if (isLastPage) "Ya tengo cuenta" else "Omitir tutorial",
+            text = if (isLastPage) stringResource(R.string.onboarding_skip_have_account) else stringResource(R.string.onboarding_skip),
             color = onboardingSteps[pagerState.currentPage].accentColor,
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,

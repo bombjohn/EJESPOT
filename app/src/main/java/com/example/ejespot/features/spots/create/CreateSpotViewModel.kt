@@ -1,6 +1,8 @@
 package com.example.ejespot.features.spots.create
 
 import androidx.lifecycle.ViewModel
+import com.example.ejespot.R
+import com.example.ejespot.core.util.ResourceProviderHolder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -10,6 +12,9 @@ class CreateSpotViewModel : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateSpotUiState())
     val uiState: StateFlow<CreateSpotUiState> = _uiState.asStateFlow()
+
+    /** Textos de error tomados de `strings.xml` (guía 14). */
+    private val resources get() = ResourceProviderHolder.resources
 
     fun onNameChanged(name: String) {
         _uiState.update { it.copy(name = name, errorMessage = null) }
@@ -38,7 +43,7 @@ class CreateSpotViewModel : ViewModel() {
     fun onSubmit(onSuccessSpot: ((name: String, cat: String, loc: String, hours: String, price: String, desc: String) -> Unit)? = null) {
         val state = _uiState.value
         if (state.name.isBlank()) {
-            _uiState.update { it.copy(errorMessage = "Por favor ingresa el nombre del lugar") }
+            _uiState.update { it.copy(errorMessage = resources.getString(R.string.error_name_required)) }
             return
         }
         val spotName = state.name.trim()
@@ -46,7 +51,9 @@ class CreateSpotViewModel : ViewModel() {
         val loc = state.location
         val hours = state.hours
         val price = state.priceType
-        val desc = state.description.ifBlank { "Nuevo punto turístico y cultural sugerido por la comunidad en $loc." }
+        val desc = state.description.ifBlank {
+            resources.getString(R.string.vm_default_description, loc)
+        }
 
         onSuccessSpot?.invoke(spotName, cat, loc, hours, price, desc)
 

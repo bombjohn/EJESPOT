@@ -1,5 +1,6 @@
 package com.example.ejespot.features.auth.ui
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -20,6 +21,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -32,18 +34,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejespot.R
+import com.example.ejespot.core.component.ConfirmAlertDialog
+import com.example.ejespot.domain.model.User
 import com.example.ejespot.ui.theme.*
 
 @Composable
 fun RegisterScreen(
     onNavigateBack: () -> Unit,
     onNavigateToLogin: () -> Unit,
-    onRegisterSuccess: () -> Unit,
+    onRegisterSuccess: (User) -> Unit,
     viewModel: RegisterViewModel = viewModel()
 ) {
+    val c = ejeSpotColors()
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var departmentExpanded by remember { mutableStateOf(false) }
+    val registerSuccessMessage = stringResource(R.string.register_success)
+
+    // Intercepta el botón "atrás" del dispositivo (guía 10): mientras el
+    // diálogo de salida no esté visible, se pide confirmar antes de perder
+    // los datos escritos en el formulario.
+    BackHandler(enabled = !uiState.showExitDialog) {
+        viewModel.onBackClick()
+    }
 
     val departments = listOf(
         "Risaralda (Pereira)",
@@ -52,13 +65,14 @@ fun RegisterScreen(
         "Valle del Cauca",
         "Antioquia (Medellín)",
         "Bogotá D.C.",
-        "Otro departamento"
+        stringResource(R.string.register_department_other)
     )
 
     LaunchedEffect(uiState.registerSuccess) {
         if (uiState.registerSuccess) {
-            snackbarHostState.showSnackbar("¡Cuenta creada con éxito! Bienvenido a EjeSpot")
-            onRegisterSuccess()
+            snackbarHostState.showSnackbar(registerSuccessMessage)
+            // Se entrega la cuenta creada para que la app inicie su sesión.
+            uiState.registeredUser?.let { onRegisterSuccess(it) }
             viewModel.resetSuccess()
         }
     }
@@ -71,7 +85,7 @@ fun RegisterScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = EjeSpotBackground
+        containerColor = c.background
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -94,13 +108,13 @@ fun RegisterScreen(
                     onClick = onNavigateBack,
                     modifier = Modifier.size(40.dp),
                     shape = CircleShape,
-                    color = Color(0xFFEFE6D6)
+                    color = c.surfaceVariant
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Volver",
-                            tint = Color(0xFF1F1A15),
+                            contentDescription = stringResource(R.string.common_back),
+                            tint = c.text,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -108,7 +122,7 @@ fun RegisterScreen(
 
                 // Badge "👢 Nuevo Aventurero"
                 Text(
-                    text = "👢 Nuevo Aventurero",
+                    text = stringResource(R.string.register_badge),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 13.sp,
@@ -123,11 +137,11 @@ fun RegisterScreen(
 
             // Título "Crea tu cuenta" en Fraunces Serif
             Text(
-                text = "Crea tu cuenta",
+                text = stringResource(R.string.register_title),
                 fontFamily = FrauncesFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 28.sp,
-                color = Color(0xFF1F1A15),
+                color = c.text,
                 textAlign = TextAlign.Center
             )
 
@@ -135,11 +149,11 @@ fun RegisterScreen(
 
             // Subtítulo
             Text(
-                text = "Únete a la comunidad turística del Eje\nCafetero y gana XP explorando",
+                text = stringResource(R.string.register_subtitle),
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.5.sp,
-                color = Color(0xFF2E241C),
+                color = c.textMuted,
                 textAlign = TextAlign.Center,
                 lineHeight = 19.sp
             )
@@ -149,11 +163,11 @@ fun RegisterScreen(
             // Campo 1: Nombre completo
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Nombre completo",
+                    text = stringResource(R.string.register_name_label),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 )
                 Spacer(modifier = Modifier.height(5.dp))
                 RegisterInputBox(
@@ -169,17 +183,17 @@ fun RegisterScreen(
             // Campo 2: Correo electrónico
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Correo electrónico",
+                    text = stringResource(R.string.register_email_label),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 )
                 Spacer(modifier = Modifier.height(5.dp))
                 RegisterInputBox(
                     value = uiState.email,
                     onValueChange = { viewModel.onEmailChanged(it) },
-                    placeholder = "renata@turismoeje.com",
+                    placeholder = stringResource(R.string.register_email_placeholder),
                     iconRes = R.drawable.ic_mail_icon,
                     keyboardType = KeyboardType.Email
                 )
@@ -190,11 +204,11 @@ fun RegisterScreen(
             // Campo 3: Departamento de origen / residencia (Selector desplegable)
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Departamento de origen / residencia",
+                    text = stringResource(R.string.register_department_label),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 )
                 Spacer(modifier = Modifier.height(5.dp))
 
@@ -204,8 +218,8 @@ fun RegisterScreen(
                             .fillMaxWidth()
                             .height(46.dp)
                             .shadow(elevation = 1.dp, shape = RoundedCornerShape(14.dp))
-                            .background(Color.White, RoundedCornerShape(14.dp))
-                            .border(1.dp, EjeSpotOutline, RoundedCornerShape(14.dp))
+                            .background(c.surface, RoundedCornerShape(14.dp))
+                            .border(1.dp, c.outline, RoundedCornerShape(14.dp))
                             .clickable { departmentExpanded = true }
                             .padding(horizontal = 14.dp),
                         verticalAlignment = Alignment.CenterVertically
@@ -213,7 +227,7 @@ fun RegisterScreen(
                         Icon(
                             painter = painterResource(id = R.drawable.ic_location_icon),
                             contentDescription = null,
-                            tint = Color(0xFF1F1A15),
+                            tint = c.text,
                             modifier = Modifier.size(16.dp)
                         )
                         Spacer(modifier = Modifier.width(10.dp))
@@ -222,7 +236,7 @@ fun RegisterScreen(
                             fontFamily = ManropeFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.5.sp,
-                            color = Color(0xFF1F1A15)
+                            color = c.text
                         )
                     }
 
@@ -254,11 +268,11 @@ fun RegisterScreen(
             // Campo 4: Contraseña
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Contraseña",
+                    text = stringResource(R.string.register_password_label),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 )
                 Spacer(modifier = Modifier.height(5.dp))
                 RegisterInputBox(
@@ -286,26 +300,26 @@ fun RegisterScreen(
                     onCheckedChange = { viewModel.onToggleTerms(it) },
                     colors = CheckboxDefaults.colors(
                         checkedColor = EjeSpotPrimary,
-                        uncheckedColor = EjeSpotOutline
+                        uncheckedColor = c.outline
                     ),
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = buildAnnotatedString {
-                        append("Acepto los ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color(0xFF1F1A15))) {
-                            append("Términos del Servicio")
+                        append(stringResource(R.string.register_terms_prefix))
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = c.text)) {
+                            append(stringResource(R.string.register_terms_service))
                         }
-                        append(" y la ")
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color(0xFF1F1A15))) {
-                            append("Política de Privacidad de Eje Spot")
+                        append(stringResource(R.string.register_terms_mid))
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = c.text)) {
+                            append(stringResource(R.string.register_terms_privacy))
                         }
-                        append(".")
+                        append(stringResource(R.string.register_terms_suffix))
                     },
                     fontFamily = ManropeFontFamily,
                     fontSize = 11.5.sp,
-                    color = Color(0xFF2E241C),
+                    color = c.textMuted,
                     lineHeight = 16.sp
                 )
             }
@@ -327,7 +341,7 @@ fun RegisterScreen(
                     CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
                 } else {
                     Text(
-                        text = "Crear cuenta gratis",
+                        text = stringResource(R.string.register_button),
                         fontFamily = ManropeFontFamily,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold,
@@ -344,14 +358,14 @@ fun RegisterScreen(
                 modifier = Modifier.padding(bottom = 28.dp)
             ) {
                 Text(
-                    text = "¿Ya tienes cuenta? ",
+                    text = "${stringResource(R.string.register_have_account)} ",
                     fontFamily = ManropeFontFamily,
                     fontSize = 13.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color(0xFF2E241C)
+                    color = c.textMuted
                 )
                 Text(
-                    text = "Inicia sesión",
+                    text = stringResource(R.string.register_login),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 13.sp,
@@ -360,6 +374,21 @@ fun RegisterScreen(
                 )
             }
         }
+    }
+
+    // Diálogo de confirmación de salida (guía 10).
+    if (uiState.showExitDialog) {
+        ConfirmAlertDialog(
+            title = stringResource(R.string.register_exit_title),
+            message = stringResource(R.string.register_exit_message),
+            onConfirm = {
+                // Se limpia el formulario y luego se navega hacia atrás.
+                viewModel.onConfirmExit()
+                onNavigateBack()
+            },
+            onDismiss = viewModel::onDismissExitDialog,
+            confirmText = stringResource(R.string.register_exit_confirm)
+        )
     }
 }
 
@@ -372,20 +401,21 @@ private fun RegisterInputBox(
     isPassword: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
+    val c = ejeSpotColors()
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(46.dp)
             .shadow(elevation = 1.dp, shape = RoundedCornerShape(14.dp))
-            .background(Color.White, RoundedCornerShape(14.dp))
-            .border(1.dp, EjeSpotOutline, RoundedCornerShape(14.dp))
+            .background(c.surface, RoundedCornerShape(14.dp))
+            .border(1.dp, c.outline, RoundedCornerShape(14.dp))
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             painter = painterResource(id = iconRes),
             contentDescription = null,
-            tint = Color(0xFF1F1A15),
+            tint = c.text,
             modifier = Modifier.size(16.dp)
         )
 
@@ -397,7 +427,7 @@ private fun RegisterInputBox(
                     text = placeholder,
                     fontFamily = ManropeFontFamily,
                     fontSize = 13.5.sp,
-                    color = EjeSpotOutline
+                    color = c.placeholder
                 )
             }
             BasicTextField(
@@ -409,7 +439,7 @@ private fun RegisterInputBox(
                 textStyle = TextStyle(
                     fontFamily = ManropeFontFamily,
                     fontSize = 13.5.sp,
-                    color = Color(0xFF1F1A15)
+                    color = c.text
                 ),
                 cursorBrush = SolidColor(EjeSpotPrimary),
                 modifier = Modifier.fillMaxWidth()

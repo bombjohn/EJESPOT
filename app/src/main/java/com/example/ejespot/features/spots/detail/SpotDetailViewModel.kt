@@ -1,6 +1,10 @@
 package com.example.ejespot.features.spots.detail
 
 import androidx.lifecycle.ViewModel
+import com.example.ejespot.R
+import com.example.ejespot.core.data.SpotStore
+import com.example.ejespot.core.session.SessionManager
+import com.example.ejespot.core.util.ResourceProviderHolder
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.domain.model.SpotReview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,26 +17,46 @@ class SpotDetailViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(SpotDetailUiState())
     val uiState: StateFlow<SpotDetailUiState> = _uiState.asStateFlow()
 
+    /** Textos de la pantalla tomados de `strings.xml` (guía 14). */
+    private val resources get() = ResourceProviderHolder.resources
+
     fun setSpot(spot: Spot?) {
-        _uiState.update { it.copy(spot = spot) }
+        _uiState.update {
+            it.copy(
+                spot = spot,
+                isSaved = spot?.let { s -> SpotStore.isSaved(s.id) } ?: false,
+                isVisited = spot?.let { s -> SpotStore.isVisited(s.id) } ?: false,
+                reviewAuthor = if (SessionManager.isGuest) "" else SessionManager.displayName
+            )
+        }
     }
 
     fun toggleSaved() {
-        val willSave = !_uiState.value.isSaved
+        val spotId = _uiState.value.spot?.id ?: return
+        val nowSaved = SpotStore.toggleSaved(spotId)
         _uiState.update {
             it.copy(
-                isSaved = willSave,
-                feedbackMessage = if (willSave) "¡Guardado en tus favoritos!" else "Eliminado de favoritos"
+                isSaved = nowSaved,
+                feedbackMessage = if (nowSaved) {
+                    resources.getString(R.string.vm_saved_to_favorites)
+                } else {
+                    resources.getString(R.string.vm_removed_from_favorites)
+                }
             )
         }
     }
 
     fun toggleVisited() {
-        val willVisit = !_uiState.value.isVisited
+        val spotId = _uiState.value.spot?.id ?: return
+        val nowVisited = SpotStore.toggleVisited(spotId)
         _uiState.update {
             it.copy(
-                isVisited = willVisit,
-                feedbackMessage = if (willVisit) "✓ ¡Marcado como visitado! Ganaste +10 XP" else "Lugar desmarcado de visitas"
+                isVisited = nowVisited,
+                feedbackMessage = if (nowVisited) {
+                    resources.getString(R.string.vm_marked_visited)
+                } else {
+                    resources.getString(R.string.vm_unmarked_visited)
+                }
             )
         }
     }
@@ -55,7 +79,11 @@ class SpotDetailViewModel : ViewModel() {
 
     fun submitReview(onReviewAdded: (SpotReview) -> Unit) {
         val state = _uiState.value
-        val author = if (state.reviewAuthor.isNotBlank()) state.reviewAuthor.trim() else "Explorador EjeSpot"
+        val author = when {
+            state.reviewAuthor.isNotBlank() -> state.reviewAuthor.trim()
+            !SessionManager.isGuest -> SessionManager.displayName
+            else -> resources.getString(R.string.vm_default_review_author)
+        }
         val initials = author.split(" ")
             .mapNotNull { it.firstOrNull()?.toString() }
             .take(2)
@@ -66,10 +94,17 @@ class SpotDetailViewModel : ViewModel() {
         val newReview = SpotReview(
             id = "rev_${System.currentTimeMillis()}",
             authorName = author,
-            authorBadge = "🌟 Explorador",
+            authorBadge = if (SessionManager.isGuest) {
+                resources.getString(R.string.vm_explorer_badge)
+            } else {
+                resources.getString(R.string.vm_guide_badge, SessionManager.roleLabel)
+            },
             avatarInitials = initials,
             rating = state.reviewRating,
-            comment = state.reviewComment.ifBlank { "¡Lugar increíble y recomendado para visitar en el Eje Cafetero!" }
+            comment = state.reviewComment.ifBlank {
+                resources.getString(R.string.vm_default_review_comment)
+            },
+            authorProfileId = if (SessionManager.isGuest) null else SessionManager.profileId
         )
 
         onReviewAdded(newReview)
@@ -80,7 +115,7 @@ class SpotDetailViewModel : ViewModel() {
                 reviewAuthor = "",
                 reviewComment = "",
                 reviewRating = 5,
-                feedbackMessage = "🎉 ¡Reseña publicada! Ganaste +25 XP"
+                feedbackMessage = resources.getString(R.string.vm_review_published)
             )
         }
     }

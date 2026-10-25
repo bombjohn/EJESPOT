@@ -1,4 +1,4 @@
-package com.example.ejespot.features.auth.ui
+﻿package com.example.ejespot.features.auth.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,10 +16,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -30,37 +33,60 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejespot.R
+import com.example.ejespot.domain.model.User
 import com.example.ejespot.ui.theme.*
+
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (User) -> Unit,
     onNavigateToRegister: () -> Unit = {},
     onNavigateToForgotPassword: () -> Unit = {},
     viewModel: LoginViewModel = viewModel()
 ) {
+    val c = ejeSpotColors()
     val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val googleSoonMessage = stringResource(R.string.login_social_google_soon)
+    val facebookSoonMessage = stringResource(R.string.login_social_facebook_soon)
+    val appleSoonMessage = stringResource(R.string.login_social_apple_soon)
 
     LaunchedEffect(uiState.loginSuccess) {
-        if (uiState.loginSuccess) {
-            onLoginSuccess()
+        uiState.authenticatedUser?.let { user ->
+            if (uiState.loginSuccess) onLoginSuccess(user)
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(EjeSpotBackground)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(36.dp))
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { message ->
+            snackbarHostState.showSnackbar(message)
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = c.background
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(36.dp))
 
         // Logo Oficial EjeSpot
         Image(
             painter = painterResource(id = R.drawable.ic_logo_ejespot),
-            contentDescription = "Logo EjeSpot",
+            contentDescription = stringResource(R.string.splash_logo_description),
             modifier = Modifier.size(130.dp)
         )
 
@@ -68,11 +94,11 @@ fun LoginScreen(
 
         // Título con Fraunces Serif
         Text(
-            text = "Bienvenido a Eje Spot",
+            text = stringResource(R.string.login_welcome),
             fontFamily = FrauncesFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 25.sp,
-            color = EjeSpotText,
+            color = c.text,
             textAlign = TextAlign.Center
         )
 
@@ -80,11 +106,11 @@ fun LoginScreen(
 
         // Subtítulo con Manrope
         Text(
-            text = "Inicia sesión para descubrir y compartir\nlugares",
+            text = stringResource(R.string.login_subtitle),
             fontFamily = ManropeFontFamily,
             fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp,
-            color = Color(0xFF1F1A15),
+            color = c.text,
             textAlign = TextAlign.Center,
             lineHeight = 20.sp
         )
@@ -94,17 +120,17 @@ fun LoginScreen(
         // Campo 1: Correo electrónico
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "Correo electrónico",
+                text = stringResource(R.string.login_email_label),
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
-                color = Color(0xFF1F1A15)
+                color = c.text
             )
             Spacer(modifier = Modifier.height(5.dp))
             CustomInputBox(
                 value = uiState.email,
                 onValueChange = { viewModel.onEmailChanged(it) },
-                placeholder = "tú@correo.com",
+                placeholder = stringResource(R.string.forgot_email_placeholder),
                 iconRes = R.drawable.ic_mail_icon,
                 keyboardType = KeyboardType.Email
             )
@@ -115,11 +141,11 @@ fun LoginScreen(
         // Campo 2: Contraseña (sin icono de ojo a la derecha, tal como el mockup original)
         Column(modifier = Modifier.fillMaxWidth()) {
             Text(
-                text = "Contraseña",
+                text = stringResource(R.string.login_password_label),
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
-                color = Color(0xFF1F1A15)
+                color = c.text
             )
             Spacer(modifier = Modifier.height(5.dp))
             CustomInputBox(
@@ -140,7 +166,7 @@ fun LoginScreen(
             contentAlignment = Alignment.CenterEnd
         ) {
             Text(
-                text = "¿Olvidaste tu contraseña?",
+                text = stringResource(R.string.login_forgot_password),
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.sp,
@@ -180,7 +206,7 @@ fun LoginScreen(
                 CircularProgressIndicator(color = Color.White, modifier = Modifier.size(20.dp))
             } else {
                 Text(
-                    text = "Iniciar sesión",
+                    text = stringResource(R.string.login_button),
                     fontFamily = ManropeFontFamily,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.ExtraBold,
@@ -196,50 +222,62 @@ fun LoginScreen(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
-            HorizontalDivider(modifier = Modifier.weight(1f), color = EjeSpotOutline)
+            HorizontalDivider(modifier = Modifier.weight(1f), color = c.outline)
             Text(
-                text = "  o continúa con  ",
+                text = "  ${stringResource(R.string.login_or_continue_with)}  ",
                 fontFamily = ManropeFontFamily,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF2E241C)
+                color = c.textMuted
             )
-            HorizontalDivider(modifier = Modifier.weight(1f), color = EjeSpotOutline)
+            HorizontalDivider(modifier = Modifier.weight(1f), color = c.outline)
         }
 
         Spacer(modifier = Modifier.height(14.dp))
 
         // Botón Google (.social-btn)
         SocialLoginButton(
-            text = "Continuar con Google",
+            text = stringResource(R.string.login_google),
             iconRes = R.drawable.ic_google_logo
-        ) { }
+        ) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(googleSoonMessage)
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Botón Facebook (.social-btn)
         SocialLoginButton(
-            text = "Continuar con Facebook",
+            text = stringResource(R.string.login_facebook),
             iconRes = R.drawable.ic_facebook_logo
-        ) { }
+        ) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(facebookSoonMessage)
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Botón Apple (.social-btn)
         SocialLoginButton(
-            text = "Continuar con Apple",
+            text = stringResource(R.string.login_apple),
             iconRes = R.drawable.ic_apple_logo
-        ) { }
+        ) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(appleSoonMessage)
+            }
+        }
 
         Spacer(modifier = Modifier.height(18.dp))
 
         // Explorar como invitado (verde/marrón subrayado)
         Text(
-            text = "Explorar como invitado",
+            text = stringResource(R.string.login_guest),
             fontFamily = ManropeFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
-            color = Color(0xFF2E241C),
+            color = c.textMuted,
             textDecoration = TextDecoration.Underline,
             modifier = Modifier
                 .clickable { viewModel.onLoginAsGuest() }
@@ -254,14 +292,14 @@ fun LoginScreen(
             modifier = Modifier.padding(bottom = 24.dp)
         ) {
             Text(
-                text = "¿No tienes cuenta? ",
+                text = "${stringResource(R.string.login_no_account)} ",
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.Medium,
                 fontSize = 12.5.sp,
-                color = Color(0xFF2E241C)
+                color = c.textMuted
             )
             Text(
-                text = "Regístrate como Turista",
+                text = stringResource(R.string.login_register),
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 12.5.sp,
@@ -270,6 +308,7 @@ fun LoginScreen(
             )
         }
     }
+}
 }
 
 @Composable
@@ -281,20 +320,21 @@ private fun CustomInputBox(
     isPassword: Boolean = false,
     keyboardType: KeyboardType = KeyboardType.Text
 ) {
+    val c = ejeSpotColors()
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(46.dp)
             .shadow(elevation = 1.dp, shape = RoundedCornerShape(14.dp))
-            .background(Color.White, RoundedCornerShape(14.dp))
-            .border(1.dp, EjeSpotOutline, RoundedCornerShape(14.dp))
+            .background(c.surface, RoundedCornerShape(14.dp))
+            .border(1.dp, c.outline, RoundedCornerShape(14.dp))
             .padding(horizontal = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             painter = painterResource(id = iconRes),
             contentDescription = null,
-            tint = EjeSpotTextMuted,
+            tint = c.textMuted,
             modifier = Modifier.size(16.dp)
         )
 
@@ -306,7 +346,7 @@ private fun CustomInputBox(
                     text = placeholder,
                     fontFamily = ManropeFontFamily,
                     fontSize = 13.5.sp,
-                    color = EjeSpotOutline
+                    color = c.placeholder
                 )
             }
             BasicTextField(
@@ -318,7 +358,7 @@ private fun CustomInputBox(
                 textStyle = TextStyle(
                     fontFamily = ManropeFontFamily,
                     fontSize = 13.5.sp,
-                    color = EjeSpotText
+                    color = c.text
                 ),
                 cursorBrush = SolidColor(EjeSpotPrimary),
                 modifier = Modifier.fillMaxWidth()
@@ -333,6 +373,7 @@ private fun SocialLoginButton(
     iconRes: Int,
     onClick: () -> Unit
 ) {
+    val c = ejeSpotColors()
     Surface(
         onClick = onClick,
         modifier = Modifier
@@ -340,8 +381,8 @@ private fun SocialLoginButton(
             .height(44.dp)
             .shadow(elevation = 0.5.dp, shape = RoundedCornerShape(100.dp)),
         shape = RoundedCornerShape(100.dp),
-        color = Color.White,
-        border = BorderStroke(1.2.dp, EjeSpotOutline)
+        color = c.surface,
+        border = BorderStroke(1.2.dp, c.outline)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -360,7 +401,7 @@ private fun SocialLoginButton(
                 fontFamily = ManropeFontFamily,
                 fontSize = 12.5.sp,
                 fontWeight = FontWeight.Bold,
-                color = EjeSpotText
+                color = c.text
             )
         }
     }

@@ -281,7 +281,7 @@
     <string name="category_gastronomia">Gastronomía</string>
     <string name="category_historia">Historia</string>
     <string name="category_cultura">Cultura</string>
-    <string name="category_ocio">Ocio</string>
+    <string name="category_ocio">Recreación</string>
 
     <!-- Niveles de la comunidad (el identificador no se traduce, la etiqueta sí) -->
     <string name="level_turista">Turista</string>

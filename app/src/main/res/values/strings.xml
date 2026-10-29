@@ -294,6 +294,9 @@
     <string name="error_empty_fields">Por favor completa todos los campos</string>
     <string name="error_empty_email">Por favor ingresa tu correo electrónico</string>
     <string name="error_invalid_email">Ingresa un correo electrónico válido</string>
+    <string name="error_invalid_email_format">Ingresa un correo electrónico válido (ej. usuario@gmail.com)</string>
+    <string name="error_password_min_length">La contraseña debe tener al menos 8 caracteres</string>
+    <string name="error_name_min_length">Por favor ingresa tu nombre completo (mínimo 3 caracteres)</string>
     <string name="error_generic_login">No fue posible iniciar sesión.</string>
     <string name="error_terms_required">Debes aceptar los Términos y la Política de Privacidad</string>
     <string name="error_name_required">Por favor ingresa el nombre del lugar</string>

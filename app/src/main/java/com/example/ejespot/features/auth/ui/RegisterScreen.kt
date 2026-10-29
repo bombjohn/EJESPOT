@@ -193,10 +193,19 @@ fun RegisterScreen(
                 RegisterInputBox(
                     value = uiState.email,
                     onValueChange = { viewModel.onEmailChanged(it) },
-                    placeholder = stringResource(R.string.register_email_placeholder),
+                    placeholder = "ejemplo@gmail.com",
                     iconRes = R.drawable.ic_mail_icon,
                     keyboardType = KeyboardType.Email
                 )
+                if (uiState.email.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(uiState.email).matches()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Formato de correo no válido (ej. usuario@gmail.com)",
+                        fontFamily = ManropeFontFamily,
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
 
             Spacer(modifier = Modifier.height(14.dp))
@@ -282,6 +291,25 @@ fun RegisterScreen(
                     iconRes = R.drawable.ic_lock_icon,
                     isPassword = true,
                     keyboardType = KeyboardType.Password
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = if (uiState.password.isEmpty()) {
+                        "Mínimo 8 caracteres"
+                    } else if (uiState.password.length < 8) {
+                        "Mínimo 8 caracteres (${uiState.password.length}/8)"
+                    } else {
+                        "✓ Contraseña válida (${uiState.password.length} caracteres)"
+                    },
+                    fontFamily = ManropeFontFamily,
+                    fontSize = 11.sp,
+                    color = if (uiState.password.isEmpty()) {
+                        c.textMuted
+                    } else if (uiState.password.length < 8) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        Color(0xFF2C5640)
+                    }
                 )
             }
 

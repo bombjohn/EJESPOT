@@ -42,10 +42,33 @@ class RegisterViewModel : ViewModel() {
 
     fun onRegister() {
         val state = _uiState.value
-        if (state.fullName.isBlank() || state.email.isBlank() || state.password.isBlank()) {
+        val name = state.fullName.trim()
+        val email = state.email.trim()
+        val password = state.password
+
+        if (name.isBlank() || email.isBlank() || password.isBlank()) {
             _uiState.update { it.copy(errorMessage = resources.getString(R.string.error_empty_fields)) }
             return
         }
+
+        if (name.length < 3) {
+            _uiState.update { it.copy(errorMessage = resources.getString(R.string.error_name_min_length)) }
+            return
+        }
+
+        // Validación de correo electrónico (ej. usuario@gmail.com)
+        val emailPattern = android.util.Patterns.EMAIL_ADDRESS
+        if (!emailPattern.matcher(email).matches()) {
+            _uiState.update { it.copy(errorMessage = resources.getString(R.string.error_invalid_email_format)) }
+            return
+        }
+
+        // Validación de contraseña: mínimo 8 caracteres
+        if (password.length < 8) {
+            _uiState.update { it.copy(errorMessage = resources.getString(R.string.error_password_min_length)) }
+            return
+        }
+
         if (!state.acceptedTerms) {
             _uiState.update {
                 it.copy(errorMessage = resources.getString(R.string.error_terms_required))
@@ -57,16 +80,16 @@ class RegisterViewModel : ViewModel() {
         // Se crea la cuenta en memoria (Fase 2: no hay backend) y se devuelve
         // para que la navegación inicie su sesión y la persista en Data Store.
         val newUser = User(
-            id = "u_${state.email.trim().lowercase()}",
-            email = state.email.trim(),
-            name = state.fullName.trim(),
-            password = state.password,
+            id = "u_${email.lowercase()}",
+            email = email,
+            name = name,
+            password = password,
             role = UserRole.USER,
-            profileId = state.email.trim().lowercase()
+            profileId = email.lowercase()
         )
 
         DemoUsers.register(newUser)
-        val usernamePart = state.email.trim().substringBefore("@")
+        val usernamePart = email.substringBefore("@")
         ProfileSampleData.registerProfile(newUser.profileId, newUser.name, usernamePart)
 
         _uiState.update {

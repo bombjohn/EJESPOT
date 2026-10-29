@@ -294,6 +294,9 @@
     <string name="error_empty_fields">Please fill in all the fields</string>
     <string name="error_empty_email">Please enter your email</string>
     <string name="error_invalid_email">Enter a valid email</string>
+    <string name="error_invalid_email_format">Enter a valid email address (e.g. user@gmail.com)</string>
+    <string name="error_password_min_length">Password must be at least 8 characters long</string>
+    <string name="error_name_min_length">Please enter your full name (at least 3 characters)</string>
     <string name="error_generic_login">Could not sign in.</string>
     <string name="error_terms_required">You must accept the Terms and the Privacy Policy</string>
     <string name="error_name_required">Please enter the place name</string>

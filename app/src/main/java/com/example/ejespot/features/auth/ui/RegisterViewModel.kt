@@ -5,6 +5,8 @@ import com.example.ejespot.R
 import com.example.ejespot.core.util.ResourceProviderHolder
 import com.example.ejespot.domain.model.User
 import com.example.ejespot.domain.model.UserRole
+import com.example.ejespot.domain.repository.DemoUsers
+import com.example.ejespot.features.dashboard.profile.ProfileSampleData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -62,6 +64,10 @@ class RegisterViewModel : ViewModel() {
             role = UserRole.USER,
             profileId = state.email.trim().lowercase()
         )
+
+        DemoUsers.register(newUser)
+        val usernamePart = state.email.trim().substringBefore("@")
+        ProfileSampleData.registerProfile(newUser.profileId, newUser.name, usernamePart)
 
         _uiState.update {
             it.copy(

@@ -57,13 +57,20 @@ object DemoUsers {
         isGuest = true
     )
 
-    val accounts: List<User> = listOf(renata, mateo, camila)
+    private val dynamicUsers = mutableListOf<User>()
+
+    fun register(user: User) {
+        dynamicUsers.removeAll { it.email.equals(user.email.trim(), ignoreCase = true) }
+        dynamicUsers.add(user)
+    }
+
+    val accounts: List<User> get() = listOf(renata, mateo, camila) + dynamicUsers
 
     fun findByEmail(email: String): User? =
         accounts.firstOrNull { it.email.equals(email.trim(), ignoreCase = true) }
 
     /** Entrada directa desde los botones de "acceso rápido" del Login. */
-    val quickAccess: List<User> = accounts
+    val quickAccess: List<User> get() = accounts
 }
 
 /**

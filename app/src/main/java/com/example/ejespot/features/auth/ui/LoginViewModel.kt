@@ -20,8 +20,8 @@ class LoginViewModel(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    /** Cuentas demo listas para entrar con un solo toque. */
-    val demoAccounts: List<User> = DemoUsers.quickAccess
+    /** Cuentas demo listas para entrar con un solo toque (incluye usuarios registrados). */
+    val demoAccounts: List<User> get() = DemoUsers.quickAccess
 
     /** Textos de error tomados de `strings.xml` (guía 14). */
     private val resources get() = ResourceProviderHolder.resources

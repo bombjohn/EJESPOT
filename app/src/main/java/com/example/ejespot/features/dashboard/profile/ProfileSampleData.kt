@@ -86,8 +86,28 @@ object ProfileSampleData {
         )
     )
 
+    private val dynamicProfiles = mutableMapOf<String, UserProfile>()
+
+    fun registerProfile(profileId: String, name: String, username: String) {
+        val initials = name.trim().split(Regex("\\s+")).take(2).mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
+        dynamicProfiles[profileId] = UserProfile(
+            name = name,
+            username = if (username.startsWith("@")) username else "@$username",
+            location = "Pereira, Risaralda",
+            bio = "Nuevo viajero explorando el Paisaje Cultural Cafetero.",
+            initials = if (initials.isNotEmpty()) initials else "US",
+            level = 1,
+            levelName = ProfileLevels.TURISTA,
+            xp = 0,
+            nextLevelXp = 200,
+            nextLevelName = ProfileLevels.AVENTURERO,
+            memberSince = "Hoy"
+        )
+    }
+
     /** Perfil correspondiente al identificador de sesión (o el invitado). */
-    fun profileFor(profileId: String): UserProfile = profilesByUser[profileId] ?: profilesByUser.getValue("invitado")
+    fun profileFor(profileId: String): UserProfile =
+        dynamicProfiles[profileId] ?: profilesByUser[profileId] ?: profilesByUser.getValue("invitado")
 
     /** Propuestas quemadas por cuenta. */
     val proposalsByUser: Map<String, List<ProposedSpot>> get() = mapOf(

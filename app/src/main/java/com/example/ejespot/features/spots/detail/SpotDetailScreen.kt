@@ -26,9 +26,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejespot.R
+import com.example.ejespot.core.session.SessionManager
 import com.example.ejespot.core.ui.SpotImage
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.domain.model.SpotReview
+import com.example.ejespot.domain.model.UserRole
 import com.example.ejespot.ui.theme.*
 
 @Composable
@@ -167,6 +169,151 @@ fun SpotDetailScreen(
                 .background(EjeSpotBackground)
                 .padding(horizontal = 20.dp, vertical = 22.dp)
         ) {
+            // --- GESTIÓN DE SPOT (MODERADOR O USUARIO AUTENTICADO) ---
+            if (!SessionManager.isGuest) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 14.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    color = c.surfaceVariant,
+                    border = BorderStroke(1.dp, c.outline)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Gestión del Spot (${if (SessionManager.role == UserRole.ADMIN) "Moderador" else "Comunidad"})",
+                                fontFamily = ManropeFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 11.sp,
+                                color = c.textSoft
+                            )
+                            if (currentSpot.isFinalized) {
+                                Surface(
+                                    shape = RoundedCornerShape(100.dp),
+                                    color = Color(0xFFFFCDD2)
+                                ) {
+                                    Text(
+                                        text = "FINALIZADO / CERRADO",
+                                        fontFamily = ManropeFontFamily,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontSize = 9.sp,
+                                        color = Color(0xFFC62828),
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            // Editar
+                            OutlinedButton(
+                                onClick = { viewModel.setEditDialogVisible(true) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(36.dp),
+                                contentPadding = PaddingValues(0.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(containerColor = c.surface),
+                                border = BorderStroke(1.dp, c.outline)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = null,
+                                    tint = EjeSpotPrimary,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Editar", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = c.text)
+                            }
+
+                            // Finalizar / Reactivar
+                            OutlinedButton(
+                                onClick = { viewModel.toggleFinalizeSpot() },
+                                modifier = Modifier
+                                    .weight(1.1f)
+                                    .height(36.dp),
+                                contentPadding = PaddingValues(0.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = c.surface,
+                                    contentColor = if (currentSpot.isFinalized) c.successText else Color(0xFFE65100)
+                                ),
+                                border = BorderStroke(1.dp, c.outline)
+                            ) {
+                                Icon(
+                                    imageVector = if (currentSpot.isFinalized) Icons.Default.PlayArrow else Icons.Default.Pause,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = if (currentSpot.isFinalized) "Reactivar" else "Finalizar",
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            // Eliminar
+                            OutlinedButton(
+                                onClick = { viewModel.setDeleteDialogVisible(true) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .height(36.dp),
+                                contentPadding = PaddingValues(0.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    containerColor = c.surface,
+                                    contentColor = MaterialTheme.colorScheme.error
+                                ),
+                                border = BorderStroke(1.dp, c.outline)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DeleteOutline,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Eliminar", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (currentSpot.isFinalized) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFFFEBEE),
+                    border = BorderStroke(1.dp, Color(0xFFFFCDD2))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("⛔", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Este spot ha sido finalizado. No está recibiendo nuevas visitas.",
+                            fontFamily = ManropeFontFamily,
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFC62828)
+                        )
+                    }
+                }
+            }
+
             // Badges Categoría, Precio y Verificado
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -886,6 +1033,28 @@ fun SpotDetailScreen(
             }
         )
     }
+
+    // --- DIÁLOGO MODAL: EDITAR INFORMACIÓN DEL SPOT ---
+    if (uiState.showEditDialog) {
+        EditSpotDialog(
+            spot = currentSpot,
+            onDismiss = { viewModel.setEditDialogVisible(false) },
+            onConfirm = { name, category, municipality, hours, priceRange, description ->
+                viewModel.updateSpot(name, category, municipality, hours, priceRange, description)
+            }
+        )
+    }
+
+    // --- DIÁLOGO MODAL: CONFIRMAR ELIMINACIÓN DE SPOT ---
+    if (uiState.showDeleteDialog) {
+        DeleteSpotConfirmDialog(
+            spotName = currentSpot.name,
+            onDismiss = { viewModel.setDeleteDialogVisible(false) },
+            onConfirm = {
+                viewModel.deleteSpot { onNavigateBack() }
+            }
+        )
+    }
 }
 
 @Composable
@@ -963,4 +1132,149 @@ private fun ReviewCard(review: SpotReview) {
             )
         }
     }
+}
+
+@Composable
+private fun EditSpotDialog(
+    spot: Spot,
+    onDismiss: () -> Unit,
+    onConfirm: (name: String, category: String, municipality: String, hours: String, priceRange: String, description: String) -> Unit
+) {
+    val c = ejeSpotColors()
+    val context = LocalContext.current
+    var name by remember { mutableStateOf(spot.name) }
+    var category by remember { mutableStateOf(spot.category) }
+    var municipality by remember { mutableStateOf(spot.municipality) }
+    val initialHours = spot.hoursRes?.let { context.getString(it) } ?: spot.hours
+    var hours by remember { mutableStateOf(initialHours) }
+    val initialPrice = spot.priceRangeRes?.let { context.getString(it) } ?: spot.priceRange
+    var priceRange by remember { mutableStateOf(initialPrice) }
+    val initialDesc = spot.descriptionRes?.let { context.getString(it) } ?: spot.description
+    var description by remember { mutableStateOf(initialDesc) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Editar información del Spot",
+                fontFamily = FrauncesFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = c.text
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                OutlinedTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nombre del lugar") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = municipality,
+                    onValueChange = { municipality = it },
+                    label = { Text("Municipio y departamento") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = category,
+                    onValueChange = { category = it },
+                    label = { Text("Categoría (Naturaleza, Café, etc.)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = hours,
+                    onValueChange = { hours = it },
+                    label = { Text("Horario") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = priceRange,
+                    onValueChange = { priceRange = it },
+                    label = { Text("Rango de precio (ej. $15.000 - $35.000 COP)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    label = { Text("Descripción") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp),
+                    maxLines = 4
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (name.isNotBlank()) {
+                        onConfirm(name, category, municipality, hours, priceRange, description)
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = EjeSpotPrimary)
+            ) {
+                Text("Guardar cambios", fontFamily = ManropeFontFamily, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar", fontFamily = ManropeFontFamily, color = c.textSoft)
+            }
+        }
+    )
+}
+
+@Composable
+private fun DeleteSpotConfirmDialog(
+    spotName: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    val c = ejeSpotColors()
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Eliminar spot",
+                fontFamily = FrauncesFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = c.text
+            )
+        },
+        text = {
+            Text(
+                text = "¿Estás seguro de que deseas eliminar \"$spotName\"? Esta acción no se puede deshacer y se eliminará de las recomendaciones y favoritos de la comunidad.",
+                fontFamily = ManropeFontFamily,
+                fontSize = 13.5.sp,
+                color = c.textSoft,
+                lineHeight = 19.sp
+            )
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Eliminar definitivamente", fontFamily = ManropeFontFamily, fontWeight = FontWeight.Bold)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancelar", fontFamily = ManropeFontFamily, color = c.textSoft)
+            }
+        }
+    )
 }

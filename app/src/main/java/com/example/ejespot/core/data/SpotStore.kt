@@ -119,6 +119,90 @@ object SpotStore {
         _pendingSpots.update { listOf(spot.copy(isPending = true)) + it }
     }
 
+    /**
+     * Aprueba un spot pendiente: se retira de la lista de pendientes y
+     * pasa a estar verificado y publicado en la lista oficial de spots.
+     */
+    fun approvePendingSpot(spotId: String) {
+        val pending = _pendingSpots.value.firstOrNull { it.id == spotId }
+        if (pending != null) {
+            val approved = pending.copy(isPending = false, isVerified = true)
+            _pendingSpots.update { list -> list.filterNot { it.id == spotId } }
+            _spots.update { list -> listOf(approved) + list.filterNot { it.id == spotId } }
+        }
+    }
+
+    /**
+     * Rechaza un spot pendiente: se retira de los pendientes.
+     */
+    fun rejectPendingSpot(spotId: String) {
+        _pendingSpots.update { list -> list.filterNot { it.id == spotId } }
+    }
+
+    /**
+     * Actualiza la información editable de un spot existente.
+     */
+    fun updateSpot(
+        id: String,
+        name: String,
+        category: String,
+        municipality: String,
+        hours: String,
+        priceRange: String,
+        description: String
+    ) {
+        val updater: (Spot) -> Spot = {
+            it.copy(
+                name = name.trim(),
+                category = category.trim(),
+                municipality = municipality.trim(),
+                hours = hours.trim(),
+                priceRange = priceRange.trim(),
+                description = description.trim()
+            )
+        }
+        _spots.update { list -> list.map { if (it.id == id) updater(it) else it } }
+        _pendingSpots.update { list -> list.map { if (it.id == id) updater(it) else it } }
+    }
+
+    /**
+     * Marca un spot como finalizado/inactivo o lo reactiva.
+     */
+    fun finalizeSpot(id: String, finalized: Boolean = true) {
+        val updater: (Spot) -> Spot = { it.copy(isFinalized = finalized) }
+        _spots.update { list -> list.map { if (it.id == id) updater(it) else it } }
+        _pendingSpots.update { list -> list.map { if (it.id == id) updater(it) else it } }
+    }
+
+    /**
+     * Elimina un spot por ID de ambas listas (verificados o pendientes).
+     */
+    fun deleteSpot(id: String) {
+        _spots.update { list -> list.filterNot { it.id == id } }
+        _pendingSpots.update { list -> list.filterNot { it.id == id } }
+        // También limpiar de guardados y visitados
+        savedByUser.keys.forEach { user ->
+            val set = savedByUser[user]
+            if (set != null && id in set) savedByUser[user] = set - id
+        }
+        visitedByUser.keys.forEach { user ->
+            val set = visitedByUser[user]
+            if (set != null && id in set) visitedByUser[user] = set - id
+        }
+        refreshForCurrentUser()
+    }
+
+    /**
+     * Limpia los datos asociados a un usuario cuando elimina su cuenta.
+     */
+    fun clearUserData(profileId: String) {
+        savedByUser.remove(profileId)
+        visitedByUser.remove(profileId)
+        // Eliminar spots propuestos por este usuario
+        _pendingSpots.update { list -> list.filterNot { it.addedBy == profileId } }
+        refreshForCurrentUser()
+    }
+
     private fun Spot.withReview(review: SpotReview) = copy(
         reviews = listOf(review) + reviews,
         reviewCount = reviewCount + 1

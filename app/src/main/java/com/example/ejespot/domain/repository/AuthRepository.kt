@@ -64,6 +64,10 @@ object DemoUsers {
         dynamicUsers.add(user)
     }
 
+    fun removeUser(profileId: String) {
+        dynamicUsers.removeAll { it.profileId == profileId }
+    }
+
     val accounts: List<User> get() = listOf(renata, mateo, camila) + dynamicUsers
 
     fun findByEmail(email: String): User? =

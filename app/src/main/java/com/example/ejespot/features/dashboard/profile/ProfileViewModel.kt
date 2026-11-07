@@ -8,20 +8,36 @@ import com.example.ejespot.core.data.SpotStore
 import com.example.ejespot.core.session.SessionManager
 import com.example.ejespot.core.settings.AppLanguageController
 import com.example.ejespot.core.util.ResourceProviderHolder
+import com.example.ejespot.data.repository.local.LocalProfileRepository
+import com.example.ejespot.data.repository.local.LocalSpotRepository
 import com.example.ejespot.domain.model.AppLanguage
+import com.example.ejespot.domain.model.ModerationReport
+import com.example.ejespot.domain.model.MyReview
 import com.example.ejespot.domain.model.ProfileActivity
 import com.example.ejespot.domain.model.ProfileDraft
 import com.example.ejespot.domain.model.ProposalStatus
 import com.example.ejespot.domain.model.ProposedSpot
 import com.example.ejespot.domain.model.UserProfile
 import com.example.ejespot.domain.model.UserStats
+import com.example.ejespot.domain.repository.ProfileRepository
+import com.example.ejespot.domain.repository.SpotRepository
+import com.example.ejespot.domain.usecase.ApproveProposalUseCase
+import com.example.ejespot.domain.usecase.DeleteAccountUseCase
+import com.example.ejespot.domain.usecase.RejectProposalUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ProfileViewModel(appliaation: Application) : AndroidViewModel(appliaation) {
+class ProfileViewModel(
+    application: Application,
+    private val spotRepository: SpotRepository = LocalSpotRepository(),
+    private val profileRepository: ProfileRepository = LocalProfileRepository(),
+    private val approveProposalUseCase: ApproveProposalUseCase = ApproveProposalUseCase(spotRepository),
+    private val rejectProposalUseCase: RejectProposalUseCase = RejectProposalUseCase(spotRepository),
+    private val deleteAccountUseCase: DeleteAccountUseCase = DeleteAccountUseCase(spotRepository, profileRepository)
+) : AndroidViewModel(application) {
 
     val availableLocations = listOf(
         "Pereira, Risaralda",
@@ -38,11 +54,11 @@ class ProfileViewModel(appliaation: Application) : AndroidViewModel(appliaation)
     /** Textos de `strings.xml` para el contenido quemado de la demo (guía 14). */
     private val resources get() = ResourceProviderHolder.resources
 
-    private fun currentProfile(): UserProfile = ProfileSampleData.profileFor(currentProfileId)
+    private fun currentProfile(): UserProfile = profileRepository.getProfile(currentProfileId)
 
-    private fun currentProposals() = ProfileSampleData.proposalsFor(currentProfileId)
+    private fun currentProposals() = profileRepository.getProposals(currentProfileId)
 
-    private fun currentReviews() = ProfileSampleData.reviewsFor(currentProfileId)
+    private fun currentReviews() = profileRepository.getReviews(currentProfileId)
 
     /**
      * Idioma activo según la preferencia guardada (guía 13).
@@ -376,6 +392,11 @@ class ProfileViewModel(appliaation: Application) : AndroidViewModel(appliaation)
     }
 
     fun approveProposal(proposalId: String) {
+        val target = _uiState.value.proposals.firstOrNull { it.id == proposalId }
+        val spotId = target?.spotId
+        if (spotId != null) {
+            approveProposalUseCase(spotId)
+        }
         _uiState.update { state ->
             state.copy(
                 proposals = state.proposals.map {
@@ -385,11 +406,31 @@ class ProfileViewModel(appliaation: Application) : AndroidViewModel(appliaation)
         }
     }
 
-    fun rejectProposal(proposalId: String) {
+    fun rejectProposal(proposalId: String, reason: String = "No cumple con las pautas de contenido") {
+        val target = _uiState.value.proposals.firstOrNull { it.id == proposalId }
+        val spotId = target?.spotId
+        if (spotId != null) {
+            rejectProposalUseCase(spotId)
+        }
         _uiState.update { state ->
             state.copy(
-                proposals = state.proposals.filterNot { it.id == proposalId }
+                proposals = state.proposals.map {
+                    if (it.id == proposalId) it.copy(status = ProposalStatus.REJECTED, rejectionReason = reason) else it
+                }
             )
+        }
+    }
+
+    fun addModerationReport(report: ModerationReport) {
+        _uiState.update { state ->
+            state.copy(moderationQueue = listOf(report) + state.moderationQueue)
+        }
+    }
+
+    fun deleteAccount(onFinished: () -> Unit) {
+        val pid = currentProfileId
+        viewModelScope.launch {
+            deleteAccountUseCase(pid, onFinished)
         }
     }
 

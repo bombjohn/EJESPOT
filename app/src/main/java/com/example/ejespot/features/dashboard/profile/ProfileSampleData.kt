@@ -46,11 +46,11 @@ object ProfileSampleData {
             bio = "",
             bioRes = R.string.profile_bio_mateo,
             initials = "MS",
-            level = 6,
+            level = 4,
             levelName = ProfileLevels.EMBAJADOR_LOCAL,
             xp = 2450,
-            nextLevelXp = 3000,
-            nextLevelName = ProfileLevels.LEYENDA_EJE,
+            nextLevelXp = 2500,
+            nextLevelName = ProfileLevels.EMBAJADOR_LOCAL,
             memberSince = "",
             memberSinceRes = R.string.profile_member_since_mateo
         ),
@@ -61,8 +61,8 @@ object ProfileSampleData {
             bio = "",
             bioRes = R.string.profile_bio_camila,
             initials = "CH",
-            level = 3,
-            levelName = ProfileLevels.AVENTURERA,
+            level = 2,
+            levelName = ProfileLevels.AVENTURERO,
             xp = 430,
             nextLevelXp = 500,
             nextLevelName = ProfileLevels.EXPLORADOR_CAFETERO,
@@ -103,6 +103,10 @@ object ProfileSampleData {
             nextLevelName = ProfileLevels.AVENTURERO,
             memberSince = "Hoy"
         )
+    }
+
+    fun removeProfile(profileId: String) {
+        dynamicProfiles.remove(profileId)
     }
 
     /** Perfil correspondiente al identificador de sesión (o el invitado). */

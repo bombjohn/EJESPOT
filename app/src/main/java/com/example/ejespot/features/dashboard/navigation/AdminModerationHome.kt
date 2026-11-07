@@ -1,4 +1,4 @@
-package com.example.ejespot.features.dashboard.navigation
+﻿package com.example.ejespot.features.dashboard.navigation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -52,6 +52,7 @@ fun AdminModerationHome(
     var activeTab by remember { mutableStateOf(0) } // 0: Reportes, 1: Propuestas
     var resolvingReport by remember { mutableStateOf<ModerationReport?>(null) }
     var approvingProposal by remember { mutableStateOf<ProposedSpot?>(null) }
+    var rejectingProposal by remember { mutableStateOf<ProposedSpot?>(null) }
 
     val pendingProposalsCount = remember(uiState.proposals) {
         uiState.proposals.count { it.status == ProposalStatus.PENDING }
@@ -180,10 +181,7 @@ fun AdminModerationHome(
                                 approvingProposal = proposal
                             },
                             onReject = {
-                                viewModel.rejectProposal(proposal.id)
-                                coroutineScope.launch {
-                                    snackbarHostState?.showSnackbar("Propuesta de '${proposal.name}' desestimada")
-                                }
+                                rejectingProposal = proposal
                             }
                         )
                     }
@@ -226,6 +224,21 @@ fun AdminModerationHome(
                 approvingProposal = null
                 coroutineScope.launch {
                     snackbarHostState?.showSnackbar("¡Spot '${proposal.name}' aprobado y publicado (+100 XP para el autor)!")
+                }
+            }
+        )
+    }
+
+    // DIÁLOGO INTERACTIVO: RECHAZAR / DESESTIMAR PROPUESTA CON MOTIVO
+    rejectingProposal?.let { proposal ->
+        RejectProposalDialog(
+            proposal = proposal,
+            onDismiss = { rejectingProposal = null },
+            onConfirm = { reason ->
+                viewModel.rejectProposal(proposal.id, reason)
+                rejectingProposal = null
+                coroutineScope.launch {
+                    snackbarHostState?.showSnackbar("Propuesta de '" + proposal.name + "' rechazada: " + reason)
                 }
             }
         )
@@ -769,6 +782,120 @@ private fun ApproveProposalDialog(
             ) {
                 Text(
                     text = "Confirmar y Publicar",
+                    fontFamily = ManropeFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    color = Color.White
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = "Cancelar",
+                    fontFamily = ManropeFontFamily,
+                    color = c.textSoft,
+                    fontSize = 12.sp
+                )
+            }
+        }
+    )
+}
+
+
+/**
+ * Di�logo interactivo para rechazar una propuesta solicitando el motivo al moderador.
+ */
+@Composable
+private fun RejectProposalDialog(
+    proposal: ProposedSpot,
+    onDismiss: () -> Unit,
+    onConfirm: (reason: String) -> Unit
+) {
+    val c = ejeSpotColors()
+    var selectedReason by remember { mutableStateOf("Informaci�n incompleta o no verificable") }
+    var customDetails by remember { mutableStateOf("") }
+
+    val presetReasons = listOf(
+        "Informaci�n incompleta o no verificable",
+        "Lugar duplicado en el cat�logo",
+        "El lugar ya no opera comercialmente",
+        "Ubicaci�n fuera del Paisaje Cultural Cafetero",
+        "Otro motivo espec�fico"
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = "?", fontSize = 20.sp)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Desestimar Propuesta",
+                    fontFamily = FrauncesFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = c.text
+                )
+            }
+        },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "Indica el motivo por el cual no se publicar� '${proposal.name}':",
+                    fontFamily = ManropeFontFamily,
+                    fontSize = 12.5.sp,
+                    color = c.textSoft
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                presetReasons.forEach { reason ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedReason = reason }
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = selectedReason == reason,
+                            onClick = { selectedReason = reason },
+                            colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF9E382B))
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = reason,
+                            fontFamily = ManropeFontFamily,
+                            fontSize = 12.sp,
+                            color = c.text
+                        )
+                    }
+                }
+                if (selectedReason == "Otro motivo espec�fico") {
+                    Spacer(modifier = Modifier.height(6.dp))
+                    OutlinedTextField(
+                        value = customDetails,
+                        onValueChange = { customDetails = it },
+                        placeholder = { Text("Escribe el motivo detallado...", fontSize = 11.5.sp) },
+                        modifier = Modifier.fillMaxWidth(),
+                        maxLines = 3
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    val finalReason = if (selectedReason == "Otro motivo espec�fico" && customDetails.isNotBlank()) {
+                        customDetails.trim()
+                    } else {
+                        selectedReason
+                    }
+                    onConfirm(finalReason)
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9E382B))
+            ) {
+                Text(
+                    text = "Confirmar Rechazo",
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,

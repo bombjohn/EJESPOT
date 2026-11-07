@@ -29,7 +29,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ejespot.R
+import com.example.ejespot.core.session.SessionManager
 import com.example.ejespot.core.ui.SpotImage
+import com.example.ejespot.domain.model.ModerationReport
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.ui.theme.*
 import kotlinx.coroutines.launch
@@ -39,6 +41,7 @@ fun ReportSpotScreen(
     spot: Spot?,
     padding: PaddingValues = PaddingValues(),
     snackbarHostState: SnackbarHostState? = null,
+    onReportSubmitted: ((ModerationReport) -> Unit)? = null,
     onNavigateBack: () -> Unit
 ) {
     val c = ejeSpotColors()
@@ -291,6 +294,16 @@ fun ReportSpotScreen(
             Button(
                 onClick = {
                     isSubmitting = true
+                    val newReport = ModerationReport(
+                        id = "rep_${System.currentTimeMillis()}",
+                        spotName = spot.name,
+                        customReason = selectedReason,
+                        reporter = SessionManager.displayName,
+                        customTimeLabel = "Hace un momento",
+                        spotId = spot.id,
+                        details = detailsText.trim()
+                    )
+                    onReportSubmitted?.invoke(newReport)
                     coroutineScope.launch {
                         snackbarHostState?.showSnackbar(reportSuccessMessage)
                         onNavigateBack()

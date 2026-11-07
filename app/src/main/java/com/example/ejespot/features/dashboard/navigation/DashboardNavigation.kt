@@ -211,6 +211,9 @@ fun DashboardNavigation(
                 spot = spot,
                 padding = padding,
                 snackbarHostState = snackbarHostState,
+                onReportSubmitted = { report ->
+                    profileViewModel.addModerationReport(report)
+                },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -260,7 +263,11 @@ fun DashboardNavigation(
                 onTerms = { navController.navigate(DashboardRoutes.Terms) },
                 onPermissions = { navController.navigate(DashboardRoutes.Permissions) },
                 onLanguage = { navController.navigate(DashboardRoutes.Language) },
-                onDeleteAccount = onLogout
+                onDeleteAccount = {
+                    profileViewModel.deleteAccount {
+                        onLogout()
+                    }
+                }
             )
         }
 

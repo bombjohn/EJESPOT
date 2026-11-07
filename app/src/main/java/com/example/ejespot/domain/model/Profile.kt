@@ -136,7 +136,8 @@ data class MyReview(
 
 enum class ProposalStatus {
     APPROVED,
-    PENDING
+    PENDING,
+    REJECTED
 }
 
 data class ProposedSpot(
@@ -149,7 +150,8 @@ data class ProposedSpot(
     val xpEarned: Int,
     @StringRes val noteRes: Int = 0,
     val customNote: String? = null,
-    val spotId: String? = null
+    val spotId: String? = null,
+    val rejectionReason: String? = null
 )
 
 data class ProfileSettings(
@@ -177,8 +179,11 @@ data class AppLanguage(
 data class ModerationReport(
     val id: String,
     val spotName: String,
-    @StringRes val reasonRes: Int,
+    @StringRes val reasonRes: Int = 0,
+    val customReason: String? = null,
     val reporter: String,
-    @StringRes val timeLabelRes: Int,
-    val spotId: String? = null
+    @StringRes val timeLabelRes: Int = 0,
+    val customTimeLabel: String? = null,
+    val spotId: String? = null,
+    val details: String? = null
 )

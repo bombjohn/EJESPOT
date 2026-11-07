@@ -7,6 +7,8 @@ data class SpotDetailUiState(
     val isSaved: Boolean = false,
     val isVisited: Boolean = false,
     val showReviewDialog: Boolean = false,
+    val showEditDialog: Boolean = false,
+    val showDeleteDialog: Boolean = false,
     val reviewRating: Int = 5,
     val reviewAuthor: String = "",
     val reviewComment: String = "",

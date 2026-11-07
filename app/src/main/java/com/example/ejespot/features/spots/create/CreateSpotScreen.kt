@@ -43,6 +43,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import com.example.ejespot.core.session.SessionManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -114,6 +115,12 @@ fun CreateSpotScreen(
         imageUri = imageUri,
         onImagePicked = { imageUri = it },
         onSubmit = {
+            if (SessionManager.isGuest) {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("Inicia sesión para proponer nuevos lugares a la comunidad")
+                }
+                return@CreateSpotFormScreen
+            }
             viewModel.onSubmit { name, cat, loc, hours, price, desc ->
                 // Generar spot pendiente para el feed.
                 // Las coordenadas se derivan del municipio elegido para que el
@@ -132,7 +139,7 @@ fun CreateSpotScreen(
                     hours = hours,
                     priceRange = price,
                     description = desc,
-                    addedBy = "@tú",
+                    addedBy = if (SessionManager.isGuest) "@invitado" else "@${SessionManager.displayName.replace(" ", "_").lowercase()}",
                     imageResId = R.drawable.spot_cascada_frailes,
                     location = Location(lat, lng),
                     isPending = true
@@ -279,6 +286,31 @@ private fun CreateSpotFormScreen(
                 fontSize = 22.sp,
                 color = c.text
             )
+        }
+
+        if (SessionManager.isGuest) {
+            Spacer(modifier = Modifier.height(14.dp))
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                color = Color(0xFFFFF3E0),
+                border = BorderStroke(1.dp, Color(0xFFFFB74D))
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("🔒", fontSize = 18.sp)
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Estás en Modo Invitado. Debes iniciar sesión con una cuenta para proponer lugares a la comunidad.",
+                        fontFamily = ManropeFontFamily,
+                        fontSize = 12.sp,
+                        color = Color(0xFFE65100),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
 
         Spacer(modifier = Modifier.height(20.dp))

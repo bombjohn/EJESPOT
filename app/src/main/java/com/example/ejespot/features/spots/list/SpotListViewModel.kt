@@ -2,9 +2,12 @@ package com.example.ejespot.features.spots.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ejespot.core.data.SpotStore
+import com.example.ejespot.data.repository.local.LocalSpotRepository
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.domain.model.SpotReview
+import com.example.ejespot.domain.repository.SpotRepository
+import com.example.ejespot.domain.usecase.ToggleSaveSpotUseCase
+import com.example.ejespot.domain.usecase.ToggleVisitSpotUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,35 +17,37 @@ import kotlinx.coroutines.launch
 /**
  * Estado de la lista de lugares (feed y mapa).
  *
- * Los datos viven en [SpotStore], que es el repositorio compartido en
- * memoria: así el feed, el mapa y la pantalla de visitados ven la misma
- * información y no se duplica al crear el ViewModel.
+ * Utiliza [SpotRepository] y los casos de uso para acceder a los datos compartidos.
  */
-class SpotListViewModel : ViewModel() {
+class SpotListViewModel(
+    private val spotRepository: SpotRepository = LocalSpotRepository(),
+    private val toggleSaveSpotUseCase: ToggleSaveSpotUseCase = ToggleSaveSpotUseCase(spotRepository),
+    private val toggleVisitSpotUseCase: ToggleVisitSpotUseCase = ToggleVisitSpotUseCase(spotRepository)
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SpotListUiState())
     val uiState: StateFlow<SpotListUiState> = _uiState.asStateFlow()
 
     /** Códigos de los lugares visitados por el usuario actual. */
-    val visitedSpotIds: StateFlow<Set<String>> = SpotStore.visitedSpotIds
+    val visitedSpotIds: StateFlow<Set<String>> = spotRepository.visitedSpotIds
 
     /** Códigos de los lugares guardados por el usuario actual. */
-    val savedSpotIds: StateFlow<Set<String>> = SpotStore.savedSpotIds
+    val savedSpotIds: StateFlow<Set<String>> = spotRepository.savedSpotIds
 
     init {
         refresh()
-        // La lista se actualiza cuando cambian los lugares del store.
+        // La lista se actualiza cuando cambian los lugares del repositorio.
         viewModelScope.launch {
-            SpotStore.spots.collect { refresh() }
+            spotRepository.spots.collect { refresh() }
         }
         viewModelScope.launch {
-            SpotStore.pendingSpots.collect { refresh() }
+            spotRepository.pendingSpots.collect { refresh() }
         }
     }
 
     /** Recalcula la lista visible aplicando categoría y búsqueda. */
     private fun refresh() {
-        val all = SpotStore.allSpots()
+        val all = spotRepository.allSpots()
         _uiState.update { state ->
             state.copy(
                 spots = applyFilters(all, state),
@@ -72,23 +77,23 @@ class SpotListViewModel : ViewModel() {
         refresh()
     }
 
-    // --- Consultas y acciones delegadas en el store compartido ---
+    // --- Consultas y acciones delegadas en el repositorio y casos de uso ---
 
-    fun getSpotById(id: String): Spot? = SpotStore.getSpotById(id)
+    fun getSpotById(id: String): Spot? = spotRepository.getSpotById(id)
 
-    fun addReview(spotId: String, newReview: SpotReview) = SpotStore.addReview(spotId, newReview)
+    fun addReview(spotId: String, newReview: SpotReview) = spotRepository.addReview(spotId, newReview)
 
-    fun addPendingSpot(newSpot: Spot) = SpotStore.addPendingSpot(newSpot)
+    fun addPendingSpot(newSpot: Spot) = spotRepository.addPendingSpot(newSpot)
 
     fun toggleSaveSpot(spotId: String) {
-        SpotStore.toggleSaved(spotId)
+        toggleSaveSpotUseCase(spotId)
     }
 
     fun toggleVisitedSpot(spotId: String) {
-        SpotStore.toggleVisited(spotId)
+        toggleVisitSpotUseCase(spotId)
     }
 
-    fun isSpotSaved(spotId: String): Boolean = SpotStore.isSaved(spotId)
+    fun isSpotSaved(spotId: String): Boolean = spotRepository.isSaved(spotId)
 
-    fun isSpotVisited(spotId: String): Boolean = SpotStore.isVisited(spotId)
+    fun isSpotVisited(spotId: String): Boolean = spotRepository.isVisited(spotId)
 }

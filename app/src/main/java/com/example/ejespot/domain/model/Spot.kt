@@ -82,6 +82,7 @@ data class Spot(
     /** Coordenadas reales para el mapa (osmdroid). */
     val location: Location = Location(4.6400, -75.5700),
     val isPending: Boolean = false,
+    val isFinalized: Boolean = false,
     @StringRes val technicalTitleRes: Int? = null,
     val technicalInfo: SpotTechnicalInfo? = null,
     @StringRes val specialtiesTitleRes: Int? = null,

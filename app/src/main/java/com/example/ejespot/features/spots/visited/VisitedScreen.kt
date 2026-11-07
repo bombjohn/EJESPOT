@@ -140,6 +140,31 @@ fun VisitedScreen(
                 }
             }
 
+            if (SessionManager.isGuest) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFFFF3E0),
+                    border = BorderStroke(1.dp, Color(0xFFFFB74D))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("🔒", fontSize = 16.sp)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Modo Invitado: Inicia sesión para guardar favoritos y registrar tus visitas en el Eje Cafetero.",
+                            fontFamily = ManropeFontFamily,
+                            fontSize = 11.5.sp,
+                            color = Color(0xFFE65100),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(14.dp))
 
             // Tarjetas de estadísticas reales del usuario

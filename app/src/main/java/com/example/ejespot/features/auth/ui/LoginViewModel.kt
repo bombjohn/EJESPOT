@@ -4,8 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.ejespot.R
 import com.example.ejespot.core.util.ResourceProviderHolder
+import com.example.ejespot.data.repository.remote.FirebaseAuthRepository
 import com.example.ejespot.domain.model.User
-import com.example.ejespot.domain.repository.DemoAuthRepository
+import com.example.ejespot.domain.repository.AuthRepository
 import com.example.ejespot.domain.repository.DemoUsers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val authRepository: DemoAuthRepository = DemoAuthRepository()
+    private val authRepository: AuthRepository = FirebaseAuthRepository()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LoginUiState())

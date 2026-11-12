@@ -70,6 +70,10 @@ data class Spot(
     val addedBy: String,
     /** Foto real; null cuando el lugar solo tiene cabecera ilustrada. */
     val imageResId: Int? = null,
+    /** URL de imagen en la nube (Cloudinary / Firebase Storage). */
+    val imageUrl: String? = null,
+    /** URI local de la imagen tomada con la cámara o elegida de la galería. */
+    val imageUri: String? = null,
     /** Emoji con el que se dibuja la cabecera cuando no hay foto. */
     val emoji: String = "📍",
     /** Color de fondo de la cabecera ilustrada (formato 0xFFRRGGBB). */
@@ -83,6 +87,8 @@ data class Spot(
     val location: Location = Location(4.6400, -75.5700),
     val isPending: Boolean = false,
     val isFinalized: Boolean = false,
+    /** Votos de 'Es importante / Me interesa' otorgados por la comunidad. */
+    val importanceVotes: Int = 0,
     @StringRes val technicalTitleRes: Int? = null,
     val technicalInfo: SpotTechnicalInfo? = null,
     @StringRes val specialtiesTitleRes: Int? = null,

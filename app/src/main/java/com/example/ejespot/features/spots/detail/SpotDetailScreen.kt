@@ -42,6 +42,7 @@ fun SpotDetailScreen(
     onAddReview: ((SpotReview) -> Unit)? = null,
     onNavigateToReviews: ((String) -> Unit)? = null,
     onNavigateToReport: ((String) -> Unit)? = null,
+    onConsultAi: ((String, String) -> Unit)? = null,
     viewModel: SpotDetailViewModel = viewModel()
 ) {
     val c = ejeSpotColors()
@@ -707,15 +708,15 @@ fun SpotDetailScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // --- 6. BOTONES DE ACCIÓN RÁPIDA (VISITAR Y COMPARTIR) ---
+            // --- 6. BOTONES DE ACCIÓN RÁPIDA (VISITAR, ME INTERESA Y COMPARTIR) ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Button(
                     onClick = { viewModel.toggleVisited() },
                     modifier = Modifier
-                        .weight(1.3f)
+                        .weight(1.2f)
                         .height(48.dp),
                     shape = RoundedCornerShape(100.dp),
                     colors = ButtonDefaults.buttonColors(
@@ -728,14 +729,44 @@ fun SpotDetailScreen(
                         tint = Color.White,
                         modifier = Modifier.size(16.dp)
                     )
-                    Spacer(modifier = Modifier.width(6.dp))
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = if (uiState.isVisited) stringResource(R.string.detail_visited_xp)
                         else stringResource(R.string.detail_mark_visited),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 12.5.sp,
+                        fontSize = 11.5.sp,
                         color = Color.White
+                    )
+                }
+
+                // Botón "Es importante / Me interesa" (Votar relevancia)
+                OutlinedButton(
+                    onClick = { viewModel.toggleImportant() },
+                    modifier = Modifier
+                        .weight(1.15f)
+                        .height(48.dp),
+                    shape = RoundedCornerShape(100.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = if (uiState.isImportant) Color(0xFFFFECE0) else c.surfaceVariant
+                    ),
+                    border = BorderStroke(
+                        1.dp,
+                        if (uiState.isImportant) Color(0xFFE65100) else c.outline
+                    )
+                ) {
+                    Text(
+                        text = if (uiState.isImportant) "🔥" else "⚡",
+                        fontSize = 14.sp
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = if (uiState.isImportant) "Importante (${currentSpot.importanceVotes})"
+                        else "Me interesa (${currentSpot.importanceVotes})",
+                        fontFamily = ManropeFontFamily,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        color = if (uiState.isImportant) Color(0xFFE65100) else c.textSoft
                     )
                 }
 
@@ -778,6 +809,61 @@ fun SpotDetailScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.5.sp,
                         color = c.textSoft
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // --- BANNER CONSULTA GUÍA IA ---
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onConsultAi?.invoke(currentSpot.name, currentSpot.municipality) },
+                shape = RoundedCornerShape(16.dp),
+                color = c.primaryContainer.copy(alpha = 0.55f),
+                border = BorderStroke(1.dp, c.primary.copy(alpha = 0.35f))
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = c.primary,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Guía Cafetero IA",
+                            fontFamily = FrauncesFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = c.text
+                        )
+                        Text(
+                            text = "¿Cómo llegar, qué pedir o recomendaciones locales? Pregúntale al asistente inteligente.",
+                            fontFamily = ManropeFontFamily,
+                            fontSize = 11.5.sp,
+                            color = c.textSoft,
+                            lineHeight = 16.sp
+                        )
+                    }
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = c.primary,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
             }

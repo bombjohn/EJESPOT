@@ -17,7 +17,10 @@ data class ProfileUiState(
     val moderationQueue: List<ModerationReport>,
     val draft: ProfileDraft,
     val draftError: String? = null,
-    val isModerator: Boolean = true
+    val isModerator: Boolean = true,
+    val activeSpotsCount: Int = 0,
+    val pendingSpotsCount: Int = 0,
+    val finalizedSpotsCount: Int = 0
 ) {
     val unreadNotifications: Int
         get() = notifications.count { !it.isRead }

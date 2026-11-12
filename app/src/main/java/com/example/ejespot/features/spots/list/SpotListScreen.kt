@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
@@ -31,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejespot.R
+import com.example.ejespot.core.data.SpotStore
 import com.example.ejespot.core.session.SessionManager
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.ui.theme.*
@@ -45,12 +47,17 @@ fun SpotListScreen(
     onNavigateToSpotDetail: (String) -> Unit,
     onNavigateToCreateSpot: () -> Unit,
     onNavigateToNotifications: (() -> Unit)? = null,
+    onNavigateToAi: (() -> Unit)? = null,
     viewModel: SpotListViewModel = viewModel()
 ) {
     val c = ejeSpotColors()
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val visitedIds by viewModel.visitedSpotIds.collectAsState()
+    val allNotifs by SpotStore.notifications.collectAsState()
+    val unreadNotifsCount = remember(allNotifs) {
+        SpotStore.getNotificationsForUser(SessionManager.profileId).count { !it.isRead }
+    }
     val coroutineScope = rememberCoroutineScope()
     val categories = com.example.ejespot.domain.model.SpotCategories.filterOptions
 
@@ -121,29 +128,61 @@ fun SpotListScreen(
                         }
                     }
 
-                    // Botón de notificaciones
-                    val noNotificationsMessage = stringResource(R.string.feed_no_notifications)
-                    Surface(
-                        modifier = Modifier.size(42.dp),
-                        shape = CircleShape,
-                        color = c.surfaceVariant,
-                        onClick = {
-                            if (onNavigateToNotifications != null) {
-                                onNavigateToNotifications()
-                            } else {
-                                coroutineScope.launch {
-                                    snackbarHostState?.showSnackbar(noNotificationsMessage)
-                                }
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Botón Guía IA (OpenRouter)
+                        Surface(
+                            modifier = Modifier.size(42.dp),
+                            shape = CircleShape,
+                            color = c.primaryContainer,
+                            onClick = { onNavigateToAi?.invoke() }
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.AutoAwesome,
+                                    contentDescription = "Guía IA",
+                                    tint = c.primary,
+                                    modifier = Modifier.size(20.dp)
+                                )
                             }
                         }
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.Notifications,
-                                contentDescription = stringResource(R.string.feed_notifications),
-                                tint = c.text,
-                                modifier = Modifier.size(20.dp)
-                            )
+
+                        // Botón de notificaciones
+                        val noNotificationsMessage = stringResource(R.string.feed_no_notifications)
+                        Surface(
+                            modifier = Modifier.size(42.dp),
+                            shape = CircleShape,
+                            color = c.surfaceVariant,
+                            onClick = {
+                                if (onNavigateToNotifications != null) {
+                                    onNavigateToNotifications()
+                                } else {
+                                    coroutineScope.launch {
+                                        snackbarHostState?.showSnackbar(noNotificationsMessage)
+                                    }
+                                }
+                            }
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = stringResource(R.string.feed_notifications),
+                                    tint = c.text,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                if (unreadNotifsCount > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(9.dp)
+                                            .align(Alignment.TopEnd)
+                                            .offset(x = 1.dp, y = (-1).dp)
+                                            .clip(CircleShape)
+                                            .background(Color(0xFFE65100))
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -426,6 +465,29 @@ fun SpotCard(
                             fontWeight = FontWeight.ExtraBold,
                             color = c.primary
                         )
+                    }
+
+                    if (spot.importanceVotes > 0) {
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Surface(
+                            shape = RoundedCornerShape(100.dp),
+                            color = Color(0xFFFFECE0)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text("🔥", fontSize = 9.sp)
+                                Spacer(modifier = Modifier.width(2.dp))
+                                Text(
+                                    text = "${spot.importanceVotes}",
+                                    fontFamily = ManropeFontFamily,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = Color(0xFFE65100)
+                                )
+                            }
+                        }
                     }
                 }
 

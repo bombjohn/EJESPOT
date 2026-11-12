@@ -61,6 +61,9 @@ sealed class DashboardRoutes {
 
     @Serializable
     data object MyProposals : DashboardRoutes()
+
+    @Serializable
+    data class AiAssistant(val spotContext: String? = null) : DashboardRoutes()
 }
 
 

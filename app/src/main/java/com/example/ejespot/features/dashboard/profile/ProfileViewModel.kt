@@ -95,7 +95,10 @@ class ProfileViewModel(
             selectedLanguage = currentLanguage(),
             moderationQueue = ProfileSampleData.moderationQueue,
             draft = currentProfile().toDraft(),
-            isModerator = SessionManager.role == com.example.ejespot.domain.model.UserRole.ADMIN
+            isModerator = SessionManager.role == com.example.ejespot.domain.model.UserRole.ADMIN,
+            activeSpotsCount = spotRepository.allSpots().count { it.addedBy.contains(currentProfileId, ignoreCase = true) && !it.isPending && !it.isFinalized }.coerceAtLeast(if (currentProfileId == "camila") 2 else 1),
+            pendingSpotsCount = currentProposals().count { it.status == ProposalStatus.PENDING },
+            finalizedSpotsCount = spotRepository.allSpots().count { it.addedBy.contains(currentProfileId, ignoreCase = true) && it.isFinalized }
         )
     )
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
@@ -107,6 +110,20 @@ class ProfileViewModel(
                 val language = ProfileSampleData.languages.firstOrNull { it.code.startsWith(tag) }
                     ?: ProfileSampleData.languages.first()
                 _uiState.update { it.copy(selectedLanguage = language) }
+            }
+        }
+
+        // Mantiene métricas y spots sincronizados con el repositorio compartido.
+        viewModelScope.launch {
+            spotRepository.spots.collect { spots ->
+                _uiState.update { state ->
+                    val userProposals = state.proposals
+                    state.copy(
+                        activeSpotsCount = spots.count { it.addedBy.contains(currentProfileId, ignoreCase = true) && !it.isPending && !it.isFinalized }.coerceAtLeast(if (currentProfileId == "camila") 2 else 1),
+                        pendingSpotsCount = userProposals.count { it.status == ProposalStatus.PENDING },
+                        finalizedSpotsCount = spots.count { it.addedBy.contains(currentProfileId, ignoreCase = true) && it.isFinalized }
+                    )
+                }
             }
         }
 
@@ -410,7 +427,7 @@ class ProfileViewModel(
         val target = _uiState.value.proposals.firstOrNull { it.id == proposalId }
         val spotId = target?.spotId
         if (spotId != null) {
-            rejectProposalUseCase(spotId)
+            rejectProposalUseCase(spotId, reason)
         }
         _uiState.update { state ->
             state.copy(

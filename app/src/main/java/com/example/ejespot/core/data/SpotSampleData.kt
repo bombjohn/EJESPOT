@@ -52,6 +52,7 @@ object SpotSampleData {
             mapRelX = 0.50f,
             mapRelY = 0.22f,
             location = Location(4.6391, -75.4890),
+            importanceVotes = 24,
             technicalTitleRes = R.string.spot_technical_title_hiking,
             technicalInfo = SpotTechnicalInfo(
                 item1Label = R.string.spot_tech_label_difficulty,
@@ -129,6 +130,7 @@ object SpotSampleData {
             mapRelX = 0.65f,
             mapRelY = 0.42f,
             location = Location(4.8143, -75.6946),
+            importanceVotes = 18,
             technicalTitleRes = R.string.spot_technical_title_gastronomy,
             technicalInfo = SpotTechnicalInfo(
                 item1Label = R.string.spot_tech_label_schedule,

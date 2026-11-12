@@ -31,5 +31,12 @@ class EjeSpotApplication : Application() {
         // Sesión persistida (Data Store): se restaura de forma asíncrona.
         SessionManager.init(applicationContext)
         SessionManager.restore()
+
+        // Inicialización segura de Firebase
+        try {
+            com.google.firebase.FirebaseApp.initializeApp(this)
+        } catch (_: Exception) {
+            // Firebase inicializado automáticamente por Google Services o en modo offline
+        }
     }
 }

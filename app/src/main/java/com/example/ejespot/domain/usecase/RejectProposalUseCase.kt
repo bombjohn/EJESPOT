@@ -8,7 +8,7 @@ import com.example.ejespot.domain.repository.SpotRepository
 class RejectProposalUseCase(
     private val spotRepository: SpotRepository
 ) {
-    operator fun invoke(spotId: String) {
-        spotRepository.rejectPendingSpot(spotId)
+    operator fun invoke(spotId: String, reason: String = "No cumple con las pautas de la comunidad") {
+        spotRepository.rejectPendingSpot(spotId, reason)
     }
 }

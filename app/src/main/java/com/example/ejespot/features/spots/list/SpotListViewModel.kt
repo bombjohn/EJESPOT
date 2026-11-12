@@ -6,6 +6,7 @@ import com.example.ejespot.data.repository.local.LocalSpotRepository
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.domain.model.SpotReview
 import com.example.ejespot.domain.repository.SpotRepository
+import com.example.ejespot.domain.usecase.ToggleImportanceVoteUseCase
 import com.example.ejespot.domain.usecase.ToggleSaveSpotUseCase
 import com.example.ejespot.domain.usecase.ToggleVisitSpotUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,8 @@ import kotlinx.coroutines.launch
 class SpotListViewModel(
     private val spotRepository: SpotRepository = LocalSpotRepository(),
     private val toggleSaveSpotUseCase: ToggleSaveSpotUseCase = ToggleSaveSpotUseCase(spotRepository),
-    private val toggleVisitSpotUseCase: ToggleVisitSpotUseCase = ToggleVisitSpotUseCase(spotRepository)
+    private val toggleVisitSpotUseCase: ToggleVisitSpotUseCase = ToggleVisitSpotUseCase(spotRepository),
+    private val toggleImportanceVoteUseCase: ToggleImportanceVoteUseCase = ToggleImportanceVoteUseCase(spotRepository)
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SpotListUiState())
@@ -33,6 +35,9 @@ class SpotListViewModel(
 
     /** Códigos de los lugares guardados por el usuario actual. */
     val savedSpotIds: StateFlow<Set<String>> = spotRepository.savedSpotIds
+
+    /** Códigos de los lugares votados como 'Me interesa' por el usuario actual. */
+    val votedSpotIds: StateFlow<Set<String>> = spotRepository.votedSpotIds
 
     init {
         refresh()
@@ -93,7 +98,13 @@ class SpotListViewModel(
         toggleVisitSpotUseCase(spotId)
     }
 
+    fun toggleImportanceVote(spotId: String) {
+        toggleImportanceVoteUseCase(spotId)
+    }
+
     fun isSpotSaved(spotId: String): Boolean = spotRepository.isSaved(spotId)
 
     fun isSpotVisited(spotId: String): Boolean = spotRepository.isVisited(spotId)
+
+    fun isSpotVotedImportant(spotId: String): Boolean = spotRepository.isVotedImportant(spotId)
 }

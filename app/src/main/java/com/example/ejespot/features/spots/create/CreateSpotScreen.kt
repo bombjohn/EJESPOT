@@ -52,6 +52,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejespot.R
 import com.example.ejespot.core.component.ImagePickerBottomSheet
+import com.example.ejespot.core.data.SpotStore
 import com.example.ejespot.core.util.createTempImageUri
 import com.example.ejespot.core.util.toImageBitmap
 import com.example.ejespot.domain.model.Location
@@ -69,6 +70,7 @@ fun CreateSpotScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     // URI de la foto elegida para el lugar (galería o cámara).
     var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
@@ -121,11 +123,18 @@ fun CreateSpotScreen(
                 }
                 return@CreateSpotFormScreen
             }
+            if (imageUri == null) {
+                coroutineScope.launch {
+                    snackbarHostState.showSnackbar("Debes incluir al menos una imagen para publicar el lugar")
+                }
+                return@CreateSpotFormScreen
+            }
             viewModel.onSubmit { name, cat, loc, hours, price, desc ->
                 // Generar spot pendiente para el feed.
                 // Las coordenadas se derivan del municipio elegido para que el
                 // marcador aparezca en el lugar correcto del mapa real.
                 val (lat, lng) = coordinatesFor(loc)
+                val currentUriString = imageUri?.toString()
                 val newSpot = Spot(
                     id = "spot_${System.currentTimeMillis()}",
                     name = name,
@@ -140,11 +149,35 @@ fun CreateSpotScreen(
                     priceRange = price,
                     description = desc,
                     addedBy = if (SessionManager.isGuest) "@invitado" else "@${SessionManager.displayName.replace(" ", "_").lowercase()}",
-                    imageResId = R.drawable.spot_cascada_frailes,
+                    imageResId = if (currentUriString == null) R.drawable.spot_cascada_frailes else null,
+                    imageUri = currentUriString,
+                    imageUrl = currentUriString,
                     location = Location(lat, lng),
                     isPending = true
                 )
                 onSpotCreated?.invoke(newSpot)
+
+                // Subida asíncrona a Firebase Storage / Cloud
+                val pickedUri = imageUri
+                coroutineScope.launch {
+                    if (pickedUri != null) {
+                        runCatching {
+                            val cloudUrl = com.example.ejespot.data.repository.remote.CloudImageStorageService.uploadImage(context, pickedUri)
+                            if (cloudUrl.startsWith("http")) {
+                                SpotStore.updateSpot(
+                                    id = newSpot.id,
+                                    name = newSpot.name,
+                                    category = newSpot.category,
+                                    municipality = newSpot.municipality,
+                                    hours = newSpot.hours,
+                                    priceRange = newSpot.priceRange,
+                                    description = newSpot.description
+                                )
+                            }
+                        }
+                    }
+                }
+
                 imageUri = null
                 coroutineScope.launch {
                     snackbarHostState.showSnackbar(successMessage)

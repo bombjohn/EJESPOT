@@ -1,5 +1,6 @@
 package com.example.ejespot.domain.repository
 
+import com.example.ejespot.domain.model.AppNotification
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.domain.model.SpotReview
 import kotlinx.coroutines.flow.StateFlow
@@ -15,17 +16,21 @@ interface SpotRepository {
     val pendingSpots: StateFlow<List<Spot>>
     val visitedSpotIds: StateFlow<Set<String>>
     val savedSpotIds: StateFlow<Set<String>>
+    val votedSpotIds: StateFlow<Set<String>>
+    val notifications: StateFlow<List<AppNotification>>
 
     fun allSpots(): List<Spot>
     fun getSpotById(id: String): Spot?
     fun isVisited(spotId: String): Boolean
     fun isSaved(spotId: String): Boolean
+    fun isVotedImportant(spotId: String): Boolean
     fun toggleVisited(spotId: String): Boolean
     fun toggleSaved(spotId: String): Boolean
+    fun toggleImportanceVote(spotId: String): Boolean
     fun addReview(spotId: String, review: SpotReview)
     fun addPendingSpot(spot: Spot)
     fun approvePendingSpot(spotId: String)
-    fun rejectPendingSpot(spotId: String)
+    fun rejectPendingSpot(spotId: String, reason: String = "No cumple con las pautas")
     fun updateSpot(
         id: String,
         name: String,
@@ -39,4 +44,10 @@ interface SpotRepository {
     fun deleteSpot(id: String)
     fun clearUserData(profileId: String)
     fun refreshForCurrentUser()
+
+    // Notificaciones
+    fun getNotificationsForUser(userId: String): List<AppNotification>
+    fun markNotificationAsRead(id: String)
+    fun markAllNotificationsAsRead(userId: String)
+    fun addNotification(notification: AppNotification)
 }

@@ -6,6 +6,7 @@ data class SpotDetailUiState(
     val spot: Spot? = null,
     val isSaved: Boolean = false,
     val isVisited: Boolean = false,
+    val isImportant: Boolean = false,
     val showReviewDialog: Boolean = false,
     val showEditDialog: Boolean = false,
     val showDeleteDialog: Boolean = false,

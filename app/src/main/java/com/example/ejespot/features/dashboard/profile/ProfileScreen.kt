@@ -238,6 +238,48 @@ fun ProfileScreen(
             }
         }
 
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // --- DASHBOARD DE MÉTRICAS (Requisito Proyecto Final: Activas, Finalizadas y Pendientes) ---
+        ProfileSectionHeader(title = "Métricas de Publicaciones")
+        Spacer(modifier = Modifier.height(8.dp))
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = c.surface,
+            border = BorderStroke(1.dp, c.outline),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ) {
+                ProfileMetricStat(
+                    emoji = "🟢",
+                    value = uiState.activeSpotsCount.toString(),
+                    label = "Activas",
+                    modifier = Modifier.weight(1f),
+                    onClick = onMyProposals
+                )
+                VerticalDivider(color = c.surfaceVariant, modifier = Modifier.height(48.dp))
+                ProfileMetricStat(
+                    emoji = "⏳",
+                    value = uiState.pendingSpotsCount.toString(),
+                    label = "Pendientes",
+                    modifier = Modifier.weight(1f),
+                    onClick = onMyProposals
+                )
+                VerticalDivider(color = c.surfaceVariant, modifier = Modifier.height(48.dp))
+                ProfileMetricStat(
+                    emoji = "🏁",
+                    value = uiState.finalizedSpotsCount.toString(),
+                    label = "Finalizadas",
+                    modifier = Modifier.weight(1f),
+                    onClick = onMyProposals
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.height(20.dp))
 
         // Niveles de la comunidad
@@ -348,6 +390,88 @@ fun ProfileScreen(
                 )
                 if (index < uiState.activities.lastIndex) {
                     HorizontalDivider(color = c.surfaceVariant, modifier = Modifier.padding(start = 59.dp))
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // --- INSIGNIAS Y LOGROS (Requisito Proyecto Final) ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ProfileSectionHeader(title = "Insignias y Reconocimientos")
+            Text(
+                text = "Ver todas →",
+                fontFamily = ManropeFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.5.sp,
+                color = EjeSpotPrimary,
+                modifier = Modifier.clickable { onGamification() }
+            )
+        }
+        Spacer(modifier = Modifier.height(9.dp))
+        ProfileCard {
+            uiState.badges.take(3).forEachIndexed { index, badge ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onGamification() }
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(
+                                if (badge.isUnlocked) EjeSpotPrimaryContainer else c.surfaceVariant,
+                                CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(text = badge.emoji, fontSize = 17.sp)
+                    }
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(badge.titleRes),
+                            fontFamily = ManropeFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.5.sp,
+                            color = if (badge.isUnlocked) c.text else c.textSoft
+                        )
+                        Text(
+                            text = stringResource(badge.descriptionRes),
+                            fontFamily = ManropeFontFamily,
+                            fontSize = 10.5.sp,
+                            color = c.placeholder,
+                            maxLines = 1
+                        )
+                    }
+                    if (badge.isUnlocked) {
+                        Surface(shape = RoundedCornerShape(100.dp), color = c.successBg) {
+                            Text(
+                                text = "Obtenida",
+                                fontFamily = ManropeFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 9.sp,
+                                color = c.successText,
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
+                            )
+                        }
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = null,
+                            tint = c.starIdle,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
+                }
+                if (index < 2) {
+                    HorizontalDivider(color = c.surfaceVariant, modifier = Modifier.padding(start = 54.dp))
                 }
             }
         }
@@ -705,4 +829,41 @@ private fun ModerationQueueDialog(
             }
         }
     )
+}
+
+@Composable
+private fun ProfileMetricStat(
+    emoji: String,
+    value: String,
+    label: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val c = ejeSpotColors()
+    Column(
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .padding(vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = emoji, fontSize = 12.sp)
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(
+                text = value,
+                fontFamily = FrauncesFontFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                color = c.text
+            )
+        }
+        Spacer(modifier = Modifier.height(2.dp))
+        Text(
+            text = label,
+            fontFamily = ManropeFontFamily,
+            fontSize = 10.5.sp,
+            color = c.textSoft,
+            fontWeight = FontWeight.Medium
+        )
+    }
 }

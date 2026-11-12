@@ -10,6 +10,7 @@ import com.example.ejespot.domain.model.SpotReview
 import com.example.ejespot.domain.repository.SpotRepository
 import com.example.ejespot.domain.usecase.DeleteSpotUseCase
 import com.example.ejespot.domain.usecase.FinalizeSpotUseCase
+import com.example.ejespot.domain.usecase.ToggleImportanceVoteUseCase
 import com.example.ejespot.domain.usecase.ToggleSaveSpotUseCase
 import com.example.ejespot.domain.usecase.ToggleVisitSpotUseCase
 import com.example.ejespot.domain.usecase.UpdateSpotUseCase
@@ -22,6 +23,7 @@ class SpotDetailViewModel(
     private val spotRepository: SpotRepository = LocalSpotRepository(),
     private val toggleSaveSpotUseCase: ToggleSaveSpotUseCase = ToggleSaveSpotUseCase(spotRepository),
     private val toggleVisitSpotUseCase: ToggleVisitSpotUseCase = ToggleVisitSpotUseCase(spotRepository),
+    private val toggleImportanceVoteUseCase: ToggleImportanceVoteUseCase = ToggleImportanceVoteUseCase(spotRepository),
     private val updateSpotUseCase: UpdateSpotUseCase = UpdateSpotUseCase(spotRepository),
     private val finalizeSpotUseCase: FinalizeSpotUseCase = FinalizeSpotUseCase(spotRepository),
     private val deleteSpotUseCase: DeleteSpotUseCase = DeleteSpotUseCase(spotRepository)
@@ -39,7 +41,25 @@ class SpotDetailViewModel(
                 spot = spot,
                 isSaved = spot?.let { s -> spotRepository.isSaved(s.id) } ?: false,
                 isVisited = spot?.let { s -> spotRepository.isVisited(s.id) } ?: false,
+                isImportant = spot?.let { s -> spotRepository.isVotedImportant(s.id) } ?: false,
                 reviewAuthor = if (SessionManager.isGuest) "" else SessionManager.displayName
+            )
+        }
+    }
+
+    fun toggleImportant() {
+        if (SessionManager.isGuest) {
+            _uiState.update { it.copy(feedbackMessage = "Inicia sesión para votar por lugares importantes") }
+            return
+        }
+        val spotId = _uiState.value.spot?.id ?: return
+        val nowImportant = toggleImportanceVoteUseCase(spotId)
+        val updatedSpot = spotRepository.getSpotById(spotId)
+        _uiState.update {
+            it.copy(
+                spot = updatedSpot,
+                isImportant = nowImportant,
+                feedbackMessage = if (nowImportant) "¡Marcado como importante! Ayudas a destacar este lugar." else "Voto retirado"
             )
         }
     }

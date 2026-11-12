@@ -88,6 +88,9 @@ fun DashboardNavigation(
                 onNavigateToNotifications = {
                     navController.navigate(DashboardRoutes.Notifications)
                 },
+                onNavigateToAi = {
+                    navController.navigate(DashboardRoutes.AiAssistant())
+                },
                 viewModel = spotListViewModel
             )
         }
@@ -184,7 +187,20 @@ fun DashboardNavigation(
                 },
                 onNavigateToReport = { id ->
                     navController.navigate(DashboardRoutes.ReportSpot(spotId = id))
+                },
+                onConsultAi = { name, muni ->
+                    navController.navigate(DashboardRoutes.AiAssistant(spotContext = "$name, $muni"))
                 }
+            )
+        }
+
+        // Pantalla Guía Cafetero IA (OpenRouter)
+        composable<DashboardRoutes.AiAssistant> { backStackEntry ->
+            val route = backStackEntry.toRoute<DashboardRoutes.AiAssistant>()
+            com.example.ejespot.features.ai.AiAssistantScreen(
+                spotContext = route.spotContext,
+                padding = padding,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
@@ -232,13 +248,14 @@ fun DashboardNavigation(
             )
         }
 
-        // Pantalla 6.3: Notificaciones
+        // Apartado de Notificaciones (Requisito Proyecto Final)
         composable<DashboardRoutes.Notifications> {
-            NotificationsScreen(
+            com.example.ejespot.features.dashboard.notifications.NotificationsScreen(
                 padding = padding,
-                viewModel = profileViewModel,
-                snackbarHostState = snackbarHostState,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToSpot = { spotId ->
+                    navController.navigate(DashboardRoutes.SpotDetail(spotId = spotId))
+                }
             )
         }
 

@@ -1,8 +1,10 @@
 package com.example.ejespot.features.auth.ui
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.ejespot.R
 import com.example.ejespot.core.util.ResourceProviderHolder
+import com.example.ejespot.data.repository.remote.FirebaseAuthRepository
 import com.example.ejespot.domain.model.User
 import com.example.ejespot.domain.model.UserRole
 import com.example.ejespot.domain.repository.DemoUsers
@@ -11,8 +13,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class RegisterViewModel : ViewModel() {
+class RegisterViewModel(
+    private val authRepo: FirebaseAuthRepository = FirebaseAuthRepository()
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RegisterUiState())
     val uiState: StateFlow<RegisterUiState> = _uiState.asStateFlow()
@@ -77,27 +82,27 @@ class RegisterViewModel : ViewModel() {
         }
         _uiState.update { it.copy(isLoading = true) }
 
-        // Se crea la cuenta en memoria (Fase 2: no hay backend) y se devuelve
-        // para que la navegación inicie su sesión y la persista en Data Store.
-        val newUser = User(
-            id = "u_${email.lowercase()}",
-            email = email,
-            name = name,
-            password = password,
-            role = UserRole.USER,
-            profileId = email.lowercase()
-        )
-
-        DemoUsers.register(newUser)
-        val usernamePart = email.substringBefore("@")
-        ProfileSampleData.registerProfile(newUser.profileId, newUser.name, usernamePart)
-
-        _uiState.update {
-            it.copy(
-                isLoading = false,
-                registerSuccess = true,
-                registeredUser = newUser
-            )
+        viewModelScope.launch {
+            authRepo.register(email, password, name)
+                .onSuccess { newUser ->
+                    val usernamePart = email.substringBefore("@")
+                    ProfileSampleData.registerProfile(newUser.profileId, newUser.name, usernamePart)
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            registerSuccess = true,
+                            registeredUser = newUser
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            errorMessage = error.message ?: resources.getString(R.string.error_generic_login)
+                        )
+                    }
+                }
         }
     }
 

@@ -32,6 +32,9 @@ class EjeSpotApplication : Application() {
         SessionManager.init(applicationContext)
         SessionManager.restore()
 
+        // Persistencia local de puntos de interés, notificaciones y votos
+        com.example.ejespot.core.data.SpotStore.init(applicationContext)
+
         // Inicialización segura de Firebase
         try {
             com.google.firebase.FirebaseApp.initializeApp(this)

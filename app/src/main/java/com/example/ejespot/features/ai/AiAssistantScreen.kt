@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -39,6 +40,8 @@ fun AiAssistantScreen(
     val c = ejeSpotColors()
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
+    var showKeyDialog by remember { mutableStateOf(false) }
+    var keyInput by remember { mutableStateOf("") }
 
     LaunchedEffect(spotContext) {
         if (!spotContext.isNullOrBlank()) {
@@ -125,6 +128,23 @@ fun AiAssistantScreen(
                         fontSize = 10.5.sp,
                         color = c.textSoft
                     )
+                }
+
+                Surface(
+                    onClick = { showKeyDialog = true },
+                    modifier = Modifier.size(36.dp),
+                    shape = CircleShape,
+                    color = c.surfaceVariant,
+                    border = BorderStroke(1.dp, c.outline)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Key,
+                            contentDescription = "Configurar API Key",
+                            tint = c.textSoft,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -267,6 +287,54 @@ fun AiAssistantScreen(
                 }
             }
         }
+    }
+
+    if (showKeyDialog) {
+        AlertDialog(
+            onDismissRequest = { showKeyDialog = false },
+            title = {
+                Text(
+                    text = "Configuración OpenRouter IA",
+                    fontFamily = FrauncesFontFamily,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Text(
+                        text = "Ingresa tu API Key de OpenRouter para consultas en vivo. Si se deja en blanco o sin red, la app utiliza el motor local de respuestas cafeteras.",
+                        fontSize = 12.sp,
+                        color = c.textSoft,
+                        lineHeight = 17.sp
+                    )
+                    OutlinedTextField(
+                        value = keyInput,
+                        onValueChange = { keyInput = it },
+                        placeholder = { Text("sk-or-v1-...", fontSize = 12.sp) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        if (keyInput.isNotBlank()) {
+                            viewModel.updateApiKey(keyInput)
+                        }
+                        showKeyDialog = false
+                    }
+                ) {
+                    Text("Guardar", color = EjeSpotPrimary, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showKeyDialog = false }) {
+                    Text("Cancelar", color = c.textSoft)
+                }
+            }
+        )
     }
 }
 

@@ -160,7 +160,7 @@ $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 
 ### 6.2. Ubicación de Salida del APK
 - **Debug APK:** `app/build/outputs/apk/debug/app-debug.apk`
-- **Release APK:** `app/build/outputs/apk/release/app-release-unsigned.apk`
+- **Release APK (Firmado y listo para instalar):** `app/build/outputs/apk/release/app-release.apk`
 
 ### 6.3. Distribución en Firebase App Distribution
 1. Acceder a [Firebase Console](https://console.firebase.google.com/) > Proyecto EjeSpot.

@@ -48,6 +48,10 @@ class AiAssistantViewModel(
         _uiState.update { it.copy(inputText = newText) }
     }
 
+    fun updateApiKey(key: String) {
+        (aiRepository as? OpenRouterAiRepository)?.updateApiKey(key)
+    }
+
     fun setSpotContext(context: String?) {
         if (!context.isNullOrBlank()) {
             _uiState.update { state ->

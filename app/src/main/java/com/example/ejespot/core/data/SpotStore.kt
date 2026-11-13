@@ -30,6 +30,177 @@ object SpotStore {
     private val firestoreScope = CoroutineScope(Dispatchers.IO)
     private val firestoreRepo = FirestoreSpotRepository()
 
+    private var prefs: android.content.SharedPreferences? = null
+
+    fun init(context: android.content.Context) {
+        if (prefs != null) return
+        val p = context.getSharedPreferences("ejespot_store_prefs", android.content.Context.MODE_PRIVATE)
+        prefs = p
+
+        // Cargar conjuntos guardados, visitados y votos persistidos
+        p.all.forEach { (k, value) ->
+            if (value is Set<*> && value.all { it is String }) {
+                @Suppress("UNCHECKED_CAST")
+                val set = value as Set<String>
+                when {
+                    k.startsWith("saved_") -> savedByUser[k.removePrefix("saved_")] = set
+                    k.startsWith("visited_") -> visitedByUser[k.removePrefix("visited_")] = set
+                    k.startsWith("voted_") -> votedImportantByUser[k.removePrefix("voted_")] = set
+                }
+            }
+        }
+
+        // Cargar spots personalizados creados por el usuario
+        val savedSpotsJson = p.getString("custom_spots", null)
+        if (!savedSpotsJson.isNullOrBlank()) {
+            runCatching {
+                val array = org.json.JSONArray(savedSpotsJson)
+                val loadedList = mutableListOf<Spot>()
+                for (i in 0 until array.length()) {
+                    val obj = array.getJSONObject(i)
+                    loadedList.add(
+                        Spot(
+                            id = obj.getString("id"),
+                            name = obj.getString("name"),
+                            category = obj.getString("category"),
+                            municipality = obj.getString("municipality"),
+                            rating = obj.optDouble("rating", 5.0),
+                            reviewCount = obj.optInt("reviewCount", 0),
+                            distance = obj.optString("distance", "1.0 km"),
+                            isVerified = obj.optBoolean("isVerified", false),
+                            priceBadge = obj.optString("priceBadge", ""),
+                            hours = obj.optString("hours", ""),
+                            priceRange = obj.optString("priceRange", ""),
+                            description = obj.optString("description", ""),
+                            addedBy = obj.optString("addedBy", "@usuario"),
+                            imageUrl = obj.optString("imageUrl").ifBlank { null },
+                            imageUri = obj.optString("imageUri").ifBlank { null },
+                            location = com.example.ejespot.domain.model.Location(
+                                latitude = obj.optDouble("lat", 4.8143),
+                                longitude = obj.optDouble("lng", -75.6946)
+                            ),
+                            isPending = obj.optBoolean("isPending", true),
+                            isFinalized = obj.optBoolean("isFinalized", false),
+                            importanceVotes = obj.optInt("importanceVotes", 0)
+                        )
+                    )
+                }
+                if (loadedList.isNotEmpty()) {
+                    _pendingSpots.update { current ->
+                        val existingIds = current.map { it.id }.toSet()
+                        loadedList.filter { it.id !in existingIds && it.isPending } + current
+                    }
+                    _spots.update { current ->
+                        val existingIds = current.map { it.id }.toSet()
+                        loadedList.filter { it.id !in existingIds && !it.isPending } + current
+                    }
+                }
+            }
+        }
+
+        // Cargar notificaciones persistidas
+        val savedNotifsJson = p.getString("custom_notifications", null)
+        if (!savedNotifsJson.isNullOrBlank()) {
+            runCatching {
+                val array = org.json.JSONArray(savedNotifsJson)
+                val loadedNotifs = mutableListOf<AppNotification>()
+                for (i in 0 until array.length()) {
+                    val obj = array.getJSONObject(i)
+                    loadedNotifs.add(
+                        AppNotification(
+                            id = obj.getString("id"),
+                            userId = obj.getString("userId"),
+                            title = obj.getString("title"),
+                            message = obj.getString("message"),
+                            type = try {
+                                NotificationType.valueOf(obj.getString("type"))
+                            } catch (_: Exception) {
+                                NotificationType.SYSTEM
+                            },
+                            relatedSpotId = obj.optString("relatedSpotId").ifBlank { null },
+                            timestamp = obj.optLong("timestamp", System.currentTimeMillis()),
+                            isRead = obj.optBoolean("isRead", false)
+                        )
+                    )
+                }
+                if (loadedNotifs.isNotEmpty()) {
+                    _notifications.update { current ->
+                        val existingIds = current.map { it.id }.toSet()
+                        loadedNotifs.filter { it.id !in existingIds } + current
+                    }
+                }
+            }
+        }
+
+        refreshForCurrentUser()
+    }
+
+    private fun persistCustomSpots() {
+        val p = prefs ?: return
+        try {
+            val allCustom = (_spots.value + _pendingSpots.value).filter { it.id.startsWith("spot_") }
+            val array = org.json.JSONArray()
+            for (spot in allCustom) {
+                val obj = org.json.JSONObject().apply {
+                    put("id", spot.id)
+                    put("name", spot.name)
+                    put("category", spot.category)
+                    put("municipality", spot.municipality)
+                    put("rating", spot.rating)
+                    put("reviewCount", spot.reviewCount)
+                    put("distance", spot.distance)
+                    put("isVerified", spot.isVerified)
+                    put("priceBadge", spot.priceBadge)
+                    put("hours", spot.hours)
+                    put("priceRange", spot.priceRange)
+                    put("description", spot.description)
+                    put("addedBy", spot.addedBy)
+                    put("imageUrl", spot.imageUrl ?: "")
+                    put("imageUri", spot.imageUri ?: "")
+                    put("lat", spot.location.latitude)
+                    put("lng", spot.location.longitude)
+                    put("isPending", spot.isPending)
+                    put("isFinalized", spot.isFinalized)
+                    put("importanceVotes", spot.importanceVotes)
+                }
+                array.put(obj)
+            }
+            p.edit().putString("custom_spots", array.toString()).apply()
+        } catch (_: Exception) {}
+    }
+
+    private fun persistNotifications() {
+        val p = prefs ?: return
+        try {
+            val array = org.json.JSONArray()
+            for (notif in _notifications.value) {
+                val obj = org.json.JSONObject().apply {
+                    put("id", notif.id)
+                    put("userId", notif.userId)
+                    put("title", notif.title)
+                    put("message", notif.message)
+                    put("type", notif.type.name)
+                    put("relatedSpotId", notif.relatedSpotId ?: "")
+                    put("timestamp", notif.timestamp)
+                    put("isRead", notif.isRead)
+                }
+                array.put(obj)
+            }
+            p.edit().putString("custom_notifications", array.toString()).apply()
+        } catch (_: Exception) {}
+    }
+
+    private fun persistUserSets(key: String) {
+        val p = prefs ?: return
+        try {
+            p.edit()
+                .putStringSet("saved_$key", savedByUser[key] ?: emptySet())
+                .putStringSet("visited_$key", visitedByUser[key] ?: emptySet())
+                .putStringSet("voted_$key", votedImportantByUser[key] ?: emptySet())
+                .apply()
+        } catch (_: Exception) {}
+    }
+
     private val _spots = MutableStateFlow(SpotSampleData.spots)
     val spots: StateFlow<List<Spot>> = _spots.asStateFlow()
 
@@ -158,6 +329,7 @@ object SpotStore {
         _notifications.update { list ->
             list.map { if (it.id == id) it.copy(isRead = true) else it }
         }
+        persistNotifications()
         firestoreScope.launch {
             firestoreRepo.markNotificationRead(id)
         }
@@ -167,10 +339,12 @@ object SpotStore {
         _notifications.update { list ->
             list.map { if (it.userId == userId) it.copy(isRead = true) else it }
         }
+        persistNotifications()
     }
 
     fun addNotification(notification: AppNotification) {
         _notifications.update { listOf(notification) + it }
+        persistNotifications()
         firestoreScope.launch {
             firestoreRepo.saveNotification(notification)
         }
@@ -234,6 +408,9 @@ object SpotStore {
             }
         }
 
+        persistUserSets(key)
+        persistCustomSpots()
+
         return nowVoted
     }
 
@@ -244,6 +421,7 @@ object SpotStore {
         val nowVisited = spotId !in current
         visitedByUser[key] = if (nowVisited) current + spotId else current - spotId
         _visitedSpotIds.value = visitedByUser[key] ?: emptySet()
+        persistUserSets(key)
         return nowVisited
     }
 
@@ -254,6 +432,7 @@ object SpotStore {
         val nowSaved = spotId !in current
         savedByUser[key] = if (nowSaved) current + spotId else current - spotId
         _savedSpotIds.value = savedByUser[key] ?: emptySet()
+        persistUserSets(key)
         return nowSaved
     }
 
@@ -295,6 +474,7 @@ object SpotStore {
     fun addPendingSpot(spot: Spot) {
         val pendingSpot = spot.copy(isPending = true)
         _pendingSpots.update { listOf(pendingSpot) + it }
+        persistCustomSpots()
         firestoreScope.launch {
             firestoreRepo.saveSpot(pendingSpot)
         }
@@ -310,6 +490,7 @@ object SpotStore {
             val approved = pending.copy(isPending = false, isVerified = true)
             _pendingSpots.update { list -> list.filterNot { it.id == spotId } }
             _spots.update { list -> listOf(approved) + list.filterNot { it.id == spotId } }
+            persistCustomSpots()
 
             firestoreScope.launch {
                 firestoreRepo.updateSpotFields(spotId, mapOf("isPending" to false, "isVerified" to true))
@@ -338,6 +519,7 @@ object SpotStore {
         val pending = _pendingSpots.value.firstOrNull { it.id == spotId }
         if (pending != null) {
             _pendingSpots.update { list -> list.filterNot { it.id == spotId } }
+            persistCustomSpots()
 
             firestoreScope.launch {
                 firestoreRepo.deleteSpot(spotId)
@@ -383,6 +565,7 @@ object SpotStore {
         }
         _spots.update { list -> list.map { if (it.id == id) updater(it) else it } }
         _pendingSpots.update { list -> list.map { if (it.id == id) updater(it) else it } }
+        persistCustomSpots()
 
         firestoreScope.launch {
             val updated = getSpotById(id)
@@ -397,6 +580,7 @@ object SpotStore {
         val updater: (Spot) -> Spot = { it.copy(isFinalized = finalized) }
         _spots.update { list -> list.map { if (it.id == id) updater(it) else it } }
         _pendingSpots.update { list -> list.map { if (it.id == id) updater(it) else it } }
+        persistCustomSpots()
 
         firestoreScope.launch {
             firestoreRepo.updateSpotFields(id, mapOf("isFinalized" to finalized))
@@ -409,6 +593,7 @@ object SpotStore {
     fun deleteSpot(id: String) {
         _spots.update { list -> list.filterNot { it.id == id } }
         _pendingSpots.update { list -> list.filterNot { it.id == id } }
+        persistCustomSpots()
 
         firestoreScope.launch {
             firestoreRepo.deleteSpot(id)
@@ -434,6 +619,7 @@ object SpotStore {
         visitedByUser.remove(profileId)
         // Eliminar spots propuestos por este usuario
         _pendingSpots.update { list -> list.filterNot { it.addedBy == profileId } }
+        persistCustomSpots()
         refreshForCurrentUser()
     }
 

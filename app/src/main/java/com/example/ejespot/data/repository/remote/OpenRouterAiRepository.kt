@@ -225,24 +225,99 @@ class OpenRouterAiRepository(
 - **Aeropuertos:** Aeropuerto El Edén (AXM) en Armenia y Matecaña (PEI) en Pereira reciben vuelos directos nacionales e internacionales diarios.
             """.trimIndent()
 
+            lower.contains("clima") || lower.contains("ropa") || lower.contains("maleta") ||
+                lower.contains("empacar") || lower.contains("lluvia") || lower.contains("llueve") || lower.contains("frio") -> """
+¡Preparar tu maleta para el Eje Cafetero es fácil si aplicas la técnica de capas! 🧥🎒
+
+🌦️ **Guía de clima y qué empacar:**
+1. **Ropa por capas:** En el día la temperatura ronda los 22°C - 26°C (cálido y agradable), pero al atardecer y en municipios altos como Salento o Manizales puede bajar a 14°C - 10°C.
+2. **Calzado:** Zapatos o botas con buen labrado y agarre; si vas a senderismo o cascadas, habrá zonas de tierra húmeda.
+3. **Impermeable o sombrilla ligera:** En el bosque de niebla suele haber lloviznas cortas ('garúas') que enriquecen el verde del paisaje.
+4. **Protección solar:** Aunque esté nublado, la radiación en zona de cordillera es alta. Lleva gorra, gafas y bloqueador biodegradable.
+5. **Para los termales:** Traje de baño oscuro y toalla propia.
+            """.trimIndent()
+
+            lower.contains("hospedaje") || lower.contains("hotel") || lower.contains("glamping") ||
+                lower.contains("dormir") || lower.contains("alojamiento") || lower.contains("finca hotel") -> """
+¡Dormir en el Paisaje Cafetero es una experiencia inolvidable! 🏡✨
+
+🛌 **Opciones recomendadas según tu estilo:**
+1. **Fincas Cafeteras Tradicionales:** Hospédate en casas de arquitectura colonial antioqueña con corredores de chambranas y desayuno con café recién tostado (Filandia, Circasia y Chinchiná).
+2. **Glampings con vista al valle:** Carpas geodésicas y cabañas elevadas con jacuzzi y mallas de catamarán hacia el cañón en Salento y Buenavista.
+3. **Hoteles boutique urbanos:** En Pereira o Manizales, ideales para quienes buscan gastronomía moderna, coworking y cercanía al aeropuerto.
+4. **Hostales para mochileros:** En Salento y Filandia hay opciones comunitarias acogedoras, económicas y con gran ambiente internacional.
+            """.trimIndent()
+
+            lower.contains("presupuesto") || lower.contains("cuanto cuesta") || lower.contains("plata") ||
+                lower.contains("dinero") || lower.contains("costo") || lower.contains("precios") || lower.contains("barato") -> """
+¡El Eje Cafetero se ajusta a todos los presupuestos! 💰☕
+
+💵 **Presupuesto promedio estimado por persona/día (COP):**
+- **Económico / Mochilero:** $90.000 - $130.000 COP (Hostal, transporte en Willys/bus, almuerzo ejecutivo y senderos naturales).
+- **Medio / Confort:** $180.000 - $280.000 COP (Hotel campestre, cafés especiales, entradas a parques y cenas típicas).
+- **Premium / Experiencias:** $380.000+ COP (Glamping exclusivo, catación privada, parapente y transporte privado).
+
+💡 **Consejo de ahorro:** En las plazas principales de los pueblos, los 'almuerzos ejecutivos' de comida tradicional son generosos, deliciosos y muy económicos ($15.000 - $22.000 COP).
+            """.trimIndent()
+
+            lower.contains("familia") || lower.contains("niño") || lower.contains("niños") || lower.contains("hijos") -> """
+¡El Eje Cafetero es uno de los mejores destinos familiares de Colombia! 👨‍👩‍👧‍👦🎡
+
+🎈 **Top planes para disfrutar con niños:**
+1. **Parque del Café (Montenegro):** Montañas rusas, teleférico, Museo del Café y el tradicional Show del Café en vivo.
+2. **Panaca (Quimbaya):** Parque temático agropecuario donde los niños pueden alimentar e interactuar con animales de granja.
+3. **Bioparque Ukumarí (Pereira):** Safari educativo con hábitats inmersivos de sabana africana y bosques andinos.
+4. **Jardín Botánico del Quindío (Calarcá):** Conoce el Mariposario con forma de mariposa gigante y camina por puentes colgantes entre guaduales.
+5. **Paseo en Chiva o Willys:** La experiencia favorita de los más pequeños por los paisajes montañeros.
+            """.trimIndent()
+
+            lower.contains("atardecer") || lower.contains("noche") || lower.contains("nocturno") ||
+                lower.contains("mirador") || lower.contains("vista") || lower.contains("panoramica") -> """
+¡Los atardeceres y miradores cafeteros son simplemente mágicos! 🌅✨
+
+🌆 **Mejores lugares para disfrutar la vista:**
+1. **Mirador de Chipre (Manizales):** El atardecer más famoso de Colombia, viendo el sol ocultarse sobre la cordillera occidental mientras disfrutas un café o un 'michelado'.
+2. **Colina Iluminada (Filandia):** Torre de madera de 27 metros con vista 360° sobre Quindío, Risaralda y el Valle del Cauca.
+3. **Mirador Alto de la Cruz (Salento):** Sube por las escalinatas coloridas de la Calle Real para una postal completa del pueblo.
+4. **Mirador La Colina (Filandia):** Excelente plan nocturno con luces cálidas, música suave y café de autor.
+5. **Terraza de San Alberto (Buenavista):** Vista panorámica de cafetales escarpados acompañada de café cinco estrellas.
+            """.trimIndent()
+
+            lower.contains("hola") || lower.contains("buenos") || lower.contains("buenas") ||
+                lower.contains("que tal") || lower.contains("saludos") || lower.contains("quien eres") -> """
+¡Hola, caminante! ☕🌿 ¡Qué alegría tenerte por el Eje Cafetero!
+
+Soy tu **Guía Cafetero virtual**, tu compañero de viaje local en Quindío, Risaralda y Caldas.
+
+Puedo ayudarte con:
+- 🧗‍♂️ **Aventura:** Parapente, canopy, rafting y senderos de montaña.
+- 🌴 **Naturaleza:** Valle de Cocora, cascadas y parques temáticos.
+- ☕ **Cultura:** Fincas cafeteras tradicionales y cataciones de café suave.
+- 🍲 **Gastronomía:** Los mejores platos típicos y restaurantes de la región.
+- 🎒 **Planificación:** Itinerarios por días, clima, transporte y presupuesto.
+
+¿Qué tienes ganas de hacer o qué municipio quieres descubrir hoy?
+            """.trimIndent()
+
             !spotContext.isNullOrBlank() -> """
 ¡Excelente elección! Sobre **$spotContext**: 📍
 
-Es uno de los puntos más destacados en EjeSpot. Te recomiendo visitarlo temprano para disfrutar la vista con calma, llevar cámara para inmortalizar el paisaje verde y probar los productos locales de la zona. 
+Es uno de los puntos más recomendados en el Paisaje Cultural Cafetero. Te aconsejo visitarlo en las primeras horas del día para evitar neblina espesa, calzar zapatos cómodos y probar el café especial de los productores locales cercanos.
 
-¿Te gustaría que te recomiende lugares cercanos para armar un circuito en el mapa? ☕
+¿Te gustaría que te organice una ruta para combinar este punto con otros lugares cercanos en el mapa? ☕
             """.trimIndent()
 
             else -> """
-¡Excelente consulta sobre "$prompt", caminante! 🌿☕
+¡Excelente pregunta, caminante! 🌿☕
 
-Para disfrutar al máximo este plan en el Paisaje Cultural Cafetero:
-1. **Busca en el mapa de EjeSpot:** Explora los puntos turísticos y miradores filtrados por municipio (Quindío, Risaralda y Caldas).
-2. **Mejor horario:** Las primeras horas de la mañana (7:00 AM - 11:00 AM) son ideales para salidas al aire libre antes de las lloviznas de tarde.
-3. **Transporte:** Apóyate en los Jeeps Willys y chivas tradicionales desde las plazas principales de cada pueblo.
-4. **Comunidad:** Lee los comentarios y recomendaciones de otros viajeros en la ficha detallada de cada spot.
+Respecto a **$prompt**, te comparto estas recomendaciones clave para tu viaje por el Paisaje Cultural Cafetero:
 
-💡 *Nota:* Puedes configurar tu API Key de OpenRouter tocando el icono de la llave (🔑) arriba a la derecha para chatear con IA generativa abierta en vivo. ¿Deseas información de algún municipio en específico?
+1. **Ubicación en el mapa:** Puedes localizar los puntos relacionados en la sección de Mapa de EjeSpot, filtrando por municipios de Quindío, Risaralda y Caldas.
+2. **Horarios sugeridos:** Las mañanas (7:00 AM a 11:30 AM) son las más despejadas y luminosas para fotografía y actividades de campo.
+3. **Transporte típico:** Desde las plazas de Salento, Filandia o Santa Rosa encuentras Jeeps Willys y buses intermunicipales con frecuencias continuas.
+4. **Aporte local:** Apoya a los campesinos, guías locales y artesanos comprando productos con sello de origen cafetero.
+
+¿Deseas que profundice en algún plan específico, municipio o recomendación gastronómica? ¡Estoy a tu servicio! 🇨🇴
             """.trimIndent()
         }
     }

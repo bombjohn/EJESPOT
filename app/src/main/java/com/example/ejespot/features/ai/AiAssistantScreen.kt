@@ -14,7 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Key
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,13 +22,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejespot.R
 import com.example.ejespot.domain.model.AiMessage
 import com.example.ejespot.ui.theme.*
+import java.util.regex.Pattern
 
 @Composable
 fun AiAssistantScreen(
@@ -40,8 +46,6 @@ fun AiAssistantScreen(
     val c = ejeSpotColors()
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
-    var showKeyDialog by remember { mutableStateOf(false) }
-    var keyInput by remember { mutableStateOf("") }
 
     LaunchedEffect(spotContext) {
         if (!spotContext.isNullOrBlank()) {
@@ -122,16 +126,25 @@ fun AiAssistantScreen(
                             modifier = Modifier.size(14.dp)
                         )
                     }
-                    Text(
-                        text = "Impulsado por OpenRouter IA",
-                        fontFamily = ManropeFontFamily,
-                        fontSize = 10.5.sp,
-                        color = c.textSoft
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(6.dp)
+                                .clip(CircleShape)
+                                .background(EjeSpotPrimary)
+                        )
+                        Spacer(modifier = Modifier.width(5.dp))
+                        Text(
+                            text = "En línea • Paisaje Cultural Cafetero",
+                            fontFamily = ManropeFontFamily,
+                            fontSize = 10.5.sp,
+                            color = c.textSoft
+                        )
+                    }
                 }
 
                 Surface(
-                    onClick = { showKeyDialog = true },
+                    onClick = { viewModel.clearConversation() },
                     modifier = Modifier.size(36.dp),
                     shape = CircleShape,
                     color = c.surfaceVariant,
@@ -139,10 +152,10 @@ fun AiAssistantScreen(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = Icons.Default.Key,
-                            contentDescription = "Configurar API Key",
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Reiniciar conversación",
                             tint = c.textSoft,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
@@ -288,53 +301,59 @@ fun AiAssistantScreen(
             }
         }
     }
+}
 
-    if (showKeyDialog) {
-        AlertDialog(
-            onDismissRequest = { showKeyDialog = false },
-            title = {
-                Text(
-                    text = "Configuración OpenRouter IA",
-                    fontFamily = FrauncesFontFamily,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(
-                        text = "Ingresa tu API Key de OpenRouter para consultas en vivo. Si se deja en blanco o sin red, la app utiliza el motor local de respuestas cafeteras.",
-                        fontSize = 12.sp,
-                        color = c.textSoft,
-                        lineHeight = 17.sp
-                    )
-                    OutlinedTextField(
-                        value = keyInput,
-                        onValueChange = { keyInput = it },
-                        placeholder = { Text("sk-or-v1-...", fontSize = 12.sp) },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp)
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        if (keyInput.isNotBlank()) {
-                            viewModel.updateApiKey(keyInput)
-                        }
-                        showKeyDialog = false
-                    }
-                ) {
-                    Text("Guardar", color = EjeSpotPrimary, fontWeight = FontWeight.Bold)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showKeyDialog = false }) {
-                    Text("Cancelar", color = c.textSoft)
-                }
+/**
+ * Convierte texto con formato Markdown básico (**negrita**, *cursiva*, # encabezados)
+ * en un [AnnotatedString] de Jetpack Compose sin asteriscos visibles.
+ */
+@Composable
+private fun rememberMarkdownAnnotatedString(rawText: String): AnnotatedString {
+    return remember(rawText) {
+        val lines = rawText.lines().map { line ->
+            val trimmed = line.trimStart()
+            when {
+                trimmed.startsWith("### ") -> "**" + trimmed.removePrefix("### ").trim() + "**"
+                trimmed.startsWith("## ") -> "**" + trimmed.removePrefix("## ").trim() + "**"
+                trimmed.startsWith("# ") -> "**" + trimmed.removePrefix("# ").trim() + "**"
+                else -> line
             }
-        )
+        }
+        val text = lines.joinToString("\n")
+
+        buildAnnotatedString {
+            val pattern = Pattern.compile("(\\*\\*(.*?)\\*\\*)|(\\*([^*\\n]+)\\*)")
+            val matcher = pattern.matcher(text)
+            var lastIndex = 0
+
+            while (matcher.find()) {
+                val start = matcher.start()
+                val end = matcher.end()
+
+                if (start > lastIndex) {
+                    append(text.substring(lastIndex, start))
+                }
+
+                val boldContent = matcher.group(2)
+                val italicContent = matcher.group(4)
+
+                if (boldContent != null) {
+                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(boldContent)
+                    }
+                } else if (italicContent != null) {
+                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                        append(italicContent)
+                    }
+                }
+
+                lastIndex = end
+            }
+
+            if (lastIndex < text.length) {
+                append(text.substring(lastIndex))
+            }
+        }
     }
 }
 
@@ -342,6 +361,7 @@ fun AiAssistantScreen(
 private fun MessageBubble(message: AiMessage) {
     val c = ejeSpotColors()
     val isUser = message.isUser
+    val formattedText = rememberMarkdownAnnotatedString(message.text)
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -374,7 +394,7 @@ private fun MessageBubble(message: AiMessage) {
             modifier = Modifier.widthIn(max = 300.dp)
         ) {
             Text(
-                text = message.text,
+                text = formattedText,
                 fontFamily = ManropeFontFamily,
                 fontSize = 13.sp,
                 color = if (isUser) Color.White else c.text,

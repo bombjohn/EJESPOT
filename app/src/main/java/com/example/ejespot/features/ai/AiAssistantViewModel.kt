@@ -38,14 +38,32 @@ class AiAssistantViewModel(
     val uiState: StateFlow<AiAssistantUiState> = _uiState.asStateFlow()
 
     val quickPrompts = listOf(
+        "🧗‍♂️ Planes extremos y aventura",
         "🌴 Itinerario 1 día en Salento",
         "☕ Mejores cafés especiales",
+        "🍲 Platos típicos que debes probar",
         "♨️ Tips para los termales",
         "🎒 ¿Qué ropa empacar?"
     )
 
     fun onInputTextChanged(newText: String) {
         _uiState.update { it.copy(inputText = newText) }
+    }
+
+    fun clearConversation() {
+        _uiState.update {
+            it.copy(
+                messages = listOf(
+                    AiMessage(
+                        text = "¡Hola, caminante! ☕🌿 Soy tu **Guía Cafetero IA**, impulsado por inteligencia artificial.\n\nPuedo armarte itinerarios, recomendarte rutas de senderismo, deportes extremos, fincas cafeteras tradicionales o darte consejos de transporte y comida típica.\n\n¿Qué plan tienes en mente para hoy?",
+                        isUser = false
+                    )
+                ),
+                inputText = "",
+                isLoading = false,
+                errorMessage = null
+            )
+        }
     }
 
     fun updateApiKey(key: String) {

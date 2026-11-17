@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class ProfileViewModel(
+class ProfileViewModel @JvmOverloads constructor(
     application: Application,
     private val spotRepository: SpotRepository = LocalSpotRepository(),
     private val profileRepository: ProfileRepository = LocalProfileRepository(),

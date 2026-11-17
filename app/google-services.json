@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "000000000000",
-    "project_id": "ejespot-app",
-    "storage_bucket": "ejespot-app.firebasestorage.app"
+    "project_number": "413793524043",
+    "project_id": "ejespot",
+    "storage_bucket": "ejespot.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+        "mobilesdk_app_id": "1:413793524043:android:182f931e9fb65cd885f0ce",
         "android_client_info": {
           "package_name": "com.example.ejespot"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyPLACEHOLDER_REPLACE_WITH_REAL_KEY"
+          "current_key": "AIzaSyAY0ixTXCyBsDVZyTXGaNzckDkiFKxh0kY"
         }
       ],
       "services": {

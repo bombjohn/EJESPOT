@@ -131,6 +131,35 @@ class OpenRouterAiRepository(
     private fun generateLocalSmartFallback(prompt: String, spotContext: String?): String {
         val lower = prompt.lowercase()
         return when {
+            lower.contains("extremo") || lower.contains("aventura") || lower.contains("parapente") ||
+                lower.contains("canopy") || lower.contains("tirolesa") || lower.contains("rafting") ||
+                lower.contains("deporte") || lower.contains("adrenalina") || lower.contains("torrentismo") -> """
+¡Para los amantes de la adrenalina y la aventura, el Eje Cafetero es un paraíso natural! 🧗‍♂️🪂
+
+⛰️ **Top 5 planes extremos imperdibles:**
+1. **Parapente en Buenavista o Calarcá:** Vuelo térmico sobrevolando los cañones del río Barragán y cafetales infinitos con instructores certificados.
+2. **Canopy y Tirolinas gigantes:** Deslízate entre copas de niebla en la Finca San Vicente (Santa Rosa) o en el Bosque del Samán (Alcalá).
+3. **Balsaje y Rafting en el Río La Vieja (Quimbaya):** Navega rápidos de clase II y III rodeado de guaduales, monos aulladores y garzas.
+4. **Torrentismo y Rappel en cascadas:** Descenso por muros de agua en la Cascada Los Frailes (Pereira) o en cascadas vírgenes de Santa Bárbara.
+5. **Ascenso de Alta Montaña al PNN Los Nevados:** Trekking hacia el glaciar del Nevado Santa Isabel o paramillo del Quindío (requiere guía de alta montaña y ropa térmica de tres capas).
+
+🧤 **Equipo sugerido:** Calzado con suela de tracción, ropa de secado rápido, bloqueador biodegradable y muda de cambio completa.
+            """.trimIndent()
+
+            lower.contains("comida") || lower.contains("comer") || lower.contains("gastronom") ||
+                lower.contains("restaurante") || lower.contains("plato") || lower.contains("trucha") ||
+                lower.contains("bandeja") || lower.contains("chorizo") || lower.contains("almuerzo") ||
+                lower.contains("cena") || lower.contains("arepa") -> """
+¡La cocina del Eje Cafetero es pura tradición y sabor montañero! 🍽️😋
+
+🍲 **Platos típicos que debes probar:**
+1. **Trucha arcoíris al ajillo:** El plato estrella de Salento, servida con un patacón gigante crujiente y ensalada fresca.
+2. **Chorizo Santarrosano original:** En Santa Rosa de Cabal, elaborado artesanalmente sin conservantes, acompañado de arepa de mote y limón mandarino.
+3. **Bandeja Paisa / Frijolada montañera:** Fríjoles cargamanto calados con pezuña, chicharrón crocante, carne molida, plátano maduro, huevo frito y aguacate.
+4. **Arepa de Chócolo con quesito:** Asada a la brasa con mantequilla de campo, infaltable a orilla de carretera.
+5. **Postres tradicionales:** Arequipe con brevas, forcha, solteritas y café frío artesanal.
+            """.trimIndent()
+
             lower.contains("cocora") || lower.contains("salento") -> """
 ¡Qué gran destino, parcero! 🌴 Salento y el Valle de Cocora son el corazón del Eje Cafetero.
 
@@ -150,7 +179,7 @@ class OpenRouterAiRepository(
 - **Gastronomía:** Antes de subir a los termales, pasa por Santa Rosa a probar el famoso Chorizo Santarrosano original.
             """.trimIndent()
 
-            lower.contains("café") || lower.contains("cafe") || lower.contains("tinto") || lower.contains("catación") -> """
+            lower.contains("café") || lower.contains("cafe") || lower.contains("tinto") || lower.contains("catación") || lower.contains("barista") -> """
 ¡Estás en la tierra del mejor café suave del mundo! ☕
 
 ✨ **Experiencias recomendadas en EjeSpot:**
@@ -175,6 +204,27 @@ class OpenRouterAiRepository(
 - Tarde/Noche: Relax total en los Termales de Santa Rosa de Cabal.
             """.trimIndent()
 
+            lower.contains("pueblo") || lower.contains("filandia") || lower.contains("pijao") ||
+                lower.contains("marsella") || lower.contains("salamina") || lower.contains("arquitectura") -> """
+¡Los pueblos del Paisaje Cultural Cafetero son joyas vivas de arquitectura colonial en bahareque y madera colorida! 🏘️🌸
+
+📍 **Pueblos recomendados para tu ruta:**
+1. **Filandia (Quindío):** Calles llenas de balcones floridos, mirador panorámico 'Colina Iluminada' y talleres de artesanos en bejuco.
+2. **Pijao (Quindío):** El primer municipio *Cittaslow* de Latinoamérica; un remanso de paz para caminar despacio, conversar con abuelos cafeteros y tomar café de origen.
+3. **Marsella (Risaralda):** Casa de la Cultura señorial, Jardín Botánico Alejandro Humboldt y vistas cafeteras espectaculares.
+4. **Salamina (Caldas):** Ciudad Luz de Colombia, famosa por sus tallas en madera, portones coloniales y atardeceres mágicos.
+            """.trimIndent()
+
+            lower.contains("transporte") || lower.contains("llegar") || lower.contains("willys") ||
+                lower.contains("chiva") || lower.contains("bus") || lower.contains("aeropuerto") -> """
+¡Moverte por el Eje Cafetero es fácil, pintoresco y muy seguro! 🚙💨
+
+🚌 **Consejos de transporte:**
+- **Jeep Willys tradicional:** Salen de las plazas centrales de los pueblos hacia veredas y miradores. Si tienes espíritu aventurero, ¡pide viajar 'en el estribo'!
+- **Buses intermunicipales:** Terminales de Armenia, Pereira y Manizales tienen salidas cada 15 a 30 minutos conectando toda la región.
+- **Aeropuertos:** Aeropuerto El Edén (AXM) en Armenia y Matecaña (PEI) en Pereira reciben vuelos directos nacionales e internacionales diarios.
+            """.trimIndent()
+
             !spotContext.isNullOrBlank() -> """
 ¡Excelente elección! Sobre **$spotContext**: 📍
 
@@ -184,15 +234,15 @@ Es uno de los puntos más destacados en EjeSpot. Te recomiendo visitarlo tempran
             """.trimIndent()
 
             else -> """
-¡Hola, caminante del Eje! ☕🌿 Soy tu **Guía Cafetero IA**.
+¡Excelente consulta sobre "$prompt", caminante! 🌿☕
 
-Puedo ayudarte con:
-- 🗺️ Itinerarios de 1, 2 o 3 días según tu presupuesto y tiempo.
-- 🌴 Rutas de naturaleza, cascadas y miradores.
-- ☕ Recomendaciones de las mejores fincas y tiendas de café especial.
-- 🚗 Cómo moverte en Chivas, Willys y buses entre Quindío, Risaralda y Caldas.
+Para disfrutar al máximo este plan en el Paisaje Cultural Cafetero:
+1. **Busca en el mapa de EjeSpot:** Explora los puntos turísticos y miradores filtrados por municipio (Quindío, Risaralda y Caldas).
+2. **Mejor horario:** Las primeras horas de la mañana (7:00 AM - 11:00 AM) son ideales para salidas al aire libre antes de las lloviznas de tarde.
+3. **Transporte:** Apóyate en los Jeeps Willys y chivas tradicionales desde las plazas principales de cada pueblo.
+4. **Comunidad:** Lee los comentarios y recomendaciones de otros viajeros en la ficha detallada de cada spot.
 
-¿Qué lugar o experiencia quieres planear hoy?
+💡 *Nota:* Puedes configurar tu API Key de OpenRouter tocando el icono de la llave (🔑) arriba a la derecha para chatear con IA generativa abierta en vivo. ¿Deseas información de algún municipio en específico?
             """.trimIndent()
         }
     }

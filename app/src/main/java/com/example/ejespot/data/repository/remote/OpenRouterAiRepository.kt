@@ -131,19 +131,181 @@ class OpenRouterAiRepository(
     private fun generateLocalSmartFallback(prompt: String, spotContext: String?): String {
         val lower = prompt.lowercase()
         return when {
+            // --- PARQUES TEMÁTICOS Y ATRACCIONES PRINCIPALES (MÁXIMA PRIORIDAD) ---
+            (lower.contains("parque") && (lower.contains("cafe") || lower.contains("café"))) ||
+                lower.contains("parquedelcafe") || lower.contains("krater") || lower.contains("yippe") ||
+                lower.contains("show del cafe") || lower.contains("show del café") -> """
+¡El Parque del Café es el parque temático más emblemático de Colombia y de Sudamérica! 🎡☕
+
+📍 **Ubicación:** Km 6 vía Montenegro - Pueblo Tapao, Quindío (a 20 minutos de Armenia).
+
+🎢 **Atracciones principales imprescindibles:**
+1. **Kráter:** Montaña rusa de última generación con una impresionante caída libre vertical de 90° desde 30 metros de altura y giros de 360°.
+2. **Yippe:** Montaña rusa inspirada en el tradicional Jeep Willys cafetero, con tramos de velocidad entre cafetales y acuatizaje.
+3. **Montaña Rusa Tradicional & Rápidos:** Emocionante descenso en balsas inflables por rápidos de agua y curvas sobre el bosque andino.
+4. **Teleférico y Telesillas panorámicas:** Vista aérea espectacular de 360° sobre los cafetales del Quindío y la cordillera central.
+
+🎭 **Experiencias culturales y del grano:**
+- **Show del Café:** Espectáculo musical de talla mundial en el teatro principal con 22 artistas en escena narrando la historia, música y folclor del grano (¡imperdible, incluido en el pasaporte!).
+- **Museo Nacional del Café:** Recorrido interactivo por salas interactivas sobre la historia, botánica, cosecha y variedades del café de Colombia.
+- **Sendero del Café:** Caminata ecológica entre cafetales en floración, cementerio indígena y casas campesinas tradicionales.
+
+💡 **Recomendaciones clave del Guía:**
+- **Pasaportes:** Adquiere el *Pasaporte Múltiple* por internet con anticipación para evitar filas en taquilla.
+- **Horario:** Abierto de 9:00 AM a 6:00 PM. Llega antes de las 9:30 AM para disfrutar de todas las atracciones sin afán.
+- **Calzado:** Zapatos cerrados con buen agarre (obligatorios para las montañas rusas).
+            """.trimIndent()
+
+            lower.contains("panaca") -> """
+¡PANACA (Parque Nacional de la Cultura Agropecuaria) es interacción total con el campo! 🐾🐎
+
+📍 **Ubicación:** Vereda Kerman, Quimbaya, Quindío (a 40 minutos de Armenia).
+Bajo el lema *"Sin campo no hay ciudad"*, es el parque agropecuario interactivo más grande del continente.
+
+🐄 **Las 8 estaciones temáticas interactivas:**
+1. **Estación de Ganadería:** Conoce razas bovinas criollas y del mundo; puedes ordeñar vacas y alimentar terneros.
+2. **Estación de Especies Menores:** Conejos gigantes, cuyes y cabras montesas para alimentar con biberón.
+3. **Estación Equina:** Colección de caballos percherones, árabes, ponis miniatura y exhibiciones de paso fino colombiano.
+4. **Estación Porcina:** El famoso 'cerdódromo' con divertidas carreras de cerditos.
+5. **Estaciones Canina, Sericultura, Avicultura y Agronomía:** Senderos interactivos donde tocas, alimentas y aprendes del campo.
+
+🎪 **Espectáculos en vivo:**
+- **'El Caballo Colombiano':** Show ecuestre de alta escuela con música y destreza montañera.
+- **'Las Aventuras de Florinda':** Show de campo educativo y divertido para toda la familia.
+
+💡 **Tips del Guía:** Lleva sombrero o gorra, calzado cómodo para caminar 2.8 km de senderos y protector solar.
+            """.trimIndent()
+
+            lower.contains("ukumari") || lower.contains("ukumarí") || lower.contains("bioparque") -> """
+¡El Bioparque Ukumarí es el santuario de flora y fauna más moderno de Colombia! 🦁🌿
+
+📍 **Ubicación:** Km 14 vía Pereira - Cerritos, Risaralda.
+
+🐾 **Biorregiones inmersivas:**
+1. **Biorregión Sabana Africana:** Observa elefantes, jirafas, leones, suricatas, cebras y rinocerontes en praderas abiertas sin barrotes tradicionales.
+2. **Biorregión Bosque Andino:** Conoce especies nativas protegidas como el oso de anteojos, dantas de páramo, pumas y monos aulladores.
+3. **Jardín Botánico y Senderos:** Más de 44 hectáreas de bosque protegido y aulas vivas de educación ambiental.
+
+💡 **Tips de visita:** El recorrido toma entre 3 y 4 horas. Abierto de 9:00 AM a 3:00 PM para ingreso a taquilla.
+            """.trimIndent()
+
+            lower.contains("jardin botanico") || lower.contains("jardín botánico") || lower.contains("mariposario") -> """
+¡El Jardín Botánico del Quindío y su Mariposario son un tesoro natural en Calarcá! 🦋🌱
+
+📍 **Ubicación:** Av. Centenario # 15-180, Calarcá, Quindío.
+
+✨ **Atractivos principales:**
+1. **El Mariposario:** Espectacular estructura de 680 m² con forma de mariposa que alberga más de 1.500 mariposas vivas de 40 especies volando entre visitantes y flores.
+2. **Colección Nacional de Palmas:** Una de las reservas botánicas más completas de América con palmas andinas y amazónicas.
+3. **Puentes Colgantes y Laberinto:** Caminatas elevadas entre copas de guaduales con avistamiento de aves silvestres (barranqueros, tucanes y colibríes).
+            """.trimIndent()
+
+            lower.contains("recuca") -> """
+¡En RECUCA vives la cultura cafetera en carne propia, de forma interactiva y con mucho humor! 🌾☕
+
+📍 **Ubicación:** Vereda Callelarga, Calarcá, Quindío.
+
+✨ **La experiencia RECUCA:**
+1. **Vístete de campesino:** Te colocan el traje típico de recolector (sombrero, ruana, canasto y machete de madera) o de chapolera con falda colorida.
+2. **La Cosecha:** Vas al cafetal a recolectar granos maduros con coplas campesinas y concurso de recolección.
+3. **Beneficio y Tostión:** Conoce el proceso de despulpe, fermentación, secado y tuesta tu propio café artesanal.
+4. **Almuerzo 'Bitute':** Tradicional almuerzo campesino servido en hoja de plátano con fríjoles, plátano maduro, carne y mazamorra con panela.
+            """.trimIndent()
+
+            lower.contains("balsaje") || lower.contains("rio la vieja") || lower.contains("río la vieja") -> """
+¡El Balsaje por el Río La Vieja es un viaje de paz y contemplación por la naturaleza virgen! 🛶🌳
+
+📍 **Ubicación:** Salidas desde Quimbaya (Puerto Alejandría o Puerto Samaria).
+
+🌿 **En qué consiste:**
+- Descenso suave en balsas artesanales construidas con troncos de guadua guiadas por expertos balseros locales ('bogas').
+- Navegación de 4 a 5 horas bordeando cañones verdes, bosques de galería y guaduales gigantes.
+- Avistamiento de monos aulladores, nutrias de río, iguanas y más de 80 especies de aves acuáticas.
+- Almuerzo típico 'Fiambre' envuelto en hoja de plátano a la orilla del río.
+            """.trimIndent()
+
+            lower.contains("cocora") || (lower.contains("valle") && lower.contains("cera")) -> """
+¡El Valle de Cocora es el santuario natural de la Palma de Cera, el Árbol Nacional de Colombia! 🌴⛰️
+
+📍 **Ubicación:** A 11 km de Salento, Quindío (2.200 a 2.600 msnm).
+
+🥾 **Rutas de senderismo disponibles:**
+1. **Circuito Corto (Miradores 1 y 2):** Caminata de 2 horas ida y vuelta entre palmas gigantes de hasta 60 metros de altura. Ideal para fotos panorámicas y familias.
+2. **Circuito Completo (Bosque de Niebla y Acaime):** Caminata de 5 a 6 horas (11 km) que cruza puentes colgantes, bosque altoandino y la Reserva Natural Acaime con avistamiento de colibríes.
+
+🚙 **Transporte y logística:**
+- **Jeep Willys:** Salen cada 15-20 minutos desde la Plaza Principal de Salento ($4.500 COP aprox).
+- **Mejor hora:** Llega antes de las 9:00 AM para evitar neblina espesa y disfrutar el paisaje despejado.
+- **Calzado:** Botas con buen agarre o pantaneras (el sendero hacia Acaime suele tener barro).
+            """.trimIndent()
+
+            lower.contains("termal") || lower.contains("santa rosa") || lower.contains("san vicente") -> """
+¡Los Termales de Santa Rosa de Cabal son el paraíso del descanso en la cordillera! ♨️🌿
+
+📍 **Ubicación:** Santa Rosa de Cabal, Risaralda (a 30 min de Pereira).
+
+🌊 **Opciones de aguas termales:**
+1. **Termales Balneario Santa Rosa:** Famoso por su majestuosa cascada natural de agua fría de 95 metros que cae al lado de las piscinas termominerales calientes a 40°C.
+2. **Termales San Vicente (Reserva Ecológica):** Experiencia más natural en medio de bosque de niebla virgen, con piscinas termales brotando de la montaña y baños de lodo mineral.
+
+🧖‍♂️ **Recomendaciones de visita:**
+- **Horario ideal:** La tarde-noche (5:00 PM a 10:00 PM) para sentir el contraste del agua caliente con el frío de la noche.
+- **Ropa:** Lleva traje de baño oscuro (los minerales naturales pueden manchar telas claras) y toalla.
+- **Gastronomía obligatoria:** Antes o después de subir a las aguas termales, haz una parada en el pueblo para probar el auténtico **Chorizo Santarrosano** artesanal.
+            """.trimIndent()
+
+            lower.contains("salento") -> """
+¡Salento es el Padre del Quindío y el municipio más turístico del Paisaje Cafetero! 🏘️🌴
+
+✨ **Qué ver y hacer en Salento:**
+1. **Calle Real (Carrera 6):** Paseo peatonal lleno de arquitectura colonial en bahareque, tiendas de artesanías en guadua y cafés especiales.
+2. **Mirador Alto de la Cruz:** Sube los 253 escalones coloridos para una panorámica completa de los techos de teja de barro del pueblo y el Valle de Cocora.
+3. **Plaza de Bolívar:** Punto de encuentro tradicional con su Iglesia Nuestra Señora del Carmen y la estación de Jeeps Willys.
+4. **Gastronomía:** Disfruta de la trucha arcoíris al ajillo con patacón gigante en los restaurantes típicos de la plaza.
+            """.trimIndent()
+
+            lower.contains("filandia") || lower.contains("colina iluminada") -> """
+¡Filandia es la joya de la arquitectura y la cestería en el Quindío! 🌸🏘️
+
+✨ **Qué ver y hacer en Filandia:**
+1. **Mirador Colina Iluminada:** Torre de madera de 27 metros inspirada en canastos tradicionales con vista panorámica de 360° sobre Quindío, Risaralda y Valle.
+2. **Calle del Tiempo Detenido:** Fachadas coloniales perfectamente conservadas con balcones de madera tallada pintados en tonos vivos.
+3. **Barrio San José y Cestería:** Talleres familiares donde artesanos locales tejen canastos en fibra de bejuco silvestre.
+4. **Gastronomía y cafés de autor:** Restaurantes de cocina de autor y terrazas con vista a los cafetales.
+            """.trimIndent()
+
+            lower.contains("manizales") || lower.contains("chipre") || lower.contains("nevado") ||
+                lower.contains("cable aereo") || lower.contains("catedral") -> """
+¡Manizales es la Ciudad de las Puertas Abiertas, encaramada en la Cordillera Central! 🏔️🚠
+
+📍 **Atractivos imperdibles en Manizales y Caldas:**
+1. **Mirador de Chipre:** El atardecer más famoso de Colombia; disfruta la vista panorámica de los valles cafeteros con un café o una copa.
+2. **Catedral Basílica de Manizales:** Templo gótico monumental con el tour del 'Corredor Polaco' a más de 100 metros de altura.
+3. **Parque Nacional Natural Los Nevados:** Ascenso guiado hacia el glaciar del Nevado Santa Isabel o el mirador del Nevado del Ruiz.
+4. **Cable Aéreo:** Medio de transporte limpio que vuela sobre la quebrada topografía de la ciudad conectando con Villamaría.
+            """.trimIndent()
+
+            lower.contains("frailes") || lower.contains("cascada") || lower.contains("cristalina") -> """
+¡Las cascadas del Eje Cafetero son paraísos de agua pura entre montañas verdes! 💧🌿
+
+🌊 **Cascadas recomendadas:**
+1. **Cascada Los Frailes (Pereira):** Imponente caída de agua de 70 metros dentro del Santuario de Fauna y Flora Otún Quimbaya. Sendero plano ecológico de 2 horas bordeando el río.
+2. **Cascada La Cristalina (Salento):** Pozo natural de aguas turquesas y frescas ideal para bañarse tras una caminata de bosque andino.
+3. **Cascadas de Santa Bárbara (Santa Rosa):** Senderos de torrentismo y rappel en cañones naturales de agua de cordillera.
+            """.trimIndent()
+
+            // --- CATEGORÍAS TEMÁTICAS ---
             lower.contains("extremo") || lower.contains("aventura") || lower.contains("parapente") ||
                 lower.contains("canopy") || lower.contains("tirolesa") || lower.contains("rafting") ||
                 lower.contains("deporte") || lower.contains("adrenalina") || lower.contains("torrentismo") -> """
 ¡Para los amantes de la adrenalina y la aventura, el Eje Cafetero es un paraíso natural! 🧗‍♂️🪂
 
-⛰️ **Top 5 planes extremos imperdibles:**
+⛰️ **Top planes extremos imperdibles:**
 1. **Parapente en Buenavista o Calarcá:** Vuelo térmico sobrevolando los cañones del río Barragán y cafetales infinitos con instructores certificados.
-2. **Canopy y Tirolinas gigantes:** Deslízate entre copas de niebla en la Finca San Vicente (Santa Rosa) o en el Bosque del Samán (Alcalá).
-3. **Balsaje y Rafting en el Río La Vieja (Quimbaya):** Navega rápidos de clase II y III rodeado de guaduales, monos aulladores y garzas.
-4. **Torrentismo y Rappel en cascadas:** Descenso por muros de agua en la Cascada Los Frailes (Pereira) o en cascadas vírgenes de Santa Bárbara.
-5. **Ascenso de Alta Montaña al PNN Los Nevados:** Trekking hacia el glaciar del Nevado Santa Isabel o paramillo del Quindío (requiere guía de alta montaña y ropa térmica de tres capas).
-
-🧤 **Equipo sugerido:** Calzado con suela de tracción, ropa de secado rápido, bloqueador biodegradable y muda de cambio completa.
+2. **Canopy y Tirolinas gigantes:** Deslízate entre copas de niebla en la Finca San Vicente (Santa Rosa) o en el Bosque del Samán.
+3. **Balsaje y Rafting en el Río La Vieja:** Navega rápidos de agua rodeado de guaduales y monos aulladores.
+4. **Torrentismo y Rappel:** Descenso por muros de agua en la Cascada Los Frailes o cascadas de Santa Rosa.
+5. **Alta Montaña en PNN Los Nevados:** Trekking hacia los glaciares andinos con guía certificado.
             """.trimIndent()
 
             lower.contains("comida") || lower.contains("comer") || lower.contains("gastronom") ||
@@ -154,38 +316,22 @@ class OpenRouterAiRepository(
 
 🍲 **Platos típicos que debes probar:**
 1. **Trucha arcoíris al ajillo:** El plato estrella de Salento, servida con un patacón gigante crujiente y ensalada fresca.
-2. **Chorizo Santarrosano original:** En Santa Rosa de Cabal, elaborado artesanalmente sin conservantes, acompañado de arepa de mote y limón mandarino.
-3. **Bandeja Paisa / Frijolada montañera:** Fríjoles cargamanto calados con pezuña, chicharrón crocante, carne molida, plátano maduro, huevo frito y aguacate.
-4. **Arepa de Chócolo con quesito:** Asada a la brasa con mantequilla de campo, infaltable a orilla de carretera.
+2. **Chorizo Santarrosano original:** En Santa Rosa de Cabal, elaborado artesanalmente sin conservantes, con arepa de mote y limón mandarino.
+3. **Bandeja Paisa / Frijolada montañera:** Fríjoles cargamanto calados con chicharrón crocante, carne molida, maduro, huevo frito y aguacate.
+4. **Arepa de Chócolo con quesito:** Asada a la brasa con mantequilla de campo en los miradores de carretera.
 5. **Postres tradicionales:** Arequipe con brevas, forcha, solteritas y café frío artesanal.
             """.trimIndent()
 
-            lower.contains("cocora") || lower.contains("salento") -> """
-¡Qué gran destino, parcero! 🌴 Salento y el Valle de Cocora son el corazón del Eje Cafetero.
+            !lower.contains("parque") && (lower.contains("café") || lower.contains("cafe") ||
+                lower.contains("tinto") || lower.contains("catación") || lower.contains("barista") ||
+                lower.contains("finca cafetera") || lower.contains("origen")) -> """
+¡Estás en la tierra del mejor café suave arábigo del mundo! ☕🌱
 
-☕ **Tips del Guía Cafetero:**
-1. **Transporte:** Toma un Jeep Willys tradicional en la plaza principal de Salento hacia Cocora ($4.500 COP aprox).
-2. **Mejor hora:** Llega a Cocora antes de las 9:00 AM para evitar neblina espesa y disfrutar las palmas de cera con buena luz.
-3. **Calzado:** Botas pantaneras o calzado de trekking con buen agarre (el sendero de Acaime suele tener barro).
-4. **Comida típica:** En Salento pide trucha al ajillo con patacón gigante en la Calle Real.
-            """.trimIndent()
-
-            lower.contains("termal") || lower.contains("santa rosa") -> """
-¡Plan de descanso total! ♨️ Los Termales de Santa Rosa de Cabal son aguas termales medicinales brotando en plena cordillera.
-
-🧖‍♂️ **Recomendaciones clave:**
-- **Horario ideal:** La tarde-noche (5:00 PM en adelante) para sentir el contraste del agua caliente con el frío de la noche.
-- **Ropa:** Lleva toalla y vestido de baño oscuro (los minerales naturales pueden teñir telas blancas).
-- **Gastronomía:** Antes de subir a los termales, pasa por Santa Rosa a probar el famoso Chorizo Santarrosano original.
-            """.trimIndent()
-
-            lower.contains("café") || lower.contains("cafe") || lower.contains("tinto") || lower.contains("catación") || lower.contains("barista") -> """
-¡Estás en la tierra del mejor café suave del mundo! ☕
-
-✨ **Experiencias recomendadas en EjeSpot:**
-- **Café San Alberto (Buenavista):** Bautizo cafetero con vista panorámica de 360° sobre el valle.
-- **Fincas Tradicionales en Filandia o Chinchiná:** Recorre el cafetal, recolecta granos maduros y prueba métodos de filtrado (Chemex, Prensa Francesa y Dripper).
-- **Tip del barista:** Pide tu café sin azúcar para apreciar las notas a frutos rojos, chocolate y panela características del grano arábigo regional.
+✨ **Experiencias recomendadas de café:**
+- **Bautizo Cafetero en San Alberto (Buenavista):** Catación sensorial guiada con vista panorámica de 360° sobre el valle.
+- **Fincas Tradicionales (El Ocaso en Salento, Combia en Calarcá):** Recorre el cafetal, recolecta granos maduros y aprende el proceso de despulpado, secado y tostión.
+- **Métodos de Filtrado en tienda:** Pide un café preparado en Chemex, Prensa Francesa, Sifón Japonés o Dripper V60 para apreciar notas cítricas, a panela y frutos rojos.
+- **Tip del barista:** Prueba tu café sin azúcar para saborear la dulzura natural del grano arábigo de alta montaña.
             """.trimIndent()
 
             lower.contains("itinerario") || lower.contains("ruta") || lower.contains("día") || lower.contains("dias") -> """
@@ -195,24 +341,48 @@ class OpenRouterAiRepository(
 - Mañana: Caminata por el Valle de Cocora entre palmas de cera gigantes.
 - Tarde: Recorrido fotográfico por la Calle Real de Salento y mirador Alto de la Cruz.
 
-📅 **Día 2 - Arquitectura & Miradores:**
-- Mañana: Pueblo de Filandia, subida al Mirador Colina Iluminada y recorrido por cestería tradicional.
-- Tarde: Tarde de cafés especiales en Buenavista.
+📅 **Día 2 - Cultura & Adrenalina:**
+- Mañana y tarde: Día completo en el **Parque del Café** en Montenegro (atracciones, Kráter, teleférico y Show del Café).
+- Noche: Cena y café en Filandia.
 
 📅 **Día 3 - Termalismo & Naturaleza:**
-- Mañana: Senderismo en la Cascada de los Frailes (Pereira).
-- Tarde/Noche: Relax total en los Termales de Santa Rosa de Cabal.
+- Mañana: Senderismo en la Cascada de los Frailes o visita a Filandia.
+- Tarde/Noche: Relax total en las aguas termales de Santa Rosa de Cabal y degustación de chorizo santarrosano.
             """.trimIndent()
 
-            lower.contains("pueblo") || lower.contains("filandia") || lower.contains("pijao") ||
-                lower.contains("marsella") || lower.contains("salamina") || lower.contains("arquitectura") -> """
-¡Los pueblos del Paisaje Cultural Cafetero son joyas vivas de arquitectura colonial en bahareque y madera colorida! 🏘️🌸
+            lower.contains("clima") || lower.contains("ropa") || lower.contains("maleta") ||
+                lower.contains("empacar") || lower.contains("lluvia") || lower.contains("frio") -> """
+¡Preparar tu maleta para el Eje Cafetero es fácil si aplicas la técnica de capas! 🧥🎒
 
-📍 **Pueblos recomendados para tu ruta:**
-1. **Filandia (Quindío):** Calles llenas de balcones floridos, mirador panorámico 'Colina Iluminada' y talleres de artesanos en bejuco.
-2. **Pijao (Quindío):** El primer municipio *Cittaslow* de Latinoamérica; un remanso de paz para caminar despacio, conversar con abuelos cafeteros y tomar café de origen.
-3. **Marsella (Risaralda):** Casa de la Cultura señorial, Jardín Botánico Alejandro Humboldt y vistas cafeteras espectaculares.
-4. **Salamina (Caldas):** Ciudad Luz de Colombia, famosa por sus tallas en madera, portones coloniales y atardeceres mágicos.
+🌦️ **Guía de clima y qué empacar:**
+1. **Ropa por capas:** En el día la temperatura ronda los 22°C - 26°C (cálido y agradable), pero al atardecer en Salento o Manizales puede bajar a 14°C - 10°C.
+2. **Calzado:** Zapatos o botas con buen agarre; para senderos o cascadas es indispensable suela con tracción.
+3. **Impermeable ligero:** En la montaña son comunes lloviznas cortas que enriquecen el verde del paisaje.
+4. **Protección solar:** Bloqueador biodegradable, gorra y gafas (la radiación en altitud es alta).
+5. **Para los termales:** Traje de baño oscuro y toalla propia.
+            """.trimIndent()
+
+            lower.contains("hospedaje") || lower.contains("hotel") || lower.contains("glamping") ||
+                lower.contains("dormir") || lower.contains("alojamiento") -> """
+¡Dormir en el Paisaje Cafetero es una experiencia inolvidable! 🏡✨
+
+🛌 **Opciones recomendadas según tu estilo:**
+1. **Fincas Cafeteras Tradicionales:** Casas de arquitectura colonial antioqueña con corredores de chambranas y desayuno campestre (Filandia, Salento, Chinchiná).
+2. **Glampings con vista al cañón:** Domos geodésicos y cabañas elevadas con jacuzzi y mallas de catamarán en Salento y Buenavista.
+3. **Hoteles boutique urbanos:** En Pereira o Manizales, ideales para negocios, gastronomía moderna y cercanía a aeropuertos.
+4. **Hostales para viajeros:** En Salento y Filandia hay opciones acogedoras, económicas y con gran ambiente de mochileros.
+            """.trimIndent()
+
+            lower.contains("presupuesto") || lower.contains("cuanto cuesta") || lower.contains("plata") ||
+                lower.contains("dinero") || lower.contains("costo") || lower.contains("precios") -> """
+¡El Eje Cafetero se ajusta a todos los bolsillos! 💰☕
+
+💵 **Presupuesto promedio estimado por persona/día (COP):**
+- **Económico / Mochilero:** $90.000 - $130.000 COP (Hostal, transporte en Willys/bus, almuerzo ejecutivo y senderos naturales).
+- **Medio / Confort:** $180.000 - $280.000 COP (Hotel campestre, cafés especiales, entradas a parques y cenas típicas).
+- **Premium / Experiencias:** $380.000+ COP (Glamping exclusivo, catación privada, parapente y transporte privado).
+
+💡 **Consejo de ahorro:** En las plazas de los pueblos los almuerzos ejecutivos de comida tradicional son generosos, deliciosos y muy económicos ($16.000 - $22.000 COP).
             """.trimIndent()
 
             lower.contains("transporte") || lower.contains("llegar") || lower.contains("willys") ||
@@ -225,62 +395,16 @@ class OpenRouterAiRepository(
 - **Aeropuertos:** Aeropuerto El Edén (AXM) en Armenia y Matecaña (PEI) en Pereira reciben vuelos directos nacionales e internacionales diarios.
             """.trimIndent()
 
-            lower.contains("clima") || lower.contains("ropa") || lower.contains("maleta") ||
-                lower.contains("empacar") || lower.contains("lluvia") || lower.contains("llueve") || lower.contains("frio") -> """
-¡Preparar tu maleta para el Eje Cafetero es fácil si aplicas la técnica de capas! 🧥🎒
-
-🌦️ **Guía de clima y qué empacar:**
-1. **Ropa por capas:** En el día la temperatura ronda los 22°C - 26°C (cálido y agradable), pero al atardecer y en municipios altos como Salento o Manizales puede bajar a 14°C - 10°C.
-2. **Calzado:** Zapatos o botas con buen labrado y agarre; si vas a senderismo o cascadas, habrá zonas de tierra húmeda.
-3. **Impermeable o sombrilla ligera:** En el bosque de niebla suele haber lloviznas cortas ('garúas') que enriquecen el verde del paisaje.
-4. **Protección solar:** Aunque esté nublado, la radiación en zona de cordillera es alta. Lleva gorra, gafas y bloqueador biodegradable.
-5. **Para los termales:** Traje de baño oscuro y toalla propia.
-            """.trimIndent()
-
-            lower.contains("hospedaje") || lower.contains("hotel") || lower.contains("glamping") ||
-                lower.contains("dormir") || lower.contains("alojamiento") || lower.contains("finca hotel") -> """
-¡Dormir en el Paisaje Cafetero es una experiencia inolvidable! 🏡✨
-
-🛌 **Opciones recomendadas según tu estilo:**
-1. **Fincas Cafeteras Tradicionales:** Hospédate en casas de arquitectura colonial antioqueña con corredores de chambranas y desayuno con café recién tostado (Filandia, Circasia y Chinchiná).
-2. **Glampings con vista al valle:** Carpas geodésicas y cabañas elevadas con jacuzzi y mallas de catamarán hacia el cañón en Salento y Buenavista.
-3. **Hoteles boutique urbanos:** En Pereira o Manizales, ideales para quienes buscan gastronomía moderna, coworking y cercanía al aeropuerto.
-4. **Hostales para mochileros:** En Salento y Filandia hay opciones comunitarias acogedoras, económicas y con gran ambiente internacional.
-            """.trimIndent()
-
-            lower.contains("presupuesto") || lower.contains("cuanto cuesta") || lower.contains("plata") ||
-                lower.contains("dinero") || lower.contains("costo") || lower.contains("precios") || lower.contains("barato") -> """
-¡El Eje Cafetero se ajusta a todos los presupuestos! 💰☕
-
-💵 **Presupuesto promedio estimado por persona/día (COP):**
-- **Económico / Mochilero:** $90.000 - $130.000 COP (Hostal, transporte en Willys/bus, almuerzo ejecutivo y senderos naturales).
-- **Medio / Confort:** $180.000 - $280.000 COP (Hotel campestre, cafés especiales, entradas a parques y cenas típicas).
-- **Premium / Experiencias:** $380.000+ COP (Glamping exclusivo, catación privada, parapente y transporte privado).
-
-💡 **Consejo de ahorro:** En las plazas principales de los pueblos, los 'almuerzos ejecutivos' de comida tradicional son generosos, deliciosos y muy económicos ($15.000 - $22.000 COP).
-            """.trimIndent()
-
-            lower.contains("familia") || lower.contains("niño") || lower.contains("niños") || lower.contains("hijos") -> """
-¡El Eje Cafetero es uno de los mejores destinos familiares de Colombia! 👨‍👩‍👧‍👦🎡
-
-🎈 **Top planes para disfrutar con niños:**
-1. **Parque del Café (Montenegro):** Montañas rusas, teleférico, Museo del Café y el tradicional Show del Café en vivo.
-2. **Panaca (Quimbaya):** Parque temático agropecuario donde los niños pueden alimentar e interactuar con animales de granja.
-3. **Bioparque Ukumarí (Pereira):** Safari educativo con hábitats inmersivos de sabana africana y bosques andinos.
-4. **Jardín Botánico del Quindío (Calarcá):** Conoce el Mariposario con forma de mariposa gigante y camina por puentes colgantes entre guaduales.
-5. **Paseo en Chiva o Willys:** La experiencia favorita de los más pequeños por los paisajes montañeros.
-            """.trimIndent()
-
             lower.contains("atardecer") || lower.contains("noche") || lower.contains("nocturno") ||
-                lower.contains("mirador") || lower.contains("vista") || lower.contains("panoramica") -> """
+                lower.contains("mirador") || lower.contains("vista") -> """
 ¡Los atardeceres y miradores cafeteros son simplemente mágicos! 🌅✨
 
 🌆 **Mejores lugares para disfrutar la vista:**
-1. **Mirador de Chipre (Manizales):** El atardecer más famoso de Colombia, viendo el sol ocultarse sobre la cordillera occidental mientras disfrutas un café o un 'michelado'.
-2. **Colina Iluminada (Filandia):** Torre de madera de 27 metros con vista 360° sobre Quindío, Risaralda y el Valle del Cauca.
-3. **Mirador Alto de la Cruz (Salento):** Sube por las escalinatas coloridas de la Calle Real para una postal completa del pueblo.
+1. **Mirador de Chipre (Manizales):** El atardecer más famoso de Colombia sobre la cordillera occidental con café o postre.
+2. **Colina Iluminada (Filandia):** Torre de madera de 27 metros con vista 360° sobre Quindío, Risaralda y Valle.
+3. **Mirador Alto de la Cruz (Salento):** Sube por las escalinatas de la Calle Real para una postal completa del pueblo.
 4. **Mirador La Colina (Filandia):** Excelente plan nocturno con luces cálidas, música suave y café de autor.
-5. **Terraza de San Alberto (Buenavista):** Vista panorámica de cafetales escarpados acompañada de café cinco estrellas.
+5. **Terraza de San Alberto (Buenavista):** Vista panorámica de cafetales escarpados acompañada de café premium.
             """.trimIndent()
 
             lower.contains("hola") || lower.contains("buenos") || lower.contains("buenas") ||
@@ -289,14 +413,15 @@ class OpenRouterAiRepository(
 
 Soy tu **Guía Cafetero virtual**, tu compañero de viaje local en Quindío, Risaralda y Caldas.
 
-Puedo ayudarte con:
-- 🧗‍♂️ **Aventura:** Parapente, canopy, rafting y senderos de montaña.
-- 🌴 **Naturaleza:** Valle de Cocora, cascadas y parques temáticos.
-- ☕ **Cultura:** Fincas cafeteras tradicionales y cataciones de café suave.
-- 🍲 **Gastronomía:** Los mejores platos típicos y restaurantes de la región.
-- 🎒 **Planificación:** Itinerarios por días, clima, transporte y presupuesto.
+Puedo ayudarte con información detallada sobre:
+- 🎡 **Parques temáticos:** Parque del Café, PANACA, Bioparque Ukumarí y Recuca.
+- 🌴 **Naturaleza:** Valle de Cocora, Cascada Los Frailes, Termales de Santa Rosa y senderismo.
+- 🏘️ **Pueblos:** Salento, Filandia, Pijao, Buenavista, Manizales y Pereira.
+- 🧗‍♂️ **Aventura:** Parapente, canopy, rafting y deportes extremos.
+- 🍲 **Gastronomía y Café:** Dónde comer trucha, chorizo santarrosano y las mejores tiendas de café especial.
+- 🎒 **Planificación:** Qué empacar, clima, transporte y presupuesto.
 
-¿Qué tienes ganas de hacer o qué municipio quieres descubrir hoy?
+¿De qué lugar o experiencia te gustaría que hablemos?
             """.trimIndent()
 
             !spotContext.isNullOrBlank() -> """

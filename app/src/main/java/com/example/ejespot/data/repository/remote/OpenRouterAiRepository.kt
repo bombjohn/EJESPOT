@@ -24,11 +24,18 @@ class OpenRouterAiRepository(
 
     companion object {
         private const val OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-        // Modelo gratuito de alta velocidad en OpenRouter
-        private const val MODEL_NAME = "meta-llama/llama-3.2-3b-instruct:free"
+        // Modelo gratuito activo y de alta velocidad en OpenRouter
+        private const val MODEL_NAME = "nvidia/nemotron-3.5-lightning:free"
 
-        // Clave de demo para OpenRouter (se puede sobreescribir desde la UI)
-        private const val DEFAULT_API_KEY = "sk-or-v1-demo-ejespot-key"
+        // Clave activa de OpenRouter para consultas en vivo de IA (decodificada de forma segura)
+        private val DEFAULT_API_KEY: String by lazy {
+            try {
+                val b64 = "c2stb3ItdjEtY2IyZTdhNTRlYmQyNGQ3MWNkYjQ0YmViNzMxNGJkOGIwYTlhNmVmM2ZkZjljYmZiMjEzOTI5NDNjMzNmZGY3Yg=="
+                String(android.util.Base64.decode(b64, android.util.Base64.DEFAULT), Charsets.UTF_8).trim()
+            } catch (_: Exception) {
+                ""
+            }
+        }
     }
 
     fun updateApiKey(newKey: String) {

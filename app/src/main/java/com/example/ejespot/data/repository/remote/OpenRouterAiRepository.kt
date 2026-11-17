@@ -24,8 +24,8 @@ class OpenRouterAiRepository(
 
     companion object {
         private const val OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
-        // Modelo gratuito activo y de alta velocidad en OpenRouter
-        private const val MODEL_NAME = "nvidia/nemotron-3.5-lightning:free"
+        // Modelo gratuito conversacional activo en OpenRouter (devuelve content no nulo)
+        private const val MODEL_NAME = "liquid/lfm-3-1.7b:free"
 
         // Clave activa de OpenRouter para consultas en vivo de IA (decodificada de forma segura)
         private val DEFAULT_API_KEY: String by lazy {
@@ -74,7 +74,7 @@ class OpenRouterAiRepository(
                 put("model", MODEL_NAME)
                 put("messages", messagesArray)
                 put("temperature", 0.7)
-                put("max_tokens", 450)
+                put("max_tokens", 700)
             }
 
             val url = URL(OPENROUTER_URL)
@@ -102,8 +102,10 @@ class OpenRouterAiRepository(
                 val jsonResponse = JSONObject(responseText)
                 val choices = jsonResponse.getJSONArray("choices")
                 if (choices.length() > 0) {
-                    val content = choices.getJSONObject(0).getJSONObject("message").getString("content")
-                    return@withContext Result.success(content.trim())
+                    val content = choices.getJSONObject(0).getJSONObject("message").optString("content", "").trim()
+                    if (content.isNotEmpty()) {
+                        return@withContext Result.success(content)
+                    }
                 }
             }
 

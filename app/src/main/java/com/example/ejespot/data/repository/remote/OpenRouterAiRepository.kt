@@ -74,14 +74,14 @@ class OpenRouterAiRepository(
                 put("model", MODEL_NAME)
                 put("messages", messagesArray)
                 put("temperature", 0.7)
-                put("max_tokens", 700)
+                put("max_tokens", 2048)
             }
 
             val url = URL(OPENROUTER_URL)
             val connection = (url.openConnection() as HttpURLConnection).apply {
                 requestMethod = "POST"
-                connectTimeout = 12000
-                readTimeout = 18000
+                connectTimeout = 15000
+                readTimeout = 30000
                 doOutput = true
                 setRequestProperty("Content-Type", "application/json; charset=UTF-8")
                 setRequestProperty("Authorization", "Bearer $apiKey")
@@ -124,7 +124,7 @@ class OpenRouterAiRepository(
             "Tu misión es guiar a turistas y locales en el Paisaje Cultural Cafetero (Quindío, Risaralda y Caldas). " +
             "Responde de forma amable, entusiasta y hospitalaria, con expresiones cafeteras sutiles ('¡Hola parcero!', 'buena cosecha', 'un tinto de bienvenida'). " +
             "Recomienda planes, transporte típico (Willys), horarios recomendados, clima de montaña, gastronomía (trucha al ajillo, patacón, arepa de choclo) y café especial. " +
-            "Sé conciso, estructurado con viñetas cuando des itinerarios."
+            "Sé conciso, estructurado con viñetas cuando des itinerarios. Concluye siempre todas tus recomendaciones e ideas completas de forma natural."
 
         return if (!spotContext.isNullOrBlank()) {
             "$base Contexto del lugar actual que el usuario está consultando: $spotContext."

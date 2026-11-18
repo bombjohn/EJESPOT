@@ -278,6 +278,14 @@ class ProfileViewModel @JvmOverloads constructor(
             initials = name.toInitials()
         )
 
+        ProfileSampleData.registerProfile(
+            profileId = currentProfileId,
+            name = name,
+            username = username,
+            location = location,
+            bio = updated.bio
+        )
+
         _uiState.update {
             it.copy(
                 profile = updated,

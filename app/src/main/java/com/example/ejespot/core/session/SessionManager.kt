@@ -120,7 +120,9 @@ object SessionManager {
                         UserSession(
                             userId = user.id,
                             profileId = user.profileId,
-                            isGuest = user.isGuest
+                            isGuest = user.isGuest,
+                            userName = user.name,
+                            userEmail = user.email
                         )
                     )
                 }
@@ -147,10 +149,21 @@ object SessionManager {
 
         DemoUsers.accounts.firstOrNull { it.id == session.userId }?.let { return it }
 
+        val resolvedName = session.userName.ifBlank {
+            session.userEmail.substringBefore("@").ifBlank {
+                ResourceProviderHolder.resources.getString(R.string.session_default_user_name)
+            }
+        }
+
+        val role = if (session.userEmail.equals("admin@ejespot.com", ignoreCase = true) ||
+            session.userEmail.equals("moderador@ejespot.co", ignoreCase = true)
+        ) UserRole.ADMIN else UserRole.USER
+
         return User(
             id = session.userId,
-            name = ResourceProviderHolder.resources.getString(R.string.session_default_user_name),
-            role = UserRole.USER,
+            name = resolvedName,
+            email = session.userEmail,
+            role = role,
             profileId = session.profileId
         )
     }

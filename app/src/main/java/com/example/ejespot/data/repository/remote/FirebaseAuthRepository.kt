@@ -36,16 +36,26 @@ class FirebaseAuthRepository : AuthRepository {
                         email.equals("moderador@ejespot.co", ignoreCase = true)
                     ) UserRole.ADMIN else UserRole.USER
 
-                    return Result.success(
-                        User(
-                            id = firebaseUser.uid,
-                            email = firebaseUser.email ?: email,
-                            name = firebaseUser.displayName ?: email.substringBefore("@"),
-                            password = "",
-                            role = role,
-                            profileId = firebaseUser.uid
-                        )
+                    val displayName = firebaseUser.displayName?.takeIf { it.isNotBlank() }
+                        ?: DemoUsers.accounts.firstOrNull { it.email.equals(email, ignoreCase = true) }?.name
+                        ?: if (email.contains("johncpapaz", ignoreCase = true)) "John Cardona"
+                        else email.substringBefore("@").replace(".", " ").replace("_", " ")
+                            .split(" ").joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+
+                    val user = User(
+                        id = firebaseUser.uid,
+                        email = firebaseUser.email ?: email,
+                        name = displayName,
+                        password = "",
+                        role = role,
+                        profileId = firebaseUser.uid
                     )
+                    com.example.ejespot.features.dashboard.profile.ProfileSampleData.registerProfile(
+                        profileId = user.profileId,
+                        name = user.name,
+                        username = (firebaseUser.email ?: email).substringBefore("@")
+                    )
+                    return Result.success(user)
                 }
             } catch (_: Exception) {
                 // Firebase no configurado o sin conexión: usar fallback local

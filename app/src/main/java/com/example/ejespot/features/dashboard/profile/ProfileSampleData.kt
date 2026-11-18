@@ -88,14 +88,22 @@ object ProfileSampleData {
 
     private val dynamicProfiles = mutableMapOf<String, UserProfile>()
 
-    fun registerProfile(profileId: String, name: String, username: String) {
-        val initials = name.trim().split(Regex("\\s+")).take(2).mapNotNull { it.firstOrNull()?.uppercase() }.joinToString("")
+    fun registerProfile(
+        profileId: String,
+        name: String,
+        username: String,
+        location: String = "Pereira, Risaralda",
+        bio: String = "Viajero explorando el Paisaje Cultural Cafetero."
+    ) {
+        val initials = name.trim().split(Regex("\\s+")).take(2)
+            .mapNotNull { it.firstOrNull()?.uppercase() }
+            .joinToString("").ifBlank { "US" }
         dynamicProfiles[profileId] = UserProfile(
             name = name,
             username = if (username.startsWith("@")) username else "@$username",
-            location = "Pereira, Risaralda",
-            bio = "Nuevo viajero explorando el Paisaje Cultural Cafetero.",
-            initials = if (initials.isNotEmpty()) initials else "US",
+            location = location,
+            bio = bio,
+            initials = initials,
             level = 1,
             levelName = ProfileLevels.TURISTA,
             xp = 0,
@@ -109,9 +117,42 @@ object ProfileSampleData {
         dynamicProfiles.remove(profileId)
     }
 
-    /** Perfil correspondiente al identificador de sesión (o el invitado). */
-    fun profileFor(profileId: String): UserProfile =
-        dynamicProfiles[profileId] ?: profilesByUser[profileId] ?: profilesByUser.getValue("invitado")
+    /** Perfil correspondiente al identificador de sesión (o el usuario activo). */
+    fun profileFor(profileId: String): UserProfile {
+        dynamicProfiles[profileId]?.let { return it }
+        profilesByUser[profileId]?.let { return it }
+
+        // Si hay una sesión activa con usuario no invitado, usar sus datos reales
+        val user = com.example.ejespot.core.session.SessionManager.currentUser
+        if (user != null && !user.isGuest) {
+            val name = user.name.ifBlank {
+                user.email.substringBefore("@").replace(".", " ").replace("_", " ")
+                    .split(" ").joinToString(" ") { it.replaceFirstChar { c -> c.uppercase() } }
+            }
+            val username = "@${user.email.substringBefore("@").lowercase().ifBlank { "viajero" }}"
+            val initials = name.trim().split(Regex("\\s+")).take(2)
+                .mapNotNull { it.firstOrNull()?.uppercase() }
+                .joinToString("").ifBlank { "US" }
+
+            val p = UserProfile(
+                name = name,
+                username = username,
+                location = "Pereira, Risaralda",
+                bio = "Viajero explorando el Paisaje Cultural Cafetero.",
+                initials = initials,
+                level = 1,
+                levelName = ProfileLevels.TURISTA,
+                xp = 0,
+                nextLevelXp = 200,
+                nextLevelName = ProfileLevels.AVENTURERO,
+                memberSince = "Hoy"
+            )
+            dynamicProfiles[profileId] = p
+            return p
+        }
+
+        return profilesByUser.getValue("invitado")
+    }
 
     /** Propuestas quemadas por cuenta. */
     val proposalsByUser: Map<String, List<ProposedSpot>> get() = mapOf(

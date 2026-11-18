@@ -13,5 +13,7 @@ package com.example.ejespot.domain.model
 data class UserSession(
     val userId: String,
     val profileId: String,
-    val isGuest: Boolean
+    val isGuest: Boolean,
+    val userName: String = "",
+    val userEmail: String = ""
 )

@@ -34,6 +34,8 @@ class LocalSessionRepository(
         val USER_ID = stringPreferencesKey("user_id")
         val PROFILE_ID = stringPreferencesKey("profile_id")
         val IS_GUEST = booleanPreferencesKey("is_guest")
+        val USER_NAME = stringPreferencesKey("user_name")
+        val USER_EMAIL = stringPreferencesKey("user_email")
     }
 
     /** Se reemite cada vez que cambian las preferencias guardadas. */
@@ -48,7 +50,9 @@ class LocalSessionRepository(
             UserSession(
                 userId = userId,
                 profileId = profileId,
-                isGuest = prefs[Keys.IS_GUEST] ?: false
+                isGuest = prefs[Keys.IS_GUEST] ?: false,
+                userName = prefs[Keys.USER_NAME] ?: "",
+                userEmail = prefs[Keys.USER_EMAIL] ?: ""
             )
         }
     }
@@ -58,6 +62,8 @@ class LocalSessionRepository(
             prefs[Keys.USER_ID] = session.userId
             prefs[Keys.PROFILE_ID] = session.profileId
             prefs[Keys.IS_GUEST] = session.isGuest
+            prefs[Keys.USER_NAME] = session.userName
+            prefs[Keys.USER_EMAIL] = session.userEmail
         }
     }
 

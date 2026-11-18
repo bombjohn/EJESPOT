@@ -515,6 +515,7 @@
     <string name="time_yesterday_1022">Yesterday · 10:22 a.m.</string>
     <string name="time_yesterday_0805">Yesterday · 8:05 a.m.</string>
     <string name="time_yesterday_0740">Yesterday · 7:40 a.m.</string>
+    <string name="time_today">Today</string>
     <string name="time_ago_20_min">20 min ago</string>
     <string name="time_ago_55_min">55 min ago</string>
     <string name="time_ago_1_hour">1 h ago</string>

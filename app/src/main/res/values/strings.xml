@@ -515,6 +515,7 @@
     <string name="time_yesterday_1022">Ayer · 10:22 a. m.</string>
     <string name="time_yesterday_0805">Ayer · 8:05 a. m.</string>
     <string name="time_yesterday_0740">Ayer · 7:40 a. m.</string>
+    <string name="time_today">Hoy</string>
     <string name="time_ago_20_min">Hace 20 min</string>
     <string name="time_ago_55_min">Hace 55 min</string>
     <string name="time_ago_1_hour">Hace 1 h</string>

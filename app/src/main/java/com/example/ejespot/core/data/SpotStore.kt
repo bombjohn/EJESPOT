@@ -7,6 +7,7 @@ import com.example.ejespot.domain.model.AppNotification
 import com.example.ejespot.domain.model.NotificationType
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.domain.model.SpotReview
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -133,6 +134,59 @@ object SpotStore {
         }
 
         refreshForCurrentUser()
+        startFirestoreSync()
+    }
+
+    private var firestoreSpotsListener: ListenerRegistration? = null
+
+    /** Sincroniza spots pendientes y verificados desde Firebase Firestore en tiempo real. */
+    fun startFirestoreSync() {
+        firestoreScope.launch {
+            try {
+                val remoteSpots = firestoreRepo.loadAllSpots()
+                if (remoteSpots.isNotEmpty()) {
+                    applyRemoteSpots(remoteSpots)
+                }
+            } catch (_: Exception) {}
+
+            try {
+                firestoreSpotsListener?.remove()
+                firestoreSpotsListener = firestoreRepo.listenToSpots { spots ->
+                    if (spots.isNotEmpty()) {
+                        applyRemoteSpots(spots)
+                    }
+                }
+            } catch (_: Exception) {}
+        }
+    }
+
+    private fun applyRemoteSpots(remoteSpots: List<Spot>) {
+        val pendingRemote = remoteSpots.filter { it.isPending }
+        val approvedRemote = remoteSpots.filter { !it.isPending }
+
+        if (pendingRemote.isNotEmpty()) {
+            _pendingSpots.update { current ->
+                val remoteMap = pendingRemote.associateBy { it.id }
+                val updated = current.map { remoteMap[it.id] ?: it }
+                val currentIds = updated.map { it.id }.toSet()
+                val newOnes = pendingRemote.filter { it.id !in currentIds }
+                newOnes + updated
+            }
+        }
+
+        if (approvedRemote.isNotEmpty()) {
+            _spots.update { current ->
+                val remoteMap = approvedRemote.associateBy { it.id }
+                val updated = current.map { remoteMap[it.id] ?: it }
+                val currentIds = updated.map { it.id }.toSet()
+                val newOnes = approvedRemote.filter { it.id !in currentIds }
+                newOnes + updated
+            }
+            val approvedIds = approvedRemote.map { it.id }.toSet()
+            _pendingSpots.update { list -> list.filterNot { it.id in approvedIds } }
+        }
+
+        persistCustomSpots()
     }
 
     private fun persistCustomSpots() {

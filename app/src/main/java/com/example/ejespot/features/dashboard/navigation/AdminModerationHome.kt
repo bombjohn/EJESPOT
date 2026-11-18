@@ -49,14 +49,17 @@ fun AdminModerationHome(
     val c = ejeSpotColors()
     val coroutineScope = rememberCoroutineScope()
 
-    var activeTab by remember { mutableStateOf(0) } // 0: Reportes, 1: Propuestas
+    val pendingProposals = uiState.moderationProposals
+    val pendingProposalsCount = remember(pendingProposals) {
+        pendingProposals.count { it.status == ProposalStatus.PENDING }
+    }
+
+    var activeTab by remember {
+        mutableStateOf(if (uiState.moderationQueue.isEmpty() && pendingProposals.any { it.status == ProposalStatus.PENDING }) 1 else 0)
+    }
     var resolvingReport by remember { mutableStateOf<ModerationReport?>(null) }
     var approvingProposal by remember { mutableStateOf<ProposedSpot?>(null) }
     var rejectingProposal by remember { mutableStateOf<ProposedSpot?>(null) }
-
-    val pendingProposalsCount = remember(uiState.proposals) {
-        uiState.proposals.count { it.status == ProposalStatus.PENDING }
-    }
 
     Column(
         modifier = Modifier
@@ -131,6 +134,47 @@ fun AdminModerationHome(
         // Contenido según la pestaña seleccionada
         if (activeTab == 0) {
             // Pestaña de Reportes de Contenido
+            if (pendingProposalsCount > 0) {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp, vertical = 4.dp)
+                        .clickable { activeTab = 1 },
+                    shape = RoundedCornerShape(12.dp),
+                    color = c.secondary.copy(alpha = 0.12f),
+                    border = BorderStroke(1.dp, c.secondary.copy(alpha = 0.35f))
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 9.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(text = "✨", fontSize = 15.sp)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Hay $pendingProposalsCount spot(s) en espera de revisión",
+                                fontFamily = ManropeFontFamily,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp,
+                                color = c.secondary
+                            )
+                        }
+                        Text(
+                            text = "Ver propuestas →",
+                            fontFamily = ManropeFontFamily,
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 11.5.sp,
+                            color = c.secondary
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+            }
+
             if (uiState.moderationQueue.isEmpty()) {
                 ProfileEmptyState(
                     emoji = "🛡️",
@@ -157,8 +201,8 @@ fun AdminModerationHome(
                 }
             }
         } else {
-            // Pestaña de Propuestas de Nuevos Spots
-            val proposals = uiState.proposals
+            // Pestaña de Propuestas de Nuevos Spots (cola global de la comunidad)
+            val proposals = pendingProposals
             if (proposals.isEmpty()) {
                 ProfileEmptyState(
                     emoji = "📍",
@@ -220,7 +264,7 @@ fun AdminModerationHome(
             proposal = proposal,
             onDismiss = { approvingProposal = null },
             onConfirm = {
-                viewModel.approveProposal(proposal.id)
+                viewModel.approvePendingSpotById(proposal.spotId ?: proposal.id)
                 approvingProposal = null
                 coroutineScope.launch {
                     snackbarHostState?.showSnackbar("¡Spot '${proposal.name}' aprobado y publicado (+100 XP para el autor)!")
@@ -235,7 +279,7 @@ fun AdminModerationHome(
             proposal = proposal,
             onDismiss = { rejectingProposal = null },
             onConfirm = { reason ->
-                viewModel.rejectProposal(proposal.id, reason)
+                viewModel.rejectPendingSpotById(proposal.spotId ?: proposal.id, reason)
                 rejectingProposal = null
                 coroutineScope.launch {
                     snackbarHostState?.showSnackbar("Propuesta de '" + proposal.name + "' rechazada: " + reason)

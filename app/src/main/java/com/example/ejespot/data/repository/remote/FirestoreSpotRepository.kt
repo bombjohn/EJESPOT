@@ -5,7 +5,9 @@ import com.example.ejespot.domain.model.Location
 import com.example.ejespot.domain.model.NotificationType
 import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.domain.model.SpotReview
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.tasks.await
 
@@ -67,47 +69,67 @@ class FirestoreSpotRepository {
         } catch (_: Exception) { /* Firestore no disponible */ }
     }
 
-    /** Carga todos los spots desde Firestore, ordenados por fecha de creación. */
+    /** Carga todos los spots desde Firestore. */
     suspend fun loadAllSpots(): List<Spot> {
         db ?: return emptyList()
         return try {
-            val snapshot = db.collection("spots")
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .get()
-                .await()
-            snapshot.documents.mapNotNull { doc ->
-                try {
-                    Spot(
-                        id = doc.getString("id") ?: doc.id,
-                        name = doc.getString("name") ?: "",
-                        category = doc.getString("category") ?: "",
-                        municipality = doc.getString("municipality") ?: "",
-                        rating = doc.getDouble("rating") ?: 0.0,
-                        reviewCount = (doc.getLong("reviewCount") ?: 0).toInt(),
-                        distance = doc.getString("distance") ?: "",
-                        isVerified = doc.getBoolean("isVerified") ?: false,
-                        priceBadge = doc.getString("priceBadge") ?: "",
-                        hours = doc.getString("hours") ?: "",
-                        priceRange = doc.getString("priceRange") ?: "",
-                        description = doc.getString("description") ?: "",
-                        addedBy = doc.getString("addedBy") ?: "",
-                        department = doc.getString("department") ?: "",
-                        location = Location(
-                            latitude = doc.getDouble("latitude") ?: 4.64,
-                            longitude = doc.getDouble("longitude") ?: -75.57
-                        ),
-                        isPending = doc.getBoolean("isPending") ?: false,
-                        isFinalized = doc.getBoolean("isFinalized") ?: false,
-                        importanceVotes = (doc.getLong("importanceVotes") ?: 0).toInt(),
-                        imageUrl = doc.getString("imageUrl"),
-                        imageUri = doc.getString("imageUri"),
-                        emoji = doc.getString("emoji") ?: "📍",
-                        accentColor = doc.getLong("accentColor") ?: 0xFF2C5640
-                    )
-                } catch (_: Exception) { null }
-            }
+            val snapshot = db.collection("spots").get().await()
+            snapshot.documents.mapNotNull { doc -> mapDocToSpot(doc) }
         } catch (_: Exception) {
             emptyList()
+        }
+    }
+
+    /**
+     * Escucha en tiempo real cambios en la colección de spots.
+     * Útil para que moderadores y usuarios vean nuevos spots sin reiniciar la app.
+     */
+    fun listenToSpots(onSpotsUpdated: (List<Spot>) -> Unit): ListenerRegistration? {
+        val db = db ?: return null
+        return try {
+            db.collection("spots").addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+                val spots = snapshot.documents.mapNotNull { doc -> mapDocToSpot(doc) }
+                onSpotsUpdated(spots)
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun mapDocToSpot(doc: DocumentSnapshot): Spot? {
+        return try {
+            val name = doc.getString("name") ?: ""
+            if (name.isBlank()) return null
+            Spot(
+                id = doc.getString("id") ?: doc.id,
+                name = name,
+                category = doc.getString("category") ?: "Naturaleza",
+                municipality = doc.getString("municipality") ?: "",
+                rating = doc.getDouble("rating") ?: 5.0,
+                reviewCount = (doc.getLong("reviewCount") ?: 0).toInt(),
+                distance = doc.getString("distance") ?: "1.0 km",
+                isVerified = doc.getBoolean("isVerified") ?: false,
+                priceBadge = doc.getString("priceBadge") ?: "",
+                hours = doc.getString("hours") ?: "",
+                priceRange = doc.getString("priceRange") ?: "",
+                description = doc.getString("description") ?: "",
+                addedBy = doc.getString("addedBy") ?: "",
+                department = doc.getString("department") ?: "",
+                location = Location(
+                    latitude = doc.getDouble("latitude") ?: 4.64,
+                    longitude = doc.getDouble("longitude") ?: -75.57
+                ),
+                isPending = doc.getBoolean("isPending") ?: false,
+                isFinalized = doc.getBoolean("isFinalized") ?: false,
+                importanceVotes = (doc.getLong("importanceVotes") ?: 0).toInt(),
+                imageUrl = doc.getString("imageUrl")?.ifBlank { null },
+                imageUri = doc.getString("imageUri")?.ifBlank { null },
+                emoji = doc.getString("emoji") ?: "📍",
+                accentColor = doc.getLong("accentColor") ?: 0xFF2C5640
+            )
+        } catch (_: Exception) {
+            null
         }
     }
 

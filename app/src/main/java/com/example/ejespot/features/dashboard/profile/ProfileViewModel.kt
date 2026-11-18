@@ -17,6 +17,7 @@ import com.example.ejespot.domain.model.ProfileActivity
 import com.example.ejespot.domain.model.ProfileDraft
 import com.example.ejespot.domain.model.ProposalStatus
 import com.example.ejespot.domain.model.ProposedSpot
+import com.example.ejespot.domain.model.Spot
 import com.example.ejespot.domain.model.UserProfile
 import com.example.ejespot.domain.model.UserStats
 import com.example.ejespot.domain.repository.ProfileRepository
@@ -94,6 +95,7 @@ class ProfileViewModel @JvmOverloads constructor(
             permissions = ProfileSampleData.permissions,
             selectedLanguage = currentLanguage(),
             moderationQueue = ProfileSampleData.moderationQueue,
+            moderationProposals = spotRepository.pendingSpots.value.map { it.toProposal() },
             draft = currentProfile().toDraft(),
             isModerator = SessionManager.role == com.example.ejespot.domain.model.UserRole.ADMIN,
             activeSpotsCount = spotRepository.allSpots().count { it.addedBy.contains(currentProfileId, ignoreCase = true) && !it.isPending && !it.isFinalized }.coerceAtLeast(if (currentProfileId == "camila") 2 else 1),
@@ -138,15 +140,64 @@ class ProfileViewModel @JvmOverloads constructor(
                         stats = base.copy(
                             visited = visited.size,
                             reviews = liveReviews.size,
-                            proposals = currentProposals().size
+                            proposals = state.proposals.size
                         ),
                         reviews = liveReviews,
                         activities = state.activities.map { activity ->
                             when (activity.id) {
                                 "visited" -> activity.copy(valueLabel = "${visited.size}")
                                 "reviews" -> activity.copy(valueLabel = "${liveReviews.size}")
-                                "proposals" -> activity.copy(valueLabel = "${currentProposals().size}")
+                                "proposals" -> activity.copy(valueLabel = "${state.proposals.size}")
                                 else -> activity
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        // Cola global de moderación: cualquier spot pendiente del store (de
+        // cualquier usuario) aparece como propuesta por revisar. También
+        // mantiene al día las propuestas propias con lo que ocurre en el
+        // store (aprobada, rechazada o creada en otra sesión).
+        viewModelScope.launch {
+            spotRepository.pendingSpots.collect { pending ->
+                val pendingIds = pending.map { it.id }.toSet()
+                val approvedIds = spotRepository.spots.value
+                    .filter { !it.isPending }
+                    .map { it.id }
+                    .toSet()
+                val ownTag = currentUserSpotTag()
+                _uiState.update { state ->
+                    val knownSpotIds = state.proposals.mapNotNull { it.spotId }.toSet()
+                    // Propuestas propias que están en el store pero no en la
+                    // lista local (p. ej. tras reiniciar: el spot persiste).
+                    val ownNew = pending
+                        .filter { it.addedBy.equals(ownTag, ignoreCase = true) && it.id !in knownSpotIds }
+                        .map { it.toProposal() }
+                    // Sincroniza el estado de las propias con la moderación.
+                    val synced = (ownNew + state.proposals).map { proposal ->
+                        val sid = proposal.spotId
+                        if (sid != null && proposal.status == ProposalStatus.PENDING && sid !in pendingIds) {
+                            if (sid in approvedIds) {
+                                proposal.copy(status = ProposalStatus.APPROVED, xpEarned = 100)
+                            } else {
+                                proposal.copy(status = ProposalStatus.REJECTED)
+                            }
+                        } else {
+                            proposal
+                        }
+                    }
+                    state.copy(
+                        moderationProposals = pending.map { it.toProposal() },
+                        proposals = synced,
+                        stats = state.stats.copy(proposals = synced.size),
+                        pendingSpotsCount = synced.count { it.status == ProposalStatus.PENDING },
+                        activities = state.activities.map { activity ->
+                            if (activity.id == "proposals") {
+                                activity.copy(valueLabel = "${synced.size}")
+                            } else {
+                                activity
                             }
                         }
                     )
@@ -201,6 +252,7 @@ class ProfileViewModel @JvmOverloads constructor(
                 stats = currentStats().copy(reviews = liveReviews.size),
                 reviews = liveReviews,
                 proposals = currentProposals(),
+                moderationProposals = spotRepository.pendingSpots.value.map { it.toProposal() },
                 draft = profile.toDraft(),
                 draftError = null,
                 isModerator = SessionManager.role == com.example.ejespot.domain.model.UserRole.ADMIN
@@ -416,6 +468,45 @@ class ProfileViewModel @JvmOverloads constructor(
         }
     }
 
+    /**
+     * Etiqueta `@usuario` con la que [com.example.ejespot.core.data.SpotStore]
+     * registra los spots creados desde "Crear lugar".
+     */
+    private fun currentUserSpotTag(): String =
+        if (SessionManager.isGuest) {
+            "@invitado"
+        } else {
+            "@${SessionManager.displayName.replace(" ", "_").lowercase()}"
+        }
+
+    /** Convierte un spot pendiente del store en propuesta para el panel. */
+    private fun Spot.toProposal(): ProposedSpot = ProposedSpot(
+        id = id,
+        name = name,
+        location = municipality,
+        submittedLabelRes = R.string.time_today,
+        status = ProposalStatus.PENDING,
+        xpEarned = 0,
+        customNote = description.ifBlank { null },
+        spotId = id
+    )
+
+    /**
+     * Aprueba una propuesta de la cola global de moderación. El spot pasa a
+     * la lista oficial y el autor recibe la notificación (+100 XP).
+     */
+    fun approvePendingSpotById(spotId: String) {
+        approveProposalUseCase(spotId)
+    }
+
+    /**
+     * Rechaza una propuesta de la cola global de moderación con el motivo
+     * indicado por el moderador.
+     */
+    fun rejectPendingSpotById(spotId: String, reason: String) {
+        rejectProposalUseCase(spotId, reason)
+    }
+
     fun approveProposal(proposalId: String) {
         val target = _uiState.value.proposals.firstOrNull { it.id == proposalId }
         val spotId = target?.spotId
@@ -491,7 +582,7 @@ class ProfileViewModel @JvmOverloads constructor(
     fun addProposalFromCreatedSpot(name: String, location: String, note: String, spotId: String) {
         _uiState.update { state ->
             val newProposal = ProposedSpot(
-                id = "prop_${System.currentTimeMillis()}",
+                id = spotId,
                 name = name,
                 location = location,
                 customSubmittedLabel = "Hoy",
@@ -501,9 +592,16 @@ class ProfileViewModel @JvmOverloads constructor(
                 spotId = spotId
             )
             val updated: List<ProposedSpot> = listOf(newProposal) + state.proposals
+            val updatedModeration = if (state.moderationProposals.none { it.id == spotId || it.spotId == spotId }) {
+                listOf(newProposal) + state.moderationProposals
+            } else {
+                state.moderationProposals
+            }
             state.copy(
                 proposals = updated,
+                moderationProposals = updatedModeration,
                 stats = state.stats.copy(proposals = updated.size),
+                pendingSpotsCount = updated.count { it.status == ProposalStatus.PENDING },
                 activities = state.activities.map { activity ->
                     if (activity.id == "proposals") activity.copy(valueLabel = "${updated.size}") else activity
                 }

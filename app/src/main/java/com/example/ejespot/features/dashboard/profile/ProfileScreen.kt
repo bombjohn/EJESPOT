@@ -46,6 +46,7 @@ fun ProfileScreen(
     onMyReviews: () -> Unit,
     onMyProposals: () -> Unit,
     onNavigateToVisited: () -> Unit,
+    onNavigateToAdmin: (() -> Unit)? = null,
     onLogout: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -525,8 +526,16 @@ fun ProfileScreen(
 
                     Spacer(modifier = Modifier.height(11.dp))
 
+                    val totalModerationItems = uiState.pendingModeration + uiState.moderationProposals.count { it.status == com.example.ejespot.domain.model.ProposalStatus.PENDING }
+
                     Surface(
-                        onClick = { showModerationDialog = true },
+                        onClick = {
+                            if (onNavigateToAdmin != null) {
+                                onNavigateToAdmin()
+                            } else {
+                                showModerationDialog = true
+                            }
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(38.dp),
@@ -552,7 +561,7 @@ fun ProfileScreen(
                                 color = c.successBg
                             ) {
                                 Text(
-                                    text = "${uiState.pendingModeration}",
+                                    text = "$totalModerationItems",
                                     fontFamily = ManropeFontFamily,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontSize = 9.5.sp,

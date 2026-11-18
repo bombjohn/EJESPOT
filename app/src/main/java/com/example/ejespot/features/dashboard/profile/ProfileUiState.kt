@@ -15,6 +15,8 @@ data class ProfileUiState(
     val permissions: List<AppPermission>,
     val selectedLanguage: AppLanguage,
     val moderationQueue: List<ModerationReport>,
+    /** Cola global de propuestas de la comunidad (Spots pendientes del store). */
+    val moderationProposals: List<ProposedSpot> = emptyList(),
     val draft: ProfileDraft,
     val draftError: String? = null,
     val isModerator: Boolean = true,

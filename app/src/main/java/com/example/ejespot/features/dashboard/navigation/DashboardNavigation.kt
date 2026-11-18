@@ -145,6 +145,7 @@ fun DashboardNavigation(
                     navController.navigate(DashboardRoutes.MyProposals)
                 },
                 onNavigateToVisited = { navigateToTab(DashboardRoutes.Visited) },
+                onNavigateToAdmin = { navController.navigate(DashboardRoutes.HomeAdmin) },
                 onLogout = onLogout
             )
         }

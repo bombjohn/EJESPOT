@@ -430,6 +430,17 @@ private fun CreateSpotFormScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        // DESCRIPCIÓN DEL LUGAR
+        FieldLabel(stringResource(R.string.create_description_label))
+        Spacer(modifier = Modifier.height(6.dp))
+        DescriptionBox(
+            value = uiState.description,
+            onValueChange = onDescriptionChanged,
+            placeholder = stringResource(R.string.create_description_placeholder)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         // CATEGORÍA
         FieldLabel(stringResource(R.string.create_category_label))
         Spacer(modifier = Modifier.height(8.dp))
@@ -943,6 +954,48 @@ private fun InputBox(
             ),
             cursorBrush = SolidColor(c.primary),
             modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+private fun DescriptionBox(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String
+) {
+    val c = ejeSpotColors()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(110.dp)
+            .background(c.surface, RoundedCornerShape(14.dp))
+            .border(1.dp, c.outlineSoft, RoundedCornerShape(14.dp))
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        contentAlignment = Alignment.TopStart
+    ) {
+        if (value.isEmpty()) {
+            Text(
+                text = placeholder,
+                fontFamily = ManropeFontFamily,
+                fontSize = 13.sp,
+                color = c.placeholder,
+                lineHeight = 18.sp
+            )
+        }
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            singleLine = false,
+            maxLines = 5,
+            textStyle = TextStyle(
+                fontFamily = ManropeFontFamily,
+                fontSize = 13.sp,
+                color = c.text,
+                lineHeight = 18.sp
+            ),
+            cursorBrush = SolidColor(c.primary),
+            modifier = Modifier.fillMaxSize()
         )
     }
 }

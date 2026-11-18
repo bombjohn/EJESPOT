@@ -175,6 +175,8 @@
     <string name="create_title">Nuevo lugar</string>
     <string name="create_name_label">NOMBRE DEL LUGAR</string>
     <string name="create_name_placeholder">Ej. Cascada El Bosque</string>
+    <string name="create_description_label">DESCRIPCIÓN DEL LUGAR</string>
+    <string name="create_description_placeholder">Cuéntale a la comunidad qué hace especial este lugar, recomendaciones o cómo llegar...</string>
     <string name="create_category_label">CATEGORÍA</string>
     <string name="create_location_label">UBICACIÓN</string>
     <string name="create_hours_label">HORARIO DE ATENCIÓN SUGERIDO</string>

@@ -175,6 +175,8 @@
     <string name="create_title">New place</string>
     <string name="create_name_label">PLACE NAME</string>
     <string name="create_name_placeholder">E.g. El Bosque Waterfall</string>
+    <string name="create_description_label">PLACE DESCRIPTION</string>
+    <string name="create_description_placeholder">Tell the community what makes this place special, tips, or how to get there...</string>
     <string name="create_category_label">CATEGORY</string>
     <string name="create_location_label">LOCATION</string>
     <string name="create_hours_label">SUGGESTED OPENING HOURS</string>

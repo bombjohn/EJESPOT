@@ -848,7 +848,7 @@ private fun ApproveProposalDialog(
 
 
 /**
- * Di�logo interactivo para rechazar una propuesta solicitando el motivo al moderador.
+ * Diálogo interactivo para rechazar una propuesta solicitando el motivo al moderador.
  */
 @Composable
 private fun RejectProposalDialog(
@@ -857,22 +857,22 @@ private fun RejectProposalDialog(
     onConfirm: (reason: String) -> Unit
 ) {
     val c = ejeSpotColors()
-    var selectedReason by remember { mutableStateOf("Informaci�n incompleta o no verificable") }
+    var selectedReason by remember { mutableStateOf("Información incompleta o no verificable") }
     var customDetails by remember { mutableStateOf("") }
 
     val presetReasons = listOf(
-        "Informaci�n incompleta o no verificable",
-        "Lugar duplicado en el cat�logo",
+        "Información incompleta o no verificable",
+        "Lugar duplicado en el catálogo",
         "El lugar ya no opera comercialmente",
-        "Ubicaci�n fuera del Paisaje Cultural Cafetero",
-        "Otro motivo espec�fico"
+        "Ubicación fuera del Paisaje Cultural Cafetero",
+        "Otro motivo específico"
     )
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "?", fontSize = 20.sp)
+                Text(text = "❌", fontSize = 20.sp)
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = "Desestimar Propuesta",
@@ -886,7 +886,7 @@ private fun RejectProposalDialog(
         text = {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "Indica el motivo por el cual no se publicar� '${proposal.name}':",
+                    text = "Indica el motivo por el cual no se publicará '${proposal.name}':",
                     fontFamily = ManropeFontFamily,
                     fontSize = 12.5.sp,
                     color = c.textSoft
@@ -914,7 +914,7 @@ private fun RejectProposalDialog(
                         )
                     }
                 }
-                if (selectedReason == "Otro motivo espec�fico") {
+                if (selectedReason == "Otro motivo especÃ­fico") {
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
                         value = customDetails,
@@ -929,7 +929,7 @@ private fun RejectProposalDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val finalReason = if (selectedReason == "Otro motivo espec�fico" && customDetails.isNotBlank()) {
+                    val finalReason = if (selectedReason == "Otro motivo especÃ­fico" && customDetails.isNotBlank()) {
                         customDetails.trim()
                     } else {
                         selectedReason

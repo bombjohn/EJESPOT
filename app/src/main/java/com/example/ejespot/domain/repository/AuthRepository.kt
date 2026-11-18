@@ -20,6 +20,24 @@ interface AuthRepository {
  */
 object DemoUsers {
 
+    val admin = User(
+        id = "u_admin",
+        email = "admin@ejespot.com",
+        name = "Administrador EjeSpot",
+        password = "admin1234",
+        role = UserRole.ADMIN,
+        profileId = "admin"
+    )
+
+    val testUser = User(
+        id = "u_usuario",
+        email = "usuario@gmail.com",
+        name = "Usuario Demo",
+        password = "usuario1234",
+        role = UserRole.USER,
+        profileId = "usuario"
+    )
+
     val renata = User(
         id = "u_renata",
         email = "renata@ejespot.co",
@@ -68,7 +86,7 @@ object DemoUsers {
         dynamicUsers.removeAll { it.profileId == profileId }
     }
 
-    val accounts: List<User> get() = listOf(renata, mateo, camila) + dynamicUsers
+    val accounts: List<User> get() = listOf(admin, testUser, renata, mateo, camila) + dynamicUsers
 
     fun findByEmail(email: String): User? =
         accounts.firstOrNull { it.email.equals(email.trim(), ignoreCase = true) }

@@ -170,8 +170,20 @@ fun SpotDetailScreen(
                 .background(EjeSpotBackground)
                 .padding(horizontal = 20.dp, vertical = 22.dp)
         ) {
-            // --- GESTIÓN DE SPOT (MODERADOR O USUARIO AUTENTICADO) ---
-            if (!SessionManager.isGuest) {
+            // --- GESTIÓN DE SPOT (SOLO MODERADOR O EL USUARIO CREADOR DEL SPOT) ---
+            val isAdmin = SessionManager.role == UserRole.ADMIN
+            val userHandle = "@${SessionManager.displayName.replace(" ", "_").lowercase()}"
+            val userEmailHandle = "@${SessionManager.currentUser?.email?.substringBefore("@")?.lowercase()}"
+            val isOwner = !SessionManager.isGuest && SessionManager.currentUser?.let { u ->
+                currentSpot.addedBy.equals(userHandle, ignoreCase = true) ||
+                currentSpot.addedBy.equals(userEmailHandle, ignoreCase = true) ||
+                currentSpot.addedBy.equals(u.email, ignoreCase = true) ||
+                currentSpot.addedBy.equals(u.id, ignoreCase = true) ||
+                currentSpot.addedBy.equals(u.profileId, ignoreCase = true)
+            } == true
+            val canManageSpot = isAdmin || isOwner
+
+            if (canManageSpot) {
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -187,7 +199,7 @@ fun SpotDetailScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Gestión del Spot (${if (SessionManager.role == UserRole.ADMIN) "Moderador" else "Comunidad"})",
+                                text = if (isAdmin) "Gestión del Spot (Moderador)" else "Gestión de tu Spot (Creador)",
                                 fontFamily = ManropeFontFamily,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 11.sp,

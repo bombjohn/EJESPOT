@@ -155,6 +155,10 @@ fun DashboardNavigation(
                 padding = padding,
                 snackbarHostState = snackbarHostState,
                 onNavigateBack = { navController.popBackStack() },
+                onViewProposedSpots = {
+                    navController.popBackStack()
+                    navController.navigate(DashboardRoutes.MyProposals)
+                },
                 onSpotCreated = { newSpot ->
                     spotListViewModel.addPendingSpot(newSpot)
                     profileViewModel.addProposalFromCreatedSpot(

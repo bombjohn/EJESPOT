@@ -66,6 +66,7 @@ fun CreateSpotScreen(
     snackbarHostState: SnackbarHostState,
     onNavigateBack: () -> Unit,
     onSpotCreated: ((Spot) -> Unit)? = null,
+    onViewProposedSpots: (() -> Unit)? = null,
     viewModel: CreateSpotViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -97,7 +98,11 @@ fun CreateSpotScreen(
             },
             onViewProposedSpots = {
                 viewModel.resetState()
-                onNavigateBack()
+                if (onViewProposedSpots != null) {
+                    onViewProposedSpots()
+                } else {
+                    onNavigateBack()
+                }
             }
         )
         return

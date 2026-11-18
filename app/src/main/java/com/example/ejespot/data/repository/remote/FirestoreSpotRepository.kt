@@ -196,6 +196,52 @@ class FirestoreSpotRepository {
         } catch (_: Exception) { /* ignorar */ }
     }
 
+    /** Carga todas las notificaciones desde Firestore. */
+    suspend fun loadAllNotifications(): List<AppNotification> {
+        db ?: return emptyList()
+        return try {
+            val snapshot = db.collection("notifications").get().await()
+            snapshot.documents.mapNotNull { doc -> mapDocToNotification(doc) }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    /** Escucha en tiempo real las notificaciones en Firestore. */
+    fun listenToNotifications(onNotificationsUpdated: (List<AppNotification>) -> Unit): ListenerRegistration? {
+        val db = db ?: return null
+        return try {
+            db.collection("notifications").addSnapshotListener { snapshot, error ->
+                if (error != null || snapshot == null) return@addSnapshotListener
+                val list = snapshot.documents.mapNotNull { doc -> mapDocToNotification(doc) }
+                onNotificationsUpdated(list)
+            }
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun mapDocToNotification(doc: DocumentSnapshot): AppNotification? {
+        return try {
+            AppNotification(
+                id = doc.getString("id") ?: doc.id,
+                userId = doc.getString("userId") ?: "",
+                type = try {
+                    NotificationType.valueOf(doc.getString("type") ?: "SYSTEM")
+                } catch (_: Exception) {
+                    NotificationType.SYSTEM
+                },
+                title = doc.getString("title") ?: "",
+                message = doc.getString("message") ?: "",
+                relatedSpotId = doc.getString("relatedSpotId")?.ifBlank { null },
+                isRead = doc.getBoolean("isRead") ?: false,
+                timestamp = doc.getLong("timestamp") ?: System.currentTimeMillis()
+            )
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     /** Carga las notificaciones de un usuario desde Firestore. */
     suspend fun loadNotifications(userId: String): List<AppNotification> {
         db ?: return emptyList()

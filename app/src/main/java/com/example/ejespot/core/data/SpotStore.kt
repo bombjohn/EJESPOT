@@ -138,14 +138,22 @@ object SpotStore {
     }
 
     private var firestoreSpotsListener: ListenerRegistration? = null
+    private var firestoreNotifsListener: ListenerRegistration? = null
 
-    /** Sincroniza spots pendientes y verificados desde Firebase Firestore en tiempo real. */
+    /** Sincroniza spots y notificaciones desde Firebase Firestore en tiempo real. */
     fun startFirestoreSync() {
         firestoreScope.launch {
             try {
                 val remoteSpots = firestoreRepo.loadAllSpots()
                 if (remoteSpots.isNotEmpty()) {
                     applyRemoteSpots(remoteSpots)
+                }
+            } catch (_: Exception) {}
+
+            try {
+                val remoteNotifs = firestoreRepo.loadAllNotifications()
+                if (remoteNotifs.isNotEmpty()) {
+                    applyRemoteNotifications(remoteNotifs)
                 }
             } catch (_: Exception) {}
 
@@ -157,7 +165,27 @@ object SpotStore {
                     }
                 }
             } catch (_: Exception) {}
+
+            try {
+                firestoreNotifsListener?.remove()
+                firestoreNotifsListener = firestoreRepo.listenToNotifications { notifs ->
+                    if (notifs.isNotEmpty()) {
+                        applyRemoteNotifications(notifs)
+                    }
+                }
+            } catch (_: Exception) {}
         }
+    }
+
+    private fun applyRemoteNotifications(remoteNotifs: List<AppNotification>) {
+        _notifications.update { current ->
+            val remoteMap = remoteNotifs.associateBy { it.id }
+            val updated = current.map { remoteMap[it.id] ?: it }
+            val currentIds = updated.map { it.id }.toSet()
+            val newOnes = remoteNotifs.filter { it.id !in currentIds }
+            newOnes + updated
+        }
+        persistNotifications()
     }
 
     private fun applyRemoteSpots(remoteSpots: List<Spot>) {
@@ -375,9 +403,21 @@ object SpotStore {
 
     // --- Notificaciones ---
 
-    fun getNotificationsForUser(userId: String): List<AppNotification> =
-        _notifications.value.filter { it.userId == userId || it.userId == "all" }
-            .sortedByDescending { it.timestamp }
+    fun getNotificationsForUser(userId: String): List<AppNotification> {
+        val currentNameTag = SessionManager.displayName.replace(" ", "_").lowercase()
+        val currentEmail = SessionManager.currentUser?.email?.lowercase() ?: ""
+        val currentUid = SessionManager.currentUser?.id?.lowercase() ?: ""
+        val normalizedUserId = userId.lowercase()
+
+        return _notifications.value.filter { notif ->
+            val target = notif.userId.lowercase()
+            target == "all" ||
+            target == normalizedUserId ||
+            (currentNameTag.isNotBlank() && target == currentNameTag) ||
+            (currentEmail.isNotBlank() && target == currentEmail) ||
+            (currentUid.isNotBlank() && target == currentUid)
+        }.sortedByDescending { it.timestamp }
+    }
 
     fun markNotificationAsRead(id: String) {
         _notifications.update { list ->

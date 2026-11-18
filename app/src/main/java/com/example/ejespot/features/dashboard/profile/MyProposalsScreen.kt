@@ -50,12 +50,16 @@ fun MyProposalsScreen(
         when (selectedFilter) {
             "Aprobados" -> uiState.proposals.filter { it.status == ProposalStatus.APPROVED }
             "En revisión" -> uiState.proposals.filter { it.status == ProposalStatus.PENDING }
+            "Rechazados" -> uiState.proposals.filter { it.status == ProposalStatus.REJECTED }
             else -> uiState.proposals
         }
     }
 
     val approvedCount = remember(uiState.proposals) {
         uiState.proposals.count { it.status == ProposalStatus.APPROVED }
+    }
+    val rejectedCount = remember(uiState.proposals) {
+        uiState.proposals.count { it.status == ProposalStatus.REJECTED }
     }
     val earnedXp = remember(uiState.proposals) {
         uiState.proposals.sumOf { it.xpEarned }
@@ -135,6 +139,11 @@ fun MyProposalsScreen(
                     text = stringResource(R.string.my_proposals_filter_pending),
                     selected = selectedFilter == "En revisión",
                     onClick = { selectedFilter = "En revisión" }
+                )
+                ProfileChip(
+                    text = "Rechazados",
+                    selected = selectedFilter == "Rechazados",
+                    onClick = { selectedFilter = "Rechazados" }
                 )
             }
         }
@@ -263,6 +272,7 @@ private fun ProposalCard(
     onDelete: () -> Unit
 ) {
     val isApproved = proposal.status == ProposalStatus.APPROVED
+    val isRejected = proposal.status == ProposalStatus.REJECTED
     val c = ejeSpotColors()
 
     val submittedText = proposal.customSubmittedLabel
@@ -276,7 +286,7 @@ private fun ProposalCard(
         color = c.surface,
         border = BorderStroke(
             1.dp,
-            if (isApproved) c.successBg else c.tertiaryContainer
+            if (isApproved) c.successBg else if (isRejected) c.dangerBg else c.tertiaryContainer
         ),
         shadowElevation = 1.dp,
         modifier = Modifier.fillMaxWidth()
@@ -287,7 +297,7 @@ private fun ProposalCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (isApproved) "✅" else "⏳",
+                    text = if (isApproved) "✅" else if (isRejected) "❌" else "⏳",
                     fontSize = 16.sp
                 )
                 Spacer(modifier = Modifier.width(7.dp))
@@ -302,14 +312,16 @@ private fun ProposalCard(
 
                 Surface(
                     shape = RoundedCornerShape(100.dp),
-                    color = if (isApproved) c.successBg else c.secondaryContainer
+                    color = if (isApproved) c.successBg else if (isRejected) c.dangerBg else c.secondaryContainer
                 ) {
                     Text(
-                        text = if (isApproved) stringResource(R.string.my_proposals_status_approved) else stringResource(R.string.my_proposals_status_pending),
+                        text = if (isApproved) stringResource(R.string.my_proposals_status_approved)
+                               else if (isRejected) "Rechazado"
+                               else stringResource(R.string.my_proposals_status_pending),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 9.5.sp,
-                        color = if (isApproved) c.successText else c.secondary,
+                        color = if (isApproved) c.successText else if (isRejected) c.dangerText else c.secondary,
                         modifier = Modifier.padding(horizontal = 9.dp, vertical = 4.dp)
                     )
                 }
@@ -328,14 +340,34 @@ private fun ProposalCard(
                 Spacer(modifier = Modifier.height(8.dp))
                 Surface(
                     shape = RoundedCornerShape(10.dp),
-                    color = if (isApproved) c.successBg else c.tertiaryContainer,
+                    color = if (isApproved) c.successBg else if (isRejected) c.dangerBg else c.tertiaryContainer,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
                         text = noteText,
                         fontFamily = ManropeFontFamily,
                         fontSize = 11.sp,
-                        color = if (isApproved) c.successText else c.textSoft,
+                        color = if (isApproved) c.successText else if (isRejected) c.dangerText else c.textSoft,
+                        lineHeight = 15.sp,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp)
+                    )
+                }
+            }
+
+            // Motivo de rechazo
+            if (isRejected && !proposal.rejectionReason.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = c.dangerBg,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = "⚠️ Motivo del rechazo: ${proposal.rejectionReason}",
+                        fontFamily = ManropeFontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 11.sp,
+                        color = c.dangerText,
                         lineHeight = 15.sp,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp)
                     )
@@ -367,30 +399,32 @@ private fun ProposalCard(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Botón Editar
-                    IconButton(
-                        onClick = onEdit,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar propuesta",
-                            tint = EjeSpotPrimary,
-                            modifier = Modifier.size(17.dp)
-                        )
-                    }
+                    if (!isRejected) {
+                        // Botón Editar
+                        IconButton(
+                            onClick = onEdit,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar propuesta",
+                                tint = EjeSpotPrimary,
+                                modifier = Modifier.size(17.dp)
+                            )
+                        }
 
-                    // Botón Eliminar
-                    IconButton(
-                        onClick = onDelete,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.DeleteOutline,
-                            contentDescription = "Eliminar propuesta",
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(18.dp)
-                        )
+                        // Botón Eliminar
+                        IconButton(
+                            onClick = onDelete,
+                            modifier = Modifier.size(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DeleteOutline,
+                                contentDescription = "Eliminar propuesta",
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
                     }
 
                     // Botón Ver Spot o Mapa

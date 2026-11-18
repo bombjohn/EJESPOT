@@ -182,7 +182,14 @@ class ProfileViewModel @JvmOverloads constructor(
                             if (sid in approvedIds) {
                                 proposal.copy(status = ProposalStatus.APPROVED, xpEarned = 100)
                             } else {
-                                proposal.copy(status = ProposalStatus.REJECTED)
+                                val rejectNotif = SpotStore.notifications.value.firstOrNull {
+                                    (it.relatedSpotId == sid || it.message.contains(proposal.name, ignoreCase = true)) &&
+                                            it.type == com.example.ejespot.domain.model.NotificationType.REJECTION
+                                }
+                                val reason = rejectNotif?.message?.substringAfter("Motivo: ")?.trim()
+                                    ?: proposal.rejectionReason
+                                    ?: "No cumple con las pautas comunitarias"
+                                proposal.copy(status = ProposalStatus.REJECTED, rejectionReason = reason)
                             }
                         } else {
                             proposal
@@ -497,6 +504,7 @@ class ProfileViewModel @JvmOverloads constructor(
      */
     fun approvePendingSpotById(spotId: String) {
         approveProposalUseCase(spotId)
+        ProfileSampleData.updateProposalStatus(spotId, ProposalStatus.APPROVED)
     }
 
     /**
@@ -505,6 +513,7 @@ class ProfileViewModel @JvmOverloads constructor(
      */
     fun rejectPendingSpotById(spotId: String, reason: String) {
         rejectProposalUseCase(spotId, reason)
+        ProfileSampleData.updateProposalStatus(spotId, ProposalStatus.REJECTED, reason)
     }
 
     fun approveProposal(proposalId: String) {
@@ -591,6 +600,7 @@ class ProfileViewModel @JvmOverloads constructor(
                 customNote = note,
                 spotId = spotId
             )
+            ProfileSampleData.addProposal(currentProfileId, newProposal)
             val updated: List<ProposedSpot> = listOf(newProposal) + state.proposals
             val updatedModeration = if (state.moderationProposals.none { it.id == spotId || it.spotId == spotId }) {
                 listOf(newProposal) + state.moderationProposals

@@ -162,8 +162,36 @@ object ProfileSampleData {
         "invitado" to emptyList()
     )
 
-    fun proposalsFor(profileId: String): List<ProposedSpot> =
-        proposalsByUser[profileId] ?: emptyList()
+    private val dynamicProposalsByUser = mutableMapOf<String, MutableList<ProposedSpot>>()
+
+    fun addProposal(profileId: String, proposal: ProposedSpot) {
+        val list = dynamicProposalsByUser.getOrPut(profileId) { mutableListOf() }
+        list.removeAll { it.id == proposal.id || (proposal.spotId != null && it.spotId == proposal.spotId) }
+        list.add(0, proposal)
+    }
+
+    fun updateProposalStatus(spotId: String, status: com.example.ejespot.domain.model.ProposalStatus, reason: String? = null) {
+        dynamicProposalsByUser.values.forEach { list ->
+            for (i in list.indices) {
+                val p = list[i]
+                if (p.spotId == spotId || p.id == spotId) {
+                    list[i] = p.copy(
+                        status = status,
+                        rejectionReason = reason ?: p.rejectionReason,
+                        xpEarned = if (status == com.example.ejespot.domain.model.ProposalStatus.APPROVED) 100 else p.xpEarned
+                    )
+                }
+            }
+        }
+    }
+
+    fun proposalsFor(profileId: String): List<ProposedSpot> {
+        val dynamic = dynamicProposalsByUser[profileId] ?: emptyList()
+        val static = proposalsByUser[profileId] ?: emptyList()
+        val dynamicSpotIds = dynamic.mapNotNull { it.spotId }.toSet()
+        val dynamicIds = dynamic.map { it.id }.toSet()
+        return dynamic + static.filter { it.id !in dynamicIds && it.spotId !in dynamicSpotIds }
+    }
 
     /** Reseñas quemadas por cuenta. */
     val reviewsByUser: Map<String, List<MyReview>> get() = mapOf(

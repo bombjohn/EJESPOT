@@ -144,6 +144,17 @@ class FirebaseAuthRepository : AuthRepository {
         } catch (_: Exception) { /* ignorar */ }
     }
 
+    /** Elimina la cuenta del usuario en Firebase Auth permanentemente. */
+    suspend fun deleteCurrentUser(): Result<Unit> {
+        val user = firebaseAuth?.currentUser ?: return Result.success(Unit)
+        return try {
+            user.delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     /** Retorna el usuario actual de Firebase, o null si no hay sesión activa. */
     fun getCurrentUser() = try {
         firebaseAuth?.currentUser

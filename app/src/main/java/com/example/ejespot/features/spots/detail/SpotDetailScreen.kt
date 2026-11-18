@@ -721,107 +721,120 @@ fun SpotDetailScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             // --- 6. BOTONES DE ACCIÓN RÁPIDA (VISITAR, ME INTERESA Y COMPARTIR) ---
-            Row(
+            val shareMessage = stringResource(
+                R.string.detail_share_message,
+                currentSpot.name,
+                currentSpot.municipality
+            )
+            val shareChooserTitle = stringResource(R.string.detail_share_chooser)
+
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                // Botón principal: Marcar Visitado con recompensa de XP (ancho completo, legible)
                 Button(
                     onClick = { viewModel.toggleVisited() },
                     modifier = Modifier
-                        .weight(1.2f)
+                        .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(100.dp),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (uiState.isVisited) Color(0xFF2B523A) else EjeSpotPrimary
-                    )
+                    ),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Check,
+                        imageVector = if (uiState.isVisited) Icons.Default.CheckCircle else Icons.Default.Check,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(18.dp)
                     )
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = if (uiState.isVisited) stringResource(R.string.detail_visited_xp)
                         else stringResource(R.string.detail_mark_visited),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 11.5.sp,
+                        fontSize = 13.5.sp,
+                        maxLines = 1,
                         color = Color.White
                     )
                 }
 
-                // Botón "Es importante / Me interesa" (Votar relevancia)
-                OutlinedButton(
-                    onClick = { viewModel.toggleImportant() },
-                    modifier = Modifier
-                        .weight(1.15f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(100.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = if (uiState.isImportant) Color(0xFFFFECE0) else c.surfaceVariant
-                    ),
-                    border = BorderStroke(
-                        1.dp,
-                        if (uiState.isImportant) Color(0xFFE65100) else c.outline
-                    )
+                // Fila secundaria: Importante (Votos de comunidad) + Compartir
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Text(
-                        text = if (uiState.isImportant) "🔥" else "⚡",
-                        fontSize = 14.sp
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = if (uiState.isImportant) "Importante (${currentSpot.importanceVotes})"
-                        else "Me interesa (${currentSpot.importanceVotes})",
-                        fontFamily = ManropeFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp,
-                        color = if (uiState.isImportant) Color(0xFFE65100) else c.textSoft
-                    )
-                }
-
-                // Mensaje de compartir, resuelto aquí (contexto @Composable).
-                val shareMessage = stringResource(
-                    R.string.detail_share_message,
-                    currentSpot.name,
-                    currentSpot.municipality
-                )
-                val shareChooserTitle = stringResource(R.string.detail_share_chooser)
-
-                OutlinedButton(
-                    onClick = {
-                        val sendIntent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, shareMessage)
-                            type = "text/plain"
-                        }
-                        context.startActivity(
-                            Intent.createChooser(sendIntent, shareChooserTitle)
+                    // Botón "Es importante / Me interesa" (Votar relevancia)
+                    OutlinedButton(
+                        onClick = { viewModel.toggleImportant() },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        shape = RoundedCornerShape(100.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            containerColor = if (uiState.isImportant) Color(0xFFFFECE0) else c.surfaceVariant
+                        ),
+                        border = BorderStroke(
+                            1.dp,
+                            if (uiState.isImportant) Color(0xFFE65100) else c.outline
+                        ),
+                        contentPadding = PaddingValues(horizontal = 10.dp)
+                    ) {
+                        Text(
+                            text = if (uiState.isImportant) "🔥" else "⚡",
+                            fontSize = 15.sp
                         )
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(48.dp),
-                    shape = RoundedCornerShape(100.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = c.surfaceVariant),
-                    border = BorderStroke(1.dp, c.outline)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = null,
-                        tint = c.textSoft,
-                        modifier = Modifier.size(15.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = stringResource(R.string.detail_share),
-                        fontFamily = ManropeFontFamily,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.5.sp,
-                        color = c.textSoft
-                    )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = if (uiState.isImportant) "Importante (${currentSpot.importanceVotes})"
+                            else "Me interesa (${currentSpot.importanceVotes})",
+                            fontFamily = ManropeFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            maxLines = 1,
+                            color = if (uiState.isImportant) Color(0xFFE65100) else c.textSoft
+                        )
+                    }
+
+                    // Botón Compartir
+                    OutlinedButton(
+                        onClick = {
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, shareMessage)
+                                type = "text/plain"
+                            }
+                            context.startActivity(
+                                Intent.createChooser(sendIntent, shareChooserTitle)
+                            )
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(44.dp),
+                        shape = RoundedCornerShape(100.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(containerColor = c.surfaceVariant),
+                        border = BorderStroke(1.dp, c.outline),
+                        contentPadding = PaddingValues(horizontal = 10.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = null,
+                            tint = c.textSoft,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.detail_share),
+                            fontFamily = ManropeFontFamily,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            maxLines = 1,
+                            color = c.textSoft
+                        )
+                    }
                 }
             }
 

@@ -397,21 +397,19 @@ fun ProfileScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         // --- INSIGNIAS Y LOGROS (Requisito Proyecto Final) ---
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ProfileSectionHeader(title = "Insignias y Reconocimientos")
-            Text(
-                text = "Ver todas →",
-                fontFamily = ManropeFontFamily,
-                fontWeight = FontWeight.Bold,
-                fontSize = 11.5.sp,
-                color = EjeSpotPrimary,
-                modifier = Modifier.clickable { onGamification() }
-            )
-        }
+        ProfileSectionHeader(
+            title = "Insignias y Reconocimientos",
+            trailing = {
+                Text(
+                    text = "Ver todas →",
+                    fontFamily = ManropeFontFamily,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp,
+                    color = EjeSpotPrimary,
+                    modifier = Modifier.clickable { onGamification() }
+                )
+            }
+        )
         Spacer(modifier = Modifier.height(9.dp))
         ProfileCard {
             uiState.badges.take(3).forEachIndexed { index, badge ->

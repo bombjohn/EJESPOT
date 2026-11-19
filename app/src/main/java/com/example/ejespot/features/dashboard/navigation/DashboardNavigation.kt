@@ -8,6 +8,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -16,6 +17,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.ejespot.core.data.SpotStore
+import com.example.ejespot.core.util.copyToPersistentStorage
 import com.example.ejespot.core.session.SessionManager
 import com.example.ejespot.domain.model.UserRole
 import com.example.ejespot.features.dashboard.profile.EditProfileScreen
@@ -202,6 +204,7 @@ fun DashboardNavigation(
         // Pantalla Detalle de Spot
         composable<DashboardRoutes.SpotDetail> { backStackEntry ->
             val route = backStackEntry.toRoute<DashboardRoutes.SpotDetail>()
+            val context = LocalContext.current
             val feedState by spotListViewModel.uiState.collectAsState()
             // Observar el repositorio para que una reseña recién publicada
             // aparezca en el detalle sin salir y volver a entrar.
@@ -224,6 +227,11 @@ fun DashboardNavigation(
                 },
                 onConsultAi = { name, muni ->
                     navController.navigate(DashboardRoutes.AiAssistant(spotContext = "$name, $muni"))
+                },
+                onImageChanged = { picked ->
+                    copyToPersistentStorage(context, picked)?.let { local ->
+                        spotListViewModel.updateSpotImage(route.spotId, null, local.toString())
+                    }
                 }
             )
         }

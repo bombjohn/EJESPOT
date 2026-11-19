@@ -93,6 +93,10 @@ class SpotListViewModel(
 
     fun addPendingSpot(newSpot: Spot) = spotRepository.addPendingSpot(newSpot)
 
+    /** Actualiza la foto de un spot (copia local persistente y/o URL cloud). */
+    fun updateSpotImage(spotId: String, imageUrl: String?, imageUri: String?) =
+        spotRepository.updateSpotImage(spotId, imageUrl, imageUri)
+
     fun toggleSaveSpot(spotId: String) {
         toggleSaveSpotUseCase(spotId)
     }

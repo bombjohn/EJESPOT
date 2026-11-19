@@ -52,9 +52,11 @@ fun SpotImage(
             contentScale = ContentScale.Crop,
             modifier = modifier
         )
-    } else if (!spot.imageUrl.isNullOrBlank()) {
-        // Imagen subida a Firebase Storage: se descarga por su URL pública,
-        // así sobrevive a reinicios y funciona en cualquier dispositivo.
+    } else if (!spot.imageUrl.isNullOrBlank() &&
+        (spot.imageUrl.startsWith("http://") || spot.imageUrl.startsWith("https://"))
+    ) {
+        // Solo URL públicas: un content:// viejo no se puede cargar y dejaría
+        // el hueco en blanco en vez de caer a la ilustración de respaldo.
         AsyncImage(
             model = spot.imageUrl,
             contentDescription = spot.name,

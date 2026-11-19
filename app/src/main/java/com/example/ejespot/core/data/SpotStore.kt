@@ -786,9 +786,16 @@ object SpotStore {
      * Se limpia el URI local porque `content://` deja de ser válido al
      * reiniciar la app; la URL de la nube es la fuente persistente.
      */
-    fun updateSpotImage(id: String, imageUrl: String) {
+    fun updateSpotImage(id: String, imageUrl: String?, imageUri: String?) {
+        val safeUrl = imageUrl?.takeIf {
+            it.startsWith("http://") || it.startsWith("https://")
+        }
         val updater: (Spot) -> Spot = {
-            it.copy(imageUrl = imageUrl, imageUri = null, imageResId = null)
+            it.copy(
+                imageUrl = safeUrl,
+                imageUri = imageUri?.takeIf { !it.contains("picker_get_content") },
+                imageResId = null
+            )
         }
         _spots.update { list -> list.map { if (it.id == id) updater(it) else it } }
         _pendingSpots.update { list -> list.map { if (it.id == id) updater(it) else it } }

@@ -22,6 +22,22 @@ fun createTempImageUri(context: Context): Uri {
 }
 
 /**
+ * Copia la imagen elegida (galería/cámara) a almacenamiento interno y devuelve
+ * un URI `file://` válido mientras la app esté instalada.
+ *
+ * Los URI `content://` del selector de fotos pierden el permiso al reiniciar:
+ * por eso deben convertirse a un archivo propio antes de guardarlos en el spot.
+ */
+fun copyToPersistentStorage(context: Context, uri: Uri): Uri? = runCatching {
+    val dir = File(context.filesDir, "spot_images").apply { mkdirs() }
+    val file = File(dir, "img_${System.currentTimeMillis()}_${(0..9999).random()}.jpg")
+    context.contentResolver.openInputStream(uri)?.use { input ->
+        file.outputStream().use { output -> input.copyTo(output) }
+    } ?: return@runCatching null
+    Uri.fromFile(file)
+}.getOrNull()
+
+/**
  * Carga el [uri] como un `Bitmap` listo para mostrar en Compose.
  *
  * Se usa para previsualizar la imagen que el usuario eligió de la galería o

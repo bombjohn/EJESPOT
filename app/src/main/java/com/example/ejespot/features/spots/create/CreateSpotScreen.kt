@@ -53,6 +53,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ejespot.R
 import com.example.ejespot.core.component.ImagePickerBottomSheet
 import com.example.ejespot.core.data.SpotStore
+import com.example.ejespot.core.util.copyToPersistentStorage
 import com.example.ejespot.core.util.createTempImageUri
 import com.example.ejespot.core.util.toImageBitmap
 import com.example.ejespot.domain.model.Location
@@ -125,7 +126,11 @@ fun CreateSpotScreen(
         onPriceTypeChanged = viewModel::onPriceTypeChanged,
         onDescriptionChanged = viewModel::onDescriptionChanged,
         imageUri = imageUri,
-        onImagePicked = { imageUri = it },
+        onImagePicked = { picked ->
+            // Guardar una copia propia: el content:// del selector se invalida
+            // al reiniciar y hacía que la foto saliera en blanco.
+            imageUri = picked?.let { copyToPersistentStorage(context, it) ?: it }
+        },
         onSubmit = {
             if (SessionManager.isGuest) {
                 coroutineScope.launch {
@@ -186,7 +191,7 @@ fun CreateSpotScreen(
                             if (cloudUrl.startsWith("http")) {
                                 // Persistir la URL pública (local + Firestore) para que
                                 // la foto se vea en todos los dispositivos y tras reiniciar.
-                                SpotStore.updateSpotImage(newSpot.id, cloudUrl)
+                                SpotStore.updateSpotImage(newSpot.id, cloudUrl, currentUriString)
                             }
                         }
                     }

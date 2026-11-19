@@ -59,8 +59,10 @@ class FirestoreSpotRepository {
                 "isPending" to spot.isPending,
                 "isFinalized" to spot.isFinalized,
                 "importanceVotes" to spot.importanceVotes,
-                "imageUrl" to (spot.imageUrl ?: ""),
-                "imageUri" to (spot.imageUri ?: ""),
+                // Nunca guardar URI temporales del selector de fotos: mueren
+                // al reiniciar y la imagen sale en blanco en otros dispositivos.
+                "imageUrl" to (spot.imageUrl?.takeIf { it.startsWith("http") } ?: ""),
+                "imageUri" to (spot.imageUri?.takeIf { !it.contains("picker_get_content") } ?: ""),
                 "emoji" to spot.emoji,
                 "accentColor" to spot.accentColor,
                 "createdAt" to com.google.firebase.Timestamp.now()

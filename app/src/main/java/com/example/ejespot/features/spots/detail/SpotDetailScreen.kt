@@ -2,6 +2,8 @@ package com.example.ejespot.features.spots.detail
 
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,11 +45,15 @@ fun SpotDetailScreen(
     onNavigateToReviews: ((String) -> Unit)? = null,
     onNavigateToReport: ((String) -> Unit)? = null,
     onConsultAi: ((String, String) -> Unit)? = null,
+    onImageChanged: ((Uri) -> Unit)? = null,
     viewModel: SpotDetailViewModel = viewModel()
 ) {
     val c = ejeSpotColors()
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri -> uri?.let { onImageChanged?.invoke(it) } }
 
     LaunchedEffect(spot) {
         viewModel.setSpot(spot)
@@ -295,6 +301,31 @@ fun SpotDetailScreen(
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text("Eliminar", fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+
+                        // Permite reemplazar la foto del lugar (por ejemplo,
+                        // si la imagen antigua era un URI temporal del selector).
+                        if (onImageChanged != null) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            OutlinedButton(
+                                onClick = { imagePicker.launch("image/*") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(36.dp),
+                                contentPadding = PaddingValues(0.dp),
+                                shape = RoundedCornerShape(8.dp),
+                                colors = ButtonDefaults.outlinedButtonColors(containerColor = c.surface),
+                                border = BorderStroke(1.dp, c.outline)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Image,
+                                    contentDescription = null,
+                                    tint = EjeSpotPrimary,
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Cambiar imagen", fontSize = 11.5.sp, fontWeight = FontWeight.Bold, color = c.text)
                             }
                         }
                     }

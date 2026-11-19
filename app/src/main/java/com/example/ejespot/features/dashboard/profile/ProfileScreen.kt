@@ -65,7 +65,7 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(padding)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 18.dp),
@@ -98,7 +98,7 @@ fun ProfileScreen(
                     .align(Alignment.BottomEnd)
                     .size(30.dp),
                 shape = CircleShape,
-                color = EjeSpotPrimary,
+                color = c.primary,
                 border = BorderStroke(2.dp, c.background),
                 shadowElevation = 2.dp
             ) {
@@ -106,7 +106,7 @@ fun ProfileScreen(
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = stringResource(R.string.profile_edit_avatar_description),
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(14.dp)
                     )
                 }
@@ -128,7 +128,7 @@ fun ProfileScreen(
 
         Surface(
             shape = RoundedCornerShape(100.dp),
-            color = EjeSpotPrimaryContainer,
+            color = c.primaryContainer,
             border = BorderStroke(1.dp, c.successBg)
         ) {
             Text(
@@ -140,7 +140,7 @@ fun ProfileScreen(
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 11.5.sp,
-                color = EjeSpotPrimary,
+                color = c.primary,
                 modifier = Modifier.padding(horizontal = 13.dp, vertical = 5.dp)
             )
         }
@@ -175,7 +175,7 @@ fun ProfileScreen(
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 12.5.sp,
-                        color = EjeSpotPrimary
+                        color = c.primary
                     )
                     Text(
                         text = stringResource(
@@ -196,7 +196,7 @@ fun ProfileScreen(
                         .fillMaxWidth()
                         .height(8.dp)
                         .clip(RoundedCornerShape(100.dp)),
-                    color = EjeSpotPrimary,
+                    color = c.primary,
                     trackColor = c.surfaceVariant
                 )
 
@@ -306,7 +306,7 @@ fun ProfileScreen(
                             .background(
                                 color = when (level.status) {
                                     LevelStatus.ACHIEVED -> c.successBg
-                                    LevelStatus.CURRENT -> EjeSpotPrimaryContainer
+                                    LevelStatus.CURRENT -> c.primaryContainer
                                     LevelStatus.LOCKED -> c.surfaceVariant
                                 },
                                 shape = CircleShape
@@ -324,7 +324,7 @@ fun ProfileScreen(
                             fontFamily = ManropeFontFamily,
                             fontWeight = if (level.status == LevelStatus.CURRENT) FontWeight.ExtraBold else FontWeight.Bold,
                             fontSize = 12.5.sp,
-                            color = if (level.status == LevelStatus.CURRENT) EjeSpotPrimary else c.text
+                            color = if (level.status == LevelStatus.CURRENT) c.primary else c.text
                         )
                         Text(
                             text = stringResource(level.rangeLabelRes),
@@ -338,7 +338,7 @@ fun ProfileScreen(
                         LevelStatus.ACHIEVED -> Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = stringResource(R.string.profile_level_achieved),
-                            tint = EjeSpotPrimary,
+                            tint = c.primary,
                             modifier = Modifier.size(17.dp)
                         )
 
@@ -412,7 +412,7 @@ fun ProfileScreen(
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
-                    color = EjeSpotPrimary,
+                    color = c.primary,
                     modifier = Modifier.clickable { onGamification() }
                 )
             }
@@ -431,7 +431,7 @@ fun ProfileScreen(
                         modifier = Modifier
                             .size(36.dp)
                             .background(
-                                if (badge.isUnlocked) EjeSpotPrimaryContainer else c.surfaceVariant,
+                                if (badge.isUnlocked) c.primaryContainer else c.surfaceVariant,
                                 CircleShape
                             ),
                         contentAlignment = Alignment.Center
@@ -591,8 +591,8 @@ fun ProfileScreen(
                 emoji = "🔔",
                 title = stringResource(R.string.profile_notifications_center),
                 badge = if (uiState.unreadNotifications > 0) stringResource(R.string.profile_notifications_new, uiState.unreadNotifications) else stringResource(R.string.profile_notifications_up_to_date),
-                badgeColor = if (uiState.unreadNotifications > 0) EjeSpotSecondary else EjeSpotPrimary,
-                badgeBackground = if (uiState.unreadNotifications > 0) EjeSpotSecondaryContainer else EjeSpotPrimaryContainer,
+                badgeColor = if (uiState.unreadNotifications > 0) c.secondary else c.primary,
+                badgeBackground = if (uiState.unreadNotifications > 0) c.secondaryContainer else c.primaryContainer,
                 onClick = onNotifications
             )
             HorizontalDivider(color = c.surfaceVariant, modifier = Modifier.padding(start = 59.dp))
@@ -726,7 +726,7 @@ private fun ProfileStat(
             fontFamily = FrauncesFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp,
-            color = EjeSpotPrimary
+            color = c.primary
         )
         Text(
             text = label,
@@ -821,7 +821,7 @@ private fun ModerationQueueDialog(
                                             fontFamily = ManropeFontFamily,
                                             fontWeight = FontWeight.Bold,
                                             fontSize = 11.sp,
-                                            color = EjeSpotPrimary
+                                            color = c.primary
                                         )
                                     }
                                 }

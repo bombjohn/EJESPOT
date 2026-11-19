@@ -87,7 +87,7 @@ fun SpotDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(bottom = padding.calculateBottomPadding())
             .verticalScroll(rememberScrollState())
     ) {
@@ -173,7 +173,7 @@ fun SpotDetailScreen(
                 .fillMaxWidth()
                 .offset(y = (-24).dp)
                 .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                .background(EjeSpotBackground)
+                .background(c.background)
                 .padding(horizontal = 20.dp, vertical = 22.dp)
         ) {
             // --- GESTIÓN DE SPOT (SOLO MODERADOR O EL USUARIO CREADOR DEL SPOT) ---

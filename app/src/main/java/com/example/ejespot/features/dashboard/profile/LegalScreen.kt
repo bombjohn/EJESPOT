@@ -1,4 +1,4 @@
-package com.example.ejespot.features.dashboard.profile
+﻿package com.example.ejespot.features.dashboard.profile
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -104,7 +105,7 @@ fun LegalScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding())
     ) {
         ProfileTopBar(title = stringResource(document.titleRes), onBack = onNavigateBack)
@@ -145,7 +146,7 @@ fun LegalScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Surface(
                                 shape = CircleShape,
-                                color = EjeSpotPrimaryContainer
+                                color = c.primaryContainer
                             ) {
                                 Box(
                                     modifier = Modifier.size(23.dp),
@@ -156,7 +157,7 @@ fun LegalScreen(
                                         fontFamily = ManropeFontFamily,
                                         fontWeight = FontWeight.ExtraBold,
                                         fontSize = 10.5.sp,
-                                        color = EjeSpotPrimary
+                                        color = c.primary
                                     )
                                 }
                             }
@@ -219,14 +220,14 @@ fun LegalScreen(
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = RoundedCornerShape(100.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = EjeSpotPrimary)
+                    colors = ButtonDefaults.buttonColors(containerColor = c.primary)
                 ) {
                     Text(
                         text = stringResource(R.string.legal_understood),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 14.sp,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
@@ -242,3 +243,4 @@ fun LegalScreen(
         }
     }
 }
+

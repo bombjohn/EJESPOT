@@ -1,4 +1,4 @@
-package com.example.ejespot.features.dashboard.profile
+﻿package com.example.ejespot.features.dashboard.profile
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -46,7 +46,7 @@ fun MyProposalsScreen(
     var selectedFilter by remember { mutableStateOf("Todos") }
 
     // Al abrir la pantalla se refrescan las propuestas del usuario activo:
-    // así los puntos recién publicados aparecen aunque la lista estuviera
+    // asÃ­ los puntos reciÃ©n publicados aparecen aunque la lista estuviera
     // desactualizada al entrar desde otra pantalla.
     LaunchedEffect(Unit) {
         viewModel.reloadForCurrentUser()
@@ -58,7 +58,7 @@ fun MyProposalsScreen(
     val filtered = remember(uiState.proposals, selectedFilter) {
         when (selectedFilter) {
             "Aprobados" -> uiState.proposals.filter { it.status == ProposalStatus.APPROVED }
-            "En revisión" -> uiState.proposals.filter { it.status == ProposalStatus.PENDING }
+            "En revisiÃ³n" -> uiState.proposals.filter { it.status == ProposalStatus.PENDING }
             "Rechazados" -> uiState.proposals.filter { it.status == ProposalStatus.REJECTED }
             else -> uiState.proposals
         }
@@ -77,7 +77,7 @@ fun MyProposalsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding())
     ) {
         ProfileTopBar(
@@ -86,14 +86,14 @@ fun MyProposalsScreen(
             trailing = {
                 Surface(
                     shape = RoundedCornerShape(100.dp),
-                    color = EjeSpotPrimaryContainer
+                    color = c.primaryContainer
                 ) {
                     Text(
                         text = "${uiState.proposals.size}",
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 11.5.sp,
-                        color = EjeSpotPrimary,
+                        color = c.primary,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
                     )
                 }
@@ -146,8 +146,8 @@ fun MyProposalsScreen(
                 )
                 ProfileChip(
                     text = stringResource(R.string.my_proposals_filter_pending),
-                    selected = selectedFilter == "En revisión",
-                    onClick = { selectedFilter = "En revisión" }
+                    selected = selectedFilter == "En revisiÃ³n",
+                    onClick = { selectedFilter = "En revisiÃ³n" }
                 )
                 ProfileChip(
                     text = stringResource(R.string.my_proposals_filter_rejected),
@@ -168,7 +168,7 @@ fun MyProposalsScreen(
             ) {
                 ProfileEmptyState(
                     modifier = Modifier.weight(1f),
-                    emoji = "📍",
+                    emoji = "ðŸ“",
                     title = stringResource(R.string.my_proposals_empty_filter_title),
                     message = stringResource(R.string.my_proposals_empty_filter_message)
                 )
@@ -207,13 +207,13 @@ fun MyProposalsScreen(
                 viewModel.editProposal(proposal.id, newName, newLocation, newNote)
                 proposalToEdit = null
                 coroutineScope.launch {
-                    snackbarHostState?.showSnackbar("Propuesta '$newName' actualizada con éxito")
+                    snackbarHostState?.showSnackbar("Propuesta '$newName' actualizada con Ã©xito")
                 }
             }
         )
     }
 
-    // Modal de confirmación para eliminar
+    // Modal de confirmaciÃ³n para eliminar
     proposalToDelete?.let { proposal ->
         DeleteProposalDialog(
             proposal = proposal,
@@ -247,7 +247,7 @@ private fun SummaryCard(value: String, label: String, modifier: Modifier = Modif
                 fontFamily = FrauncesFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 17.sp,
-                color = EjeSpotPrimary
+                color = c.primary
             )
             Text(
                 text = label,
@@ -261,18 +261,19 @@ private fun SummaryCard(value: String, label: String, modifier: Modifier = Modif
 
 @Composable
 private fun ProposeNewButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val c = ejeSpotColors()
     Button(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .height(46.dp),
         shape = RoundedCornerShape(100.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = EjeSpotSecondary)
+        colors = ButtonDefaults.buttonColors(containerColor = c.secondary)
     ) {
         Icon(
             imageVector = Icons.Default.Add,
             contentDescription = null,
-            tint = Color.White,
+            tint = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier.size(17.dp)
         )
         Spacer(modifier = Modifier.width(6.dp))
@@ -281,7 +282,7 @@ private fun ProposeNewButton(onClick: () -> Unit, modifier: Modifier = Modifier)
             fontFamily = ManropeFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 13.sp,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onPrimary
         )
     }
 }
@@ -320,7 +321,7 @@ private fun ProposalCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (isApproved) "✅" else if (isRejected) "❌" else "⏳",
+                    text = if (isApproved) "âœ…" else if (isRejected) "âŒ" else "â³",
                     fontSize = 16.sp
                 )
                 Spacer(modifier = Modifier.width(7.dp))
@@ -386,7 +387,7 @@ private fun ProposalCard(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = "⚠️ Motivo del rechazo: ${proposal.rejectionReason}",
+                        text = "âš ï¸ Motivo del rechazo: ${proposal.rejectionReason}",
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.SemiBold,
                         fontSize = 11.sp,
@@ -406,14 +407,14 @@ private fun ProposalCard(
             ) {
                 Surface(
                     shape = RoundedCornerShape(100.dp),
-                    color = EjeSpotPrimaryContainer
+                    color = c.primaryContainer
                 ) {
                     Text(
                         text = if (proposal.xpEarned > 0) stringResource(R.string.my_proposals_xp_earned, proposal.xpEarned) else stringResource(R.string.my_proposals_xp_pending),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.ExtraBold,
                         fontSize = 9.5.sp,
-                        color = EjeSpotPrimary,
+                        color = c.primary,
                         modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
                     )
                 }
@@ -423,7 +424,7 @@ private fun ProposalCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (!isRejected) {
-                        // Botón Editar
+                        // BotÃ³n Editar
                         IconButton(
                             onClick = onEdit,
                             modifier = Modifier.size(32.dp)
@@ -431,12 +432,12 @@ private fun ProposalCard(
                             Icon(
                                 imageVector = Icons.Default.Edit,
                                 contentDescription = "Editar propuesta",
-                                tint = EjeSpotPrimary,
+                                tint = c.primary,
                                 modifier = Modifier.size(17.dp)
                             )
                         }
 
-                        // Botón Eliminar
+                        // BotÃ³n Eliminar
                         IconButton(
                             onClick = onDelete,
                             modifier = Modifier.size(32.dp)
@@ -450,7 +451,7 @@ private fun ProposalCard(
                         }
                     }
 
-                    // Botón Ver Spot o Mapa
+                    // BotÃ³n Ver Spot o Mapa
                     OutlinedButton(
                         onClick = {
                             val spotId = proposal.spotId
@@ -482,6 +483,7 @@ private fun EditProposalDialog(
     onDismiss: () -> Unit,
     onConfirm: (name: String, location: String, note: String) -> Unit
 ) {
+    val c = ejeSpotColors()
     var name by remember { mutableStateOf(proposal.name) }
     var location by remember { mutableStateOf(proposal.location) }
     val initialNote = proposal.customNote
@@ -517,14 +519,14 @@ private fun EditProposalDialog(
                 OutlinedTextField(
                     value = location,
                     onValueChange = { location = it },
-                    label = { Text("Ubicación (ej: Salento, Quindío)") },
+                    label = { Text("UbicaciÃ³n (ej: Salento, QuindÃ­o)") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
-                    label = { Text("Nota o descripción de la propuesta") },
+                    label = { Text("Nota o descripciÃ³n de la propuesta") },
                     minLines = 3,
                     maxLines = 5,
                     modifier = Modifier.fillMaxWidth()
@@ -539,7 +541,7 @@ private fun EditProposalDialog(
                     }
                 },
                 enabled = isFormValid,
-                colors = ButtonDefaults.buttonColors(containerColor = EjeSpotPrimary)
+                colors = ButtonDefaults.buttonColors(containerColor = c.primary)
             ) {
                 Text("Guardar cambios", fontWeight = FontWeight.Bold)
             }
@@ -562,7 +564,7 @@ private fun DeleteProposalDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "¿Eliminar propuesta?",
+                text = "Â¿Eliminar propuesta?",
                 fontFamily = FrauncesFontFamily,
                 fontWeight = FontWeight.Bold,
                 fontSize = 18.sp
@@ -570,7 +572,7 @@ private fun DeleteProposalDialog(
         },
         text = {
             Text(
-                text = "¿Estás seguro de que deseas eliminar '${proposal.name}'? Se quitará de tu lista de puntos propuestos y de la cola de moderación.",
+                text = "Â¿EstÃ¡s seguro de que deseas eliminar '${proposal.name}'? Se quitarÃ¡ de tu lista de puntos propuestos y de la cola de moderaciÃ³n.",
                 fontFamily = ManropeFontFamily,
                 fontSize = 13.sp
             )
@@ -580,7 +582,7 @@ private fun DeleteProposalDialog(
                 onClick = onConfirm,
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
-                Text("Eliminar", fontWeight = FontWeight.Bold, color = Color.White)
+                Text("Eliminar", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onError)
             }
         },
         dismissButton = {
@@ -590,3 +592,4 @@ private fun DeleteProposalDialog(
         }
     )
 }
+

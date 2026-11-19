@@ -1,4 +1,4 @@
-package com.example.ejespot.features.dashboard.profile
+﻿package com.example.ejespot.features.dashboard.profile
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -53,7 +53,7 @@ fun EditProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding())
             .verticalScroll(rememberScrollState())
     ) {
@@ -70,7 +70,7 @@ fun EditProfileScreen(
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.Bold,
                         fontSize = 11.5.sp,
-                        color = EjeSpotPrimary
+                        color = c.primary
                     )
                 }
             }
@@ -84,7 +84,7 @@ fun EditProfileScreen(
         ) {
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Avatar editable (sin carga de imágenes en esta fase)
+            // Avatar editable (sin carga de imÃ¡genes en esta fase)
             Box(
                 modifier = Modifier.size(104.dp),
                 contentAlignment = Alignment.Center
@@ -122,7 +122,7 @@ fun EditProfileScreen(
                         .align(Alignment.BottomEnd)
                         .size(32.dp),
                     shape = CircleShape,
-                    color = EjeSpotPrimary,
+                    color = c.primary,
                     border = BorderStroke(2.dp, c.background),
                     shadowElevation = 2.dp
                 ) {
@@ -130,7 +130,7 @@ fun EditProfileScreen(
                         Icon(
                             imageVector = Icons.Default.PhotoCamera,
                             contentDescription = stringResource(R.string.edit_profile_photo_description),
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(15.dp)
                         )
                     }
@@ -184,7 +184,7 @@ fun EditProfileScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "📍",
+                        text = "ðŸ“",
                         fontSize = 14.sp
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -207,7 +207,7 @@ fun EditProfileScreen(
 
             Spacer(modifier = Modifier.height(15.dp))
 
-            // Descripción breve con contador de caracteres
+            // DescripciÃ³n breve con contador de caracteres
             FieldLabel(stringResource(R.string.edit_profile_bio_label))
             Spacer(modifier = Modifier.height(6.dp))
             Box(
@@ -236,7 +236,7 @@ fun EditProfileScreen(
                         color = c.text,
                         lineHeight = 18.sp
                     ),
-                    cursorBrush = SolidColor(EjeSpotPrimary),
+                    cursorBrush = SolidColor(c.primary),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(66.dp)
@@ -278,14 +278,14 @@ fun EditProfileScreen(
                     .fillMaxWidth()
                     .height(50.dp),
                 shape = RoundedCornerShape(100.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = EjeSpotPrimary)
+                colors = ButtonDefaults.buttonColors(containerColor = c.primary)
             ) {
                 Text(
                     text = stringResource(R.string.edit_profile_save),
                     fontFamily = ManropeFontFamily,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
 
@@ -336,14 +336,14 @@ fun EditProfileScreen(
                                 fontFamily = ManropeFontFamily,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 fontSize = 13.sp,
-                                color = if (isSelected) EjeSpotPrimary else c.text,
+                                color = if (isSelected) c.primary else c.text,
                                 modifier = Modifier.weight(1f)
                             )
                             if (isSelected) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = stringResource(R.string.edit_profile_location_selected_description),
-                                    tint = EjeSpotPrimary,
+                                    tint = c.primary,
                                     modifier = Modifier.size(18.dp)
                                 )
                             }
@@ -415,9 +415,10 @@ private fun ProfileFormField(
                     fontSize = 13.5.sp,
                     color = c.text
                 ),
-                cursorBrush = SolidColor(EjeSpotPrimary),
+                cursorBrush = SolidColor(c.primary),
                 modifier = Modifier.fillMaxWidth()
             )
         }
     }
 }
+

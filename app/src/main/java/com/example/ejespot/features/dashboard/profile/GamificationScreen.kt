@@ -45,7 +45,7 @@ fun GamificationScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding())
             .verticalScroll(rememberScrollState())
     ) {
@@ -224,7 +224,7 @@ fun GamificationScreen(
                             fontFamily = ManropeFontFamily,
                             fontWeight = FontWeight.Bold,
                             fontSize = 13.sp,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }

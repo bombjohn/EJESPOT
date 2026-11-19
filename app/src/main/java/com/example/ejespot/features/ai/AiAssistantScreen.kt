@@ -62,7 +62,7 @@ fun AiAssistantScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding())
             // Con edge-to-edge, el teclado tapa el campo de texto si no se
             // reserva su altura (targetSdk 37).

@@ -61,7 +61,7 @@ fun MyReviewsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding())
     ) {
         ProfileTopBar(title = stringResource(R.string.my_reviews_title), onBack = onNavigateBack)

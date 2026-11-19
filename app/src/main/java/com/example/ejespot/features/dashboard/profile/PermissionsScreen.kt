@@ -1,4 +1,4 @@
-package com.example.ejespot.features.dashboard.profile
+﻿package com.example.ejespot.features.dashboard.profile
 
 import android.content.Intent
 import android.net.Uri
@@ -40,7 +40,7 @@ fun PermissionsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding())
             .verticalScroll(rememberScrollState())
     ) {
@@ -67,7 +67,7 @@ fun PermissionsScreen(
 
             uiState.permissions.forEachIndexed { index, permission ->
                 val permissionTitle = stringResource(permission.titleRes)
-                // Mensajes resueltos aquí (contexto @Composable) para poder
+                // Mensajes resueltos aquÃ­ (contexto @Composable) para poder
                 // mostrarlos desde la corrutina del snackbar.
                 val enabledMessage = stringResource(
                     R.string.permissions_enabled_snackbar,
@@ -206,12 +206,13 @@ private fun PermissionCard(
                 checked = permission.isGranted,
                 onCheckedChange = { onToggle() },
                 colors = SwitchDefaults.colors(
-                    checkedThumbColor = Color.White,
-                    checkedTrackColor = EjeSpotPrimary,
-                    uncheckedThumbColor = Color.White,
-                    uncheckedTrackColor = Color(0xFFD9CFC0)
+                    checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                    checkedTrackColor = c.primary,
+                    uncheckedThumbColor = c.surface,
+                    uncheckedTrackColor = c.outline
                 )
             )
         }
     }
 }
+

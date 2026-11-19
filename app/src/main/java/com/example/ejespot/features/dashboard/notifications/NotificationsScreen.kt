@@ -61,7 +61,7 @@ fun NotificationsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(padding)
     ) {
         // --- Header con botón Atrás y Acción "Marcar todas como leídas" ---

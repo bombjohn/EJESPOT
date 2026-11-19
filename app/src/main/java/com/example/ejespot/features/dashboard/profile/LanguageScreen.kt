@@ -1,4 +1,4 @@
-package com.example.ejespot.features.dashboard.profile
+﻿package com.example.ejespot.features.dashboard.profile
 
 import android.app.Activity
 import android.os.Build
@@ -42,7 +42,7 @@ fun LanguageScreen(
     val c = ejeSpotColors()
     val context = LocalContext.current
 
-    // Mensaje de confirmación por cada idioma, resuelto en el contexto
+    // Mensaje de confirmaciÃ³n por cada idioma, resuelto en el contexto
     // @Composable para poder mostrarlo desde la corrutina del snackbar.
     val selectedMessages: Map<AppLanguage, String> = languages.associateWith { language ->
         stringResource(R.string.language_selected_snackbar, language.nativeName)
@@ -51,7 +51,7 @@ fun LanguageScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(EjeSpotBackground)
+            .background(c.background)
             .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding())
             .verticalScroll(rememberScrollState())
     ) {
@@ -88,7 +88,7 @@ fun LanguageScreen(
                                         )
                                     }
                                     // En Android 12 y anteriores el idioma se aplica
-                                    // sobre el contexto de la Activity, así que hay
+                                    // sobre el contexto de la Activity, asÃ­ que hay
                                     // que recrearla para que cambien los textos.
                                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
                                         (context as? Activity)?.recreate()
@@ -117,7 +117,7 @@ fun LanguageScreen(
                                     fontFamily = ManropeFontFamily,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 13.5.sp,
-                                    color = if (isSelected) EjeSpotPrimary else c.text
+                                    color = if (isSelected) c.primary else c.text
                                 )
                                 Text(
                                     text = language.nativeName,
@@ -130,14 +130,14 @@ fun LanguageScreen(
                             if (isSelected) {
                                 Surface(
                                     shape = CircleShape,
-                                    color = EjeSpotPrimary,
+                                    color = c.primary,
                                     modifier = Modifier.size(24.dp)
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Icon(
                                             imageVector = Icons.Default.Check,
                                             contentDescription = stringResource(R.string.language_selected_description),
-                                            tint = Color.White,
+                                            tint = MaterialTheme.colorScheme.onPrimary,
                                             modifier = Modifier.size(15.dp)
                                         )
                                     }
@@ -176,3 +176,4 @@ fun LanguageScreen(
         }
     }
 }
+

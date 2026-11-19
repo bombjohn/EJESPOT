@@ -1,4 +1,4 @@
-package com.example.ejespot.features.dashboard.profile.components
+﻿package com.example.ejespot.features.dashboard.profile.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -33,7 +34,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ejespot.ui.theme.EjeSpotPrimary
 import com.example.ejespot.ui.theme.FrauncesFontFamily
 import com.example.ejespot.ui.theme.ManropeFontFamily
 import com.example.ejespot.ui.theme.ejeSpotColors
@@ -147,9 +147,9 @@ fun ProfileMenuRow(
     subtitle: String? = null,
     value: String? = null,
     badge: String? = null,
-    badgeColor: Color = Color(0xFF2C5640),
-    badgeBackground: Color = Color(0xFFD7E8DC),
-    titleColor: Color = Color(0xFF1F1A15),
+    badgeColor: Color? = null,
+    badgeBackground: Color? = null,
+    titleColor: Color? = null,
     showChevron: Boolean = true,
     enabled: Boolean = true
 ) {
@@ -178,7 +178,7 @@ fun ProfileMenuRow(
                 fontFamily = ManropeFontFamily,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.sp,
-                color = titleColor,
+                color = titleColor ?: c.text,
                 lineHeight = 17.sp
             )
             if (!subtitle.isNullOrBlank()) {
@@ -196,14 +196,14 @@ fun ProfileMenuRow(
         if (badge != null) {
             Surface(
                 shape = RoundedCornerShape(100.dp),
-                color = badgeBackground
+                color = badgeBackground ?: c.primaryContainer
             ) {
                 Text(
                     text = badge,
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 10.sp,
-                    color = badgeColor,
+                    color = badgeColor ?: c.onPrimaryContainer,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                 )
             }
@@ -284,10 +284,10 @@ fun ProfileSwitchRow(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = EjeSpotPrimary,
-                uncheckedThumbColor = Color.White,
-                uncheckedTrackColor = c.starIdle
+                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                checkedTrackColor = c.primary,
+                uncheckedThumbColor = c.surface,
+                uncheckedTrackColor = c.outline
             )
         )
     }
@@ -303,8 +303,8 @@ fun ProfileChip(
     val c = ejeSpotColors()
     Surface(
         shape = RoundedCornerShape(100.dp),
-        color = if (selected) EjeSpotPrimary else c.chipIdle,
-        border = BorderStroke(1.dp, if (selected) EjeSpotPrimary else c.outline),
+        color = if (selected) c.primary else c.chipIdle,
+        border = BorderStroke(1.dp, if (selected) c.primary else c.outline),
         modifier = modifier.clickable(onClick = onClick)
     ) {
         Text(
@@ -312,7 +312,7 @@ fun ProfileChip(
             fontFamily = ManropeFontFamily,
             fontWeight = FontWeight.Bold,
             fontSize = 12.sp,
-            color = if (selected) Color.White else c.textMuted,
+            color = if (selected) MaterialTheme.colorScheme.onPrimary else c.textMuted,
             modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp)
         )
     }
@@ -355,3 +355,4 @@ fun ProfileEmptyState(
         }
     }
 }
+

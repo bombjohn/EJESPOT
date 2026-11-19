@@ -141,7 +141,7 @@ fun MyProposalsScreen(
                     onClick = { selectedFilter = "En revisión" }
                 )
                 ProfileChip(
-                    text = "Rechazados",
+                    text = stringResource(R.string.my_proposals_filter_rejected),
                     selected = selectedFilter == "Rechazados",
                     onClick = { selectedFilter = "Rechazados" }
                 )
@@ -316,7 +316,7 @@ private fun ProposalCard(
                 ) {
                     Text(
                         text = if (isApproved) stringResource(R.string.my_proposals_status_approved)
-                               else if (isRejected) "Rechazado"
+                               else if (isRejected) stringResource(R.string.my_proposals_status_rejected)
                                else stringResource(R.string.my_proposals_status_pending),
                         fontFamily = ManropeFontFamily,
                         fontWeight = FontWeight.ExtraBold,

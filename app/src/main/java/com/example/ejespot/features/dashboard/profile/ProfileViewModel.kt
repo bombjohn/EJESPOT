@@ -121,9 +121,9 @@ class ProfileViewModel @JvmOverloads constructor(
                 _uiState.update { state ->
                     val userProposals = state.proposals
                     state.copy(
-                        activeSpotsCount = spots.count { it.addedBy.contains(currentProfileId, ignoreCase = true) && !it.isPending && !it.isFinalized }.coerceAtLeast(if (currentProfileId == "camila") 2 else 1),
+                        activeSpotsCount = spots.count { isSpotOwnedByCurrentUser(it) && !it.isPending && !it.isFinalized }.coerceAtLeast(if (currentProfileId == "camila") 2 else 0),
                         pendingSpotsCount = userProposals.count { it.status == ProposalStatus.PENDING },
-                        finalizedSpotsCount = spots.count { it.addedBy.contains(currentProfileId, ignoreCase = true) && it.isFinalized }
+                        finalizedSpotsCount = spots.count { isSpotOwnedByCurrentUser(it) && it.isFinalized }
                     )
                 }
             }
@@ -167,13 +167,12 @@ class ProfileViewModel @JvmOverloads constructor(
                     .filter { !it.isPending }
                     .map { it.id }
                     .toSet()
-                val ownTag = currentUserSpotTag()
                 _uiState.update { state ->
                     val knownSpotIds = state.proposals.mapNotNull { it.spotId }.toSet()
                     // Propuestas propias que están en el store pero no en la
                     // lista local (p. ej. tras reiniciar: el spot persiste).
                     val ownNew = pending
-                        .filter { it.addedBy.equals(ownTag, ignoreCase = true) && it.id !in knownSpotIds }
+                        .filter { isSpotOwnedByCurrentUser(it) && it.id !in knownSpotIds }
                         .map { it.toProposal() }
                     // Sincroniza el estado de las propias con la moderación.
                     val synced = (ownNew + state.proposals).map { proposal ->
@@ -485,6 +484,27 @@ class ProfileViewModel @JvmOverloads constructor(
         } else {
             "@${SessionManager.displayName.replace(" ", "_").lowercase()}"
         }
+
+    /**
+     * Verifica si un spot fue creado/propuesto por el usuario con sesión activa.
+     */
+    private fun isSpotOwnedByCurrentUser(spot: Spot): Boolean {
+        if (SessionManager.isGuest) {
+            return spot.addedBy.equals("@invitado", ignoreCase = true)
+        }
+        val user = SessionManager.currentUser ?: return false
+        val userHandle = "@${SessionManager.displayName.replace(" ", "_").lowercase()}"
+        val userEmailHandle = "@${user.email.substringBefore("@").lowercase()}"
+        val cleanAddedBy = spot.addedBy.removePrefix("@").trim()
+
+        return spot.addedBy.equals(userHandle, ignoreCase = true) ||
+                spot.addedBy.equals(userEmailHandle, ignoreCase = true) ||
+                spot.addedBy.equals(user.email, ignoreCase = true) ||
+                spot.addedBy.equals(user.id, ignoreCase = true) ||
+                spot.addedBy.equals(user.profileId, ignoreCase = true) ||
+                cleanAddedBy.equals(SessionManager.displayName.replace(" ", "_"), ignoreCase = true) ||
+                cleanAddedBy.equals(user.email.substringBefore("@"), ignoreCase = true)
+    }
 
     /** Convierte un spot pendiente del store en propuesta para el panel. */
     private fun Spot.toProposal(): ProposedSpot = ProposedSpot(

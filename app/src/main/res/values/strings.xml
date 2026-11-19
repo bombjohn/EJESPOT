@@ -433,6 +433,8 @@
     <string name="my_proposals_propose_new">Proponer un nuevo punto</string>
     <string name="my_proposals_status_approved">Aprobado</string>
     <string name="my_proposals_status_pending">En Revisión</string>
+    <string name="my_proposals_status_rejected">Rechazado</string>
+    <string name="my_proposals_filter_rejected">Rechazados</string>
     <string name="my_proposals_location">📍 %1$s · %2$s</string>
     <string name="my_proposals_xp_earned">+%1$d XP ganados</string>
     <string name="my_proposals_xp_pending">Gana +100 XP al aprobarse</string>

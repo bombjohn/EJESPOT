@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
@@ -46,11 +47,13 @@ import com.example.ejespot.features.spots.list.SpotListViewModel
 import com.example.ejespot.ui.theme.*
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import com.example.ejespot.features.spots.create.CartoDark
+import com.example.ejespot.features.spots.create.CartoVoyager
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.compass.CompassOverlay
+import org.osmdroid.views.overlay.ScaleBarOverlay
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
@@ -78,6 +81,7 @@ fun MapScreen(
     padding: PaddingValues = PaddingValues(),
     snackbarHostState: SnackbarHostState? = null,
     onNavigateToSpotDetail: (String) -> Unit,
+    onNavigateToCreateSpot: (Double, Double) -> Unit = { _, _ -> },
     viewModel: SpotListViewModel
 ) {
     val c = ejeSpotColors()
@@ -277,7 +281,7 @@ fun MapScreen(
                         color = c.primaryContainer
                     ) {
                         Text(
-                            text = "OPENSTREETMAP",
+                            text = "OSM · CARTO",
                             fontFamily = ManropeFontFamily,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 9.sp,
@@ -639,6 +643,26 @@ fun MapScreen(
                 }
             }
         }
+
+        // Crear un spot exactamente donde está centrado el mapa.
+        FloatingActionButton(
+            onClick = {
+                val center = mapView.mapCenter
+                if (center != null) {
+                    onNavigateToCreateSpot(center.latitude, center.longitude)
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .padding(end = 16.dp),
+            containerColor = c.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = stringResource(R.string.map_create_here)
+            )
+        }
     }
 }
 
@@ -659,7 +683,7 @@ private fun rememberMapViewWithLifecycle(context: Context, darkTheme: Boolean): 
             java.io.File(context.cacheDir, "osmdroid/tiles")
 
         MapView(context).apply {
-            setTileSource(TileSourceFactory.MAPNIK)
+            setTileSource(if (darkTheme) CartoDark else CartoVoyager)
             setMultiTouchControls(true)
             controller.setZoom(DEFAULT_ZOOM)
             controller.setCenter(EJE_CAFETERO_CENTER)
@@ -667,6 +691,14 @@ private fun rememberMapViewWithLifecycle(context: Context, darkTheme: Boolean): 
             maxZoomLevel = 19.0
             // Controles nativos: brújula y capa de ubicación (se activa al conceder el permiso).
             overlays.add(CompassOverlay(context, this))
+            val scaleBar = ScaleBarOverlay(this).apply {
+                setCentred(true)
+                setScaleBarOffset(
+                    (context.resources.displayMetrics.density * 16).toInt(),
+                    (context.resources.displayMetrics.density * 16).toInt()
+                )
+            }
+            overlays.add(scaleBar)
             // La capa de ubicación queda creada pero inactiva: el botón "mi ubicación"
             // de MapScreen la activa solo después de conceder el permiso en tiempo de ejecución.
             val locationOverlay = MyLocationNewOverlay(GpsMyLocationProvider(context), this)
@@ -674,26 +706,10 @@ private fun rememberMapViewWithLifecycle(context: Context, darkTheme: Boolean): 
         }
     }
 
-    // Aplica el filtro de color oscuro al mapa cuando el tema está en modo oscuro.
+    // Mosaicos dedicados para claro/oscuro: se ven mucho mejor que invertir
+    // los colores del mapa con un filtro.
     LaunchedEffect(darkTheme) {
-        // osmdroid no tiene tema oscuro nativo: invertimos los colores del mapa.
-        @Suppress("DEPRECATION")
-        mapView.overlayManager.tilesOverlay.setColorFilter(
-            if (darkTheme) {
-                android.graphics.ColorMatrixColorFilter(
-                    android.graphics.ColorMatrix(
-                        floatArrayOf(
-                            -0.9f, 0f, 0f, 0f, 255f,
-                            0f, -0.9f, 0f, 0f, 255f,
-                            0f, 0f, -0.9f, 0f, 255f,
-                            0f, 0f, 0f, 1f, 0f
-                        )
-                    )
-                )
-            } else {
-                null
-            }
-        )
+        mapView.setTileSource(if (darkTheme) CartoDark else CartoVoyager)
         mapView.invalidate()
     }
 

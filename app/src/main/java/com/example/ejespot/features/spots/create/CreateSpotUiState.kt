@@ -4,6 +4,9 @@ data class CreateSpotUiState(
     val name: String = "",
     val category: String = "Naturaleza",
     val location: String = "Pereira, Risaralda",
+    /** Coordenadas elegidas en el mapa; null hasta que el usuario las seleccione. */
+    val latitude: Double? = null,
+    val longitude: Double? = null,
     val description: String = "",
     val hours: String = "7:00 a.m. - 5:00 p.m.",
     val priceType: String = "Gratuito",

@@ -881,4 +881,15 @@
     <string name="admin_reject_custom_placeholder">Write detailed reason…</string>
     <string name="admin_reject_confirm">Confirm Rejection</string>
     <string name="admin_reject_cancel">Cancel</string>
+
+    <!-- Map location picker -->
+    <string name="location_picker_title">Pick location on map</string>
+    <string name="location_picker_hint">Tap the map to drop the pin at the exact spot location.</string>
+    <string name="location_picker_marker_title">Selected location</string>
+    <string name="location_picker_coordinates">Lat %1$s · Lon %2$s</string>
+    <string name="location_picker_no_selection">No location selected yet</string>
+    <string name="location_picker_confirm">Use this location</string>
+    <string name="create_pick_on_map">Pick on map</string>
+    <string name="create_location_selected">Location: %1$s</string>
+    <string name="map_create_here">Create a spot here</string>
 </resources>

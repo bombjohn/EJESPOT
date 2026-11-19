@@ -7,6 +7,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -52,6 +54,8 @@ fun DashboardNavigation(
     profileViewModel: ProfileViewModel = viewModel()
 ) {
     val coroutineScope = rememberCoroutineScope()
+    // Coordenadas elegidas desde el mapa al pulsar "Crear un spot aquí".
+    var pendingCreateCoordinates by remember { mutableStateOf<Pair<Double, Double>?>(null) }
     val startDestination: DashboardRoutes = if (role == UserRole.ADMIN) {
         DashboardRoutes.HomeAdmin
     } else {
@@ -129,6 +133,10 @@ fun DashboardNavigation(
                 onNavigateToSpotDetail = { id ->
                     navController.navigate(DashboardRoutes.SpotDetail(spotId = id))
                 },
+                onNavigateToCreateSpot = { lat, lng ->
+                    pendingCreateCoordinates = lat to lng
+                    navController.navigate(DashboardRoutes.CreateSpot)
+                },
                 viewModel = spotListViewModel
             )
         }
@@ -181,6 +189,7 @@ fun DashboardNavigation(
             CreateSpotScreen(
                 padding = padding,
                 snackbarHostState = snackbarHostState,
+                initialCoordinates = pendingCreateCoordinates,
                 onNavigateBack = { navController.popBackStack() },
                 onBackToHome = { navigateToTab(DashboardRoutes.HomeUser) },
                 onViewProposedSpots = {

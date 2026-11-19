@@ -66,6 +66,7 @@ fun CreateSpotScreen(
     padding: PaddingValues = PaddingValues(),
     snackbarHostState: SnackbarHostState,
     onNavigateBack: () -> Unit,
+    initialCoordinates: Pair<Double, Double>? = null,
     onBackToHome: (() -> Unit)? = null,
     onSpotCreated: ((Spot) -> Unit)? = null,
     onViewProposedSpots: (() -> Unit)? = null,
@@ -74,6 +75,13 @@ fun CreateSpotScreen(
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val context = androidx.compose.ui.platform.LocalContext.current
+
+    // Si se llegó desde "Crear un spot aquí" del mapa, se usa esa coordenada.
+    LaunchedEffect(initialCoordinates) {
+        initialCoordinates?.let { (lat, lng) ->
+            viewModel.onLocationPicked(lat, lng)
+        }
+    }
 
     // URI de la foto elegida para el lugar (galería o cámara).
     var imageUri by rememberSaveable { mutableStateOf<Uri?>(null) }
@@ -122,6 +130,7 @@ fun CreateSpotScreen(
         onNameChanged = viewModel::onNameChanged,
         onCategoryChanged = viewModel::onCategoryChanged,
         onLocationChanged = viewModel::onLocationChanged,
+        onLocationPicked = viewModel::onLocationPicked,
         onHoursChanged = viewModel::onHoursChanged,
         onPriceTypeChanged = viewModel::onPriceTypeChanged,
         onDescriptionChanged = viewModel::onDescriptionChanged,
@@ -148,7 +157,11 @@ fun CreateSpotScreen(
                 // Generar spot pendiente para el feed.
                 // Las coordenadas se derivan del municipio elegido para que el
                 // marcador aparezca en el lugar correcto del mapa real.
-                val (lat, lng) = coordinatesFor(loc)
+                val (lat, lng) = if (uiState.latitude != null && uiState.longitude != null) {
+                    uiState.latitude!! to uiState.longitude!!
+                } else {
+                    coordinatesFor(loc)
+                }
                 val currentUriString = imageUri?.toString()
                 val userTag = when {
                     SessionManager.isGuest -> "@invitado"
@@ -230,6 +243,7 @@ private fun CreateSpotFormScreen(
     onNameChanged: (String) -> Unit,
     onCategoryChanged: (String) -> Unit,
     onLocationChanged: (String) -> Unit,
+    onLocationPicked: (Double, Double) -> Unit,
     onHoursChanged: (String) -> Unit,
     onPriceTypeChanged: (String) -> Unit,
     onDescriptionChanged: (String) -> Unit,
@@ -240,6 +254,7 @@ private fun CreateSpotFormScreen(
     val c = ejeSpotColors()
     val context = LocalContext.current
     var showLocationSelector by remember { mutableStateOf(false) }
+    var showMunicipalitySelector by remember { mutableStateOf(false) }
 
     // --- Selector de imagen (guía 15) ---
     // `GetContent` abre la galería sin necesidad de permisos: el usuario elige
@@ -591,7 +606,14 @@ private fun CreateSpotFormScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = stringResource(R.string.create_coordinates_ready, uiState.location),
+                    text = if (uiState.latitude != null && uiState.longitude != null) {
+                        stringResource(
+                            R.string.create_location_selected,
+                            String.format("%.5f, %.5f", uiState.latitude, uiState.longitude)
+                        )
+                    } else {
+                        stringResource(R.string.create_coordinates_ready, uiState.location)
+                    },
                     fontFamily = ManropeFontFamily,
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.Bold,
@@ -600,7 +622,19 @@ private fun CreateSpotFormScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        TextButton(
+            onClick = { showMunicipalitySelector = true },
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text(
+                text = stringResource(R.string.create_select_municipality),
+                fontFamily = ManropeFontFamily,
+                fontSize = 11.5.sp,
+                color = c.primary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Tarjeta Informativa / Estado Pendiente
         Surface(
@@ -666,10 +700,23 @@ private fun CreateSpotFormScreen(
         Spacer(modifier = Modifier.height(30.dp))
     }
 
-    // Diálogo de Selección de Ubicación
+    // Selector de ubicación real sobre el mapa.
     if (showLocationSelector) {
+        LocationPickerDialog(
+            initialLatitude = uiState.latitude,
+            initialLongitude = uiState.longitude,
+            onDismiss = { showLocationSelector = false },
+            onConfirm = { lat, lng ->
+                onLocationPicked(lat, lng)
+                showLocationSelector = false
+            }
+        )
+    }
+
+    // Municipio (solo etiqueta descriptiva; la posición exacta viene del mapa).
+    if (showMunicipalitySelector) {
         AlertDialog(
-            onDismissRequest = { showLocationSelector = false },
+            onDismissRequest = { showMunicipalitySelector = false },
             title = {
                 Text(
                     text = stringResource(R.string.create_select_municipality),
@@ -690,7 +737,7 @@ private fun CreateSpotFormScreen(
                                 .fillMaxWidth()
                                 .clickable {
                                     onLocationChanged(loc)
-                                    showLocationSelector = false
+                                    showMunicipalitySelector = false
                                 }
                                 .padding(vertical = 10.dp)
                         )

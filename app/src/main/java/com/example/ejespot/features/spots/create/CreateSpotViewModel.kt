@@ -28,6 +28,13 @@ class CreateSpotViewModel : ViewModel() {
         _uiState.update { it.copy(location = loc, errorMessage = null) }
     }
 
+    /** Guarda las coordenadas exactas elegidas en el mapa. */
+    fun onLocationPicked(latitude: Double, longitude: Double) {
+        _uiState.update {
+            it.copy(latitude = latitude, longitude = longitude, errorMessage = null)
+        }
+    }
+
     fun onDescriptionChanged(desc: String) {
         _uiState.update { it.copy(description = desc, errorMessage = null) }
     }

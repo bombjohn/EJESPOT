@@ -881,4 +881,15 @@
     <string name="admin_reject_custom_placeholder">Escribe el motivo detallado…</string>
     <string name="admin_reject_confirm">Confirmar Rechazo</string>
     <string name="admin_reject_cancel">Cancelar</string>
+
+    <!-- Selector de ubicación en el mapa -->
+    <string name="location_picker_title">Elegir ubicación en el mapa</string>
+    <string name="location_picker_hint">Toca el mapa para colocar el marcador en el lugar exacto del spot.</string>
+    <string name="location_picker_marker_title">Ubicación elegida</string>
+    <string name="location_picker_coordinates">Lat %1$s · Lon %2$s</string>
+    <string name="location_picker_no_selection">Aún no has elegido una ubicación</string>
+    <string name="location_picker_confirm">Usar esta ubicación</string>
+    <string name="create_pick_on_map">Elegir en el mapa</string>
+    <string name="create_location_selected">Ubicación: %1$s</string>
+    <string name="map_create_here">Crear un spot aquí</string>
 </resources>

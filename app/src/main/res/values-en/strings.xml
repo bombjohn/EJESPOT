@@ -82,6 +82,8 @@
     <string name="forgot_expires_suffix">. If you don\'t see it in your inbox, check your spam folder.</string>
     <string name="forgot_open_mail_app">Open email app</string>
     <string name="forgot_resend">Resend email</string>
+    <string name="forgot_send_error">Could not send the email. Check your connection and try again.</string>
+    <string name="forgot_email_not_found">No account is registered with that email address.</string>
 
     <!-- Onboarding -->
     <string name="onboarding_title_1">Discover unique places</string>
@@ -867,4 +869,16 @@
     <string name="spot_4_highlight_1_subtitle">Suitable for supervised recreational bathing</string>
     <string name="spot_4_highlight_2_title">Native Bird Watching</string>
     <string name="spot_4_highlight_2_subtitle">Habitat of the Emerald Toucan and hummingbirds</string>
+
+    <!-- Reject Proposal Dialog (Moderation) -->
+    <string name="admin_reject_dialog_title">Dismiss Proposal</string>
+    <string name="admin_reject_dialog_message">Indicate the reason why \'%1$s\' will not be published:</string>
+    <string name="admin_reject_reason_incomplete">Incomplete or unverifiable information</string>
+    <string name="admin_reject_reason_duplicate">Duplicate place in the catalog</string>
+    <string name="admin_reject_reason_closed">The place is no longer in business</string>
+    <string name="admin_reject_reason_out_of_region">Location outside the Coffee Cultural Landscape</string>
+    <string name="admin_reject_reason_other">Other specific reason</string>
+    <string name="admin_reject_custom_placeholder">Write detailed reason…</string>
+    <string name="admin_reject_confirm">Confirm Rejection</string>
+    <string name="admin_reject_cancel">Cancel</string>
 </resources>

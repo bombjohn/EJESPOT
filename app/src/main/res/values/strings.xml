@@ -82,6 +82,8 @@
     <string name="forgot_expires_suffix">. Si no lo ves en tu bandeja, revisa la carpeta de spam.</string>
     <string name="forgot_open_mail_app">Abrir aplicación de correo</string>
     <string name="forgot_resend">Reenviar correo</string>
+    <string name="forgot_send_error">No se pudo enviar el correo. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="forgot_email_not_found">No existe una cuenta registrada con ese correo.</string>
 
     <!-- Onboarding -->
     <string name="onboarding_title_1">Descubre lugares únicos</string>
@@ -867,4 +869,16 @@
     <string name="spot_4_highlight_1_subtitle">Apta para baño recreativo supervisado</string>
     <string name="spot_4_highlight_2_title">Avistamiento de Aves Autóctonas</string>
     <string name="spot_4_highlight_2_subtitle">Hábitat del Tucán Esmeralda y Colibríes</string>
+
+    <!-- Diálogo Desestimar Propuesta (Moderación) -->
+    <string name="admin_reject_dialog_title">Desestimar Propuesta</string>
+    <string name="admin_reject_dialog_message">Indica el motivo por el cual no se publicará \'%1$s\':</string>
+    <string name="admin_reject_reason_incomplete">Información incompleta o no verificable</string>
+    <string name="admin_reject_reason_duplicate">Lugar duplicado en el catálogo</string>
+    <string name="admin_reject_reason_closed">El lugar ya no opera comercialmente</string>
+    <string name="admin_reject_reason_out_of_region">Ubicación fuera del Paisaje Cultural Cafetero</string>
+    <string name="admin_reject_reason_other">Otro motivo específico</string>
+    <string name="admin_reject_custom_placeholder">Escribe el motivo detallado…</string>
+    <string name="admin_reject_confirm">Confirmar Rechazo</string>
+    <string name="admin_reject_cancel">Cancelar</string>
 </resources>

@@ -126,15 +126,14 @@ class FirebaseAuthRepository : AuthRepository {
      * Si Firebase no está configurado, simula el envío exitoso.
      */
     suspend fun sendPasswordResetEmail(email: String): Result<Unit> {
-        if (firebaseAuth != null) {
-            try {
-                firebaseAuth.sendPasswordResetEmail(email).await()
-                return Result.success(Unit)
-            } catch (_: Exception) {
-                // Firebase no disponible: simular éxito para la demo
-            }
+        val auth = firebaseAuth ?: return Result.success(Unit) // modo demo sin Firebase
+        return try {
+            auth.sendPasswordResetEmail(email).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            // Propagar el error para que la UI no anuncie un envío que no ocurrió.
+            Result.failure(e)
         }
-        return Result.success(Unit)
     }
 
     /** Cierra la sesión de Firebase Auth. */

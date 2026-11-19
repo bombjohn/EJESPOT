@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.ejespot.core.util.toImageBitmap
 import com.example.ejespot.domain.model.Spot
 
@@ -47,6 +48,15 @@ fun SpotImage(
     if (customBitmap != null) {
         Image(
             bitmap = customBitmap.asImageBitmap(),
+            contentDescription = spot.name,
+            contentScale = ContentScale.Crop,
+            modifier = modifier
+        )
+    } else if (!spot.imageUrl.isNullOrBlank()) {
+        // Imagen subida a Firebase Storage: se descarga por su URL pública,
+        // así sobrevive a reinicios y funciona en cualquier dispositivo.
+        AsyncImage(
+            model = spot.imageUrl,
             contentDescription = spot.name,
             contentScale = ContentScale.Crop,
             modifier = modifier

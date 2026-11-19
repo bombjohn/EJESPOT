@@ -130,8 +130,33 @@ object SessionManager {
         }
     }
 
+    /** Actualiza el nombre del usuario activo tras editar su perfil. */
+    fun updateProfileName(name: String) {
+        val user = currentUser ?: return
+        val updated = user.copy(name = name)
+        currentUser = updated
+        if (::sessionRepository.isInitialized) {
+            scope.launch {
+                runCatching {
+                    sessionRepository.saveSession(
+                        UserSession(
+                            userId = updated.id,
+                            profileId = updated.profileId,
+                            isGuest = updated.isGuest,
+                            userName = updated.name,
+                            userEmail = updated.email
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     fun signOut() {
         currentUser = null
+        // Cerrar también Firebase Auth: si no, el siguiente usuario hereda la
+        // sesión remota del anterior (Firestore/Storage siguen autorizados).
+        runCatching { com.google.firebase.auth.FirebaseAuth.getInstance().signOut() }
         if (::sessionRepository.isInitialized) {
             scope.launch {
                 runCatching { sessionRepository.clearSession() }

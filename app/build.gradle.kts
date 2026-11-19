@@ -1,9 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.services)
 }
+
+// La clave de OpenRouter se lee de local.properties (ignorado por Git) y se
+// expone como BuildConfig; así no queda embebida como literal en el código.
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+}
+val openRouterApiKey = localProperties.getProperty("openrouter.api.key", "")
 
 android {
     namespace = "com.example.ejespot"
@@ -17,6 +26,8 @@ android {
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
+
+        buildConfigField("String", "OPENROUTER_API_KEY", "\"${openRouterApiKey}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -45,6 +56,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -53,6 +65,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
     implementation("androidx.compose.material:material-icons-extended")
+    // Carga de imágenes desde Firebase Storage (URLs https) en el feed y el detalle.
+    implementation("io.coil-kt:coil-compose:2.7.0")
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)

@@ -134,6 +134,7 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_app_version),
                     value = "1.0.0",
                     showChevron = false,
+                    enabled = false,
                     onClick = {}
                 )
             }

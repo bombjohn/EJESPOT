@@ -82,7 +82,8 @@ object SpotStore {
                             ),
                             isPending = obj.optBoolean("isPending", true),
                             isFinalized = obj.optBoolean("isFinalized", false),
-                            importanceVotes = obj.optInt("importanceVotes", 0)
+                            importanceVotes = obj.optInt("importanceVotes", 0),
+                            reviews = reviewsFromJson(obj.optJSONArray("reviews"))
                         )
                     )
                 }
@@ -92,8 +93,24 @@ object SpotStore {
                         loadedList.filter { it.id !in existingIds && it.isPending } + current
                     }
                     _spots.update { current ->
-                        val existingIds = current.map { it.id }.toSet()
-                        loadedList.filter { it.id !in existingIds && !it.isPending } + current
+                        // Los spots quemados ya existen en la lista: fusionar
+                        // sus reseñas guardadas en vez de descartarlas.
+                        val merged = current.toMutableList()
+                        loadedList.filter { !it.isPending }.forEach { loaded ->
+                            val index = merged.indexOfFirst { it.id == loaded.id }
+                            if (index >= 0) {
+                                val existing = merged[index]
+                                merged[index] = existing.copy(
+                                    reviews = (loaded.reviews + existing.reviews).distinctBy { it.id },
+                                    reviewCount = maxOf(loaded.reviewCount, existing.reviewCount),
+                                    imageUrl = loaded.imageUrl ?: existing.imageUrl,
+                                    imageUri = loaded.imageUri ?: existing.imageUri
+                                )
+                            } else {
+                                merged.add(0, loaded)
+                            }
+                        }
+                        merged
                     }
                 }
             }
@@ -188,6 +205,24 @@ object SpotStore {
         persistNotifications()
     }
 
+    /** Fusiona datos remotos conservando reseñas e imágenes que solo existen en local. */
+    private fun mergeWithRemote(
+        current: List<Spot>,
+        remoteMap: Map<String, Spot>
+    ): List<Spot> = current.map { local ->
+        val remote = remoteMap[local.id] ?: return@map local
+        if (local.reviews.isEmpty() && local.imageUrl == null) {
+            remote
+        } else {
+            remote.copy(
+                reviews = (remote.reviews + local.reviews).distinctBy { it.id },
+                reviewCount = maxOf(remote.reviewCount, local.reviewCount),
+                imageUrl = remote.imageUrl ?: local.imageUrl,
+                imageUri = remote.imageUri ?: local.imageUri
+            )
+        }
+    }
+
     private fun applyRemoteSpots(remoteSpots: List<Spot>) {
         val pendingRemote = remoteSpots.filter { it.isPending }
         val approvedRemote = remoteSpots.filter { !it.isPending }
@@ -195,7 +230,7 @@ object SpotStore {
         if (pendingRemote.isNotEmpty()) {
             _pendingSpots.update { current ->
                 val remoteMap = pendingRemote.associateBy { it.id }
-                val updated = current.map { remoteMap[it.id] ?: it }
+                val updated = mergeWithRemote(current, remoteMap)
                 val currentIds = updated.map { it.id }.toSet()
                 val newOnes = pendingRemote.filter { it.id !in currentIds }
                 newOnes + updated
@@ -205,7 +240,7 @@ object SpotStore {
         if (approvedRemote.isNotEmpty()) {
             _spots.update { current ->
                 val remoteMap = approvedRemote.associateBy { it.id }
-                val updated = current.map { remoteMap[it.id] ?: it }
+                val updated = mergeWithRemote(current, remoteMap)
                 val currentIds = updated.map { it.id }.toSet()
                 val newOnes = approvedRemote.filter { it.id !in currentIds }
                 newOnes + updated
@@ -220,7 +255,10 @@ object SpotStore {
     private fun persistCustomSpots() {
         val p = prefs ?: return
         try {
-            val allCustom = (_spots.value + _pendingSpots.value).filter { it.id.startsWith("spot_") }
+            // También se guardan los spots quemados que tengan reseñas nuevas:
+            // si no, al reiniciar se perderían las reseñas del usuario.
+            val allCustom = (_spots.value + _pendingSpots.value)
+                .filter { it.id.startsWith("spot_") || it.reviews.isNotEmpty() }
             val array = org.json.JSONArray()
             for (spot in allCustom) {
                 val obj = org.json.JSONObject().apply {
@@ -244,11 +282,56 @@ object SpotStore {
                     put("isPending", spot.isPending)
                     put("isFinalized", spot.isFinalized)
                     put("importanceVotes", spot.importanceVotes)
+                    put("reviews", reviewsToJson(spot.reviews))
                 }
                 array.put(obj)
             }
             p.edit().putString("custom_spots", array.toString()).apply()
         } catch (_: Exception) {}
+    }
+
+    private fun reviewsToJson(reviews: List<SpotReview>): org.json.JSONArray {
+        val array = org.json.JSONArray()
+        reviews.forEach { r ->
+            array.put(
+                org.json.JSONObject().apply {
+                    put("id", r.id)
+                    put("authorName", r.authorName)
+                    put("authorBadge", r.authorBadge)
+                    put("avatarInitials", r.avatarInitials)
+                    put("rating", r.rating)
+                    put("comment", r.comment)
+                    put("date", r.date)
+                    put("authorProfileId", r.authorProfileId ?: "")
+                    r.authorBadgeRes?.let { put("authorBadgeRes", it) }
+                    r.commentRes?.let { put("commentRes", it) }
+                    r.dateRes?.let { put("dateRes", it) }
+                }
+            )
+        }
+        return array
+    }
+
+    private fun reviewsFromJson(array: org.json.JSONArray?): List<SpotReview> {
+        if (array == null) return emptyList()
+        return (0 until array.length()).mapNotNull { i ->
+            runCatching {
+                val o = array.getJSONObject(i)
+                SpotReview(
+                    id = o.getString("id"),
+                    authorName = o.optString("authorName"),
+                    authorBadge = o.optString("authorBadge"),
+                    avatarInitials = o.optString("avatarInitials", "EX"),
+                    rating = o.optInt("rating", 5),
+                    comment = o.optString("comment"),
+                    date = o.optString("date"),
+                    authorProfileId = o.optString("authorProfileId").ifBlank { null },
+                    authorBadgeRes = if (o.has("authorBadgeRes")) o.getInt("authorBadgeRes") else null,
+                    commentRes = if (o.has("commentRes")) o.getInt("commentRes") else null,
+                    dateRes = if (o.has("dateRes")) o.getInt("dateRes") else null
+                )
+            }.getOrNull()
+        }
     }
 
     private fun persistNotifications() {
@@ -385,6 +468,25 @@ object SpotStore {
 
     private fun currentKey(): String = SessionManager.profileId
 
+    /** Comprueba si el spot fue publicado por el usuario con sesión activa. */
+    private fun isCurrentUserSpotAuthor(spot: Spot): Boolean {
+        val user = SessionManager.currentUser ?: return false
+        val raw = spot.addedBy.removePrefix("@").trim().lowercase()
+        if (raw.isBlank()) return false
+        val names = listOf(
+            currentKey(),
+            user.id,
+            user.email,
+            user.name,
+            user.profileId,
+            SessionManager.displayName,
+            SessionManager.displayName.replace(" ", "_").lowercase(),
+            user.name.replace(" ", "_").lowercase(),
+            user.email.substringBefore("@")
+        ).map { it.removePrefix("@").trim().lowercase() }
+        return raw in names
+    }
+
     private fun currentVisited(): Set<String> = visitedByUser[currentKey()] ?: emptySet()
 
     private fun currentSaved(): Set<String> = savedByUser[currentKey()] ?: emptySet()
@@ -430,10 +532,16 @@ object SpotStore {
     }
 
     fun markAllNotificationsAsRead(userId: String) {
+        val affected = getNotificationsForUser(userId).filterNot { it.isRead }
+        val ids = affected.map { it.id }.toSet()
         _notifications.update { list ->
-            list.map { if (it.userId == userId) it.copy(isRead = true) else it }
+            list.map { if (it.id in ids) it.copy(isRead = true) else it }
         }
         persistNotifications()
+        // Reutiliza el marcado individual para que también se escriba en Firestore.
+        ids.forEach { id ->
+            firestoreScope.launch { firestoreRepo.markNotificationRead(id) }
+        }
     }
 
     fun addNotification(notification: AppNotification) {
@@ -479,10 +587,12 @@ object SpotStore {
             val spot = getSpotById(spotId)
             if (spot != null) {
                 val author = spot.addedBy.removePrefix("@").trim()
-                if (author.isNotBlank() && author != key && author != "tú" && author != "invitado") {
+                if (author.isNotBlank() && !isCurrentUserSpotAuthor(spot) &&
+                    author != "tú" && author != "invitado"
+                ) {
                     addNotification(
                         AppNotification(
-                            id = "notif_${System.currentTimeMillis()}",
+                            id = "notif_${java.util.UUID.randomUUID()}",
                             userId = author,
                             title = "¡A alguien le interesa tu publicación!",
                             message = "${SessionManager.displayName} votó 'Me interesa' en tu publicación '${spot.name}'.",
@@ -542,18 +652,22 @@ object SpotStore {
                 list.map { if (it.id == spotId) it.withReview(review) else it }
             }
         }
+        // Persistir en cuanto se agrega: de lo contrario la reseña se pierde
+        // si la app se cierra antes de otra acción que guarde el store.
+        persistCustomSpots()
 
         firestoreScope.launch {
             firestoreRepo.addReview(spotId, review)
         }
 
-        // Generar notificación para el autor de la publicación si no es el mismo usuario
+        // Generar notificación para el autor de la publicación solo si es otro usuario.
         val author = spot.addedBy.removePrefix("@").trim()
-        val current = SessionManager.profileId
-        if (author.isNotBlank() && author != current && author != "tú" && author != "invitado") {
+        if (author.isNotBlank() && !isCurrentUserSpotAuthor(spot) &&
+            author != "tú" && author != "invitado"
+        ) {
             addNotification(
                 AppNotification(
-                    id = "notif_${System.currentTimeMillis()}",
+                    id = "notif_${java.util.UUID.randomUUID()}",
                     userId = author,
                     title = "Nuevo comentario en tu publicación",
                     message = "${review.authorName} comentó en '${spot.name}': \"${review.comment.take(60)}\"",
@@ -594,7 +708,7 @@ object SpotStore {
             if (author.isNotBlank() && author != "tú" && author != "invitado") {
                 addNotification(
                     AppNotification(
-                        id = "notif_${System.currentTimeMillis()}",
+                        id = "notif_${java.util.UUID.randomUUID()}",
                         userId = author,
                         title = "¡Publicación Verificada!",
                         message = "Un moderador aprobó '${pending.name}'. ¡Ya está disponible en el feed oficial (+100 XP)!",
@@ -623,7 +737,7 @@ object SpotStore {
             if (author.isNotBlank() && author != "tú" && author != "invitado") {
                 addNotification(
                     AppNotification(
-                        id = "notif_${System.currentTimeMillis()}",
+                        id = "notif_${java.util.UUID.randomUUID()}",
                         userId = author,
                         title = "Publicación no aprobada",
                         message = "Tu propuesta '${pending.name}' fue rechazada. Motivo: $reason",
@@ -668,6 +782,25 @@ object SpotStore {
     }
 
     /**
+     * Guarda la URL pública de la imagen subida a Firebase Storage.
+     * Se limpia el URI local porque `content://` deja de ser válido al
+     * reiniciar la app; la URL de la nube es la fuente persistente.
+     */
+    fun updateSpotImage(id: String, imageUrl: String) {
+        val updater: (Spot) -> Spot = {
+            it.copy(imageUrl = imageUrl, imageUri = null, imageResId = null)
+        }
+        _spots.update { list -> list.map { if (it.id == id) updater(it) else it } }
+        _pendingSpots.update { list -> list.map { if (it.id == id) updater(it) else it } }
+        persistCustomSpots()
+
+        firestoreScope.launch {
+            val updated = getSpotById(id)
+            if (updated != null) firestoreRepo.saveSpot(updated)
+        }
+    }
+
+    /**
      * Marca un spot como finalizado/inactivo o lo reactiva.
      */
     fun finalizeSpot(id: String, finalized: Boolean = true) {
@@ -693,14 +826,27 @@ object SpotStore {
             firestoreRepo.deleteSpot(id)
         }
 
-        // También limpiar de guardados y visitados
+        // También limpiar de guardados, visitados y votos, y persistirlo.
         savedByUser.keys.forEach { user ->
             val set = savedByUser[user]
-            if (set != null && id in set) savedByUser[user] = set - id
+            if (set != null && id in set) {
+                savedByUser[user] = set - id
+                persistUserSets(user)
+            }
         }
         visitedByUser.keys.forEach { user ->
             val set = visitedByUser[user]
-            if (set != null && id in set) visitedByUser[user] = set - id
+            if (set != null && id in set) {
+                visitedByUser[user] = set - id
+                persistUserSets(user)
+            }
+        }
+        votedImportantByUser.keys.forEach { user ->
+            val set = votedImportantByUser[user]
+            if (set != null && id in set) {
+                votedImportantByUser[user] = set - id
+                persistUserSets(user)
+            }
         }
         refreshForCurrentUser()
     }
@@ -709,10 +855,32 @@ object SpotStore {
      * Limpia los datos asociados a un usuario cuando elimina su cuenta.
      */
     fun clearUserData(profileId: String) {
+        val tags = buildList {
+            add(profileId)
+            SessionManager.currentUser?.let { user ->
+                add(user.name)
+                add(user.name.replace(" ", "_").lowercase())
+                add(user.email)
+                add(user.email.substringBefore("@"))
+            }
+        }.map { it.removePrefix("@").trim().lowercase() }
+            .filter { it.isNotBlank() }
+            .toSet()
+
+        fun isOwned(spot: Spot): Boolean =
+            spot.addedBy.removePrefix("@").trim().lowercase() in tags
+
         savedByUser.remove(profileId)
         visitedByUser.remove(profileId)
-        // Eliminar spots propuestos por este usuario
-        _pendingSpots.update { list -> list.filterNot { it.addedBy == profileId } }
+        votedImportantByUser.remove(profileId)
+        _spots.update { list -> list.filterNot { isOwned(it) } }
+        _pendingSpots.update { list -> list.filterNot { isOwned(it) } }
+
+        val notifIds = getNotificationsForUser(profileId).map { it.id }.toSet()
+        _notifications.update { list ->
+            list.filterNot { it.id in notifIds || it.userId.lowercase() in tags }
+        }
+        persistNotifications()
         persistCustomSpots()
         refreshForCurrentUser()
     }

@@ -16,11 +16,14 @@ class DeleteAccountUseCase(
     private val firebaseAuthRepo: FirebaseAuthRepository = FirebaseAuthRepository()
 ) {
     suspend operator fun invoke(profileId: String, onFinished: () -> Unit) {
-        spotRepository.clearUserData(profileId)
-        DemoUsers.removeUser(profileId)
-        profileRepository.removeProfile(profileId)
-        runCatching {
-            firebaseAuthRepo.deleteCurrentUser()
+        // Solo se borran los datos locales si la cuenta remota se eliminó (o
+        // Firebase no está configurado). Antes se borraba todo aunque fallara.
+        val remoteResult = runCatching { firebaseAuthRepo.deleteCurrentUser() }.getOrNull()
+        val remoteOk = remoteResult?.isSuccess != false
+        if (remoteOk) {
+            spotRepository.clearUserData(profileId)
+            DemoUsers.removeUser(profileId)
+            profileRepository.removeProfile(profileId)
         }
         SessionManager.signOut()
         onFinished()

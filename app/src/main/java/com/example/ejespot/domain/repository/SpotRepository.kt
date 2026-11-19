@@ -40,6 +40,8 @@ interface SpotRepository {
         priceRange: String,
         description: String
     )
+    /** Guarda la URL pública de la imagen subida a Firebase Storage. */
+    fun updateSpotImage(id: String, imageUrl: String)
     fun finalizeSpot(id: String, finalized: Boolean = true)
     fun deleteSpot(id: String)
     fun clearUserData(profileId: String)

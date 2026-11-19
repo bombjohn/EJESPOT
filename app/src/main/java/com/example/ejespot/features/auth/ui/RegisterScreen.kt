@@ -105,7 +105,7 @@ fun RegisterScreen(
             ) {
                 // Botón atrás redondo
                 Surface(
-                    onClick = onNavigateBack,
+                    onClick = viewModel::onBackClick,
                     modifier = Modifier.size(40.dp),
                     shape = CircleShape,
                     color = c.surfaceVariant

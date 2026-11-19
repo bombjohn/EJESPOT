@@ -71,17 +71,18 @@ class AiAssistantViewModel(
     }
 
     fun setSpotContext(context: String?) {
-        if (!context.isNullOrBlank()) {
-            _uiState.update { state ->
-                val contextGreeting = AiMessage(
-                    text = "Veo que estás consultando sobre **$context**. 📍 ¿Deseas que te dé tips de visita, mejor hora para ir o lugares cercanos?",
-                    isUser = false
-                )
-                state.copy(
-                    spotContext = context,
-                    messages = state.messages + contextGreeting
-                )
-            }
+        if (context.isNullOrBlank()) return
+        _uiState.update { state ->
+            // Evita duplicar el saludo al recomponer o rotar la pantalla.
+            if (state.spotContext == context) return@update state
+            val contextGreeting = AiMessage(
+                text = "Veo que estás consultando sobre **$context**. 📍 ¿Deseas que te dé tips de visita, mejor hora para ir o lugares cercanos?",
+                isUser = false
+            )
+            state.copy(
+                spotContext = context,
+                messages = state.messages + contextGreeting
+            )
         }
     }
 

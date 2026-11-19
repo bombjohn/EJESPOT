@@ -3,7 +3,9 @@ package com.example.ejespot.features.dashboard.profile
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -42,6 +44,13 @@ fun MyProposalsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var selectedFilter by remember { mutableStateOf("Todos") }
+
+    // Al abrir la pantalla se refrescan las propuestas del usuario activo:
+    // así los puntos recién publicados aparecen aunque la lista estuviera
+    // desactualizada al entrar desde otra pantalla.
+    LaunchedEffect(Unit) {
+        viewModel.reloadForCurrentUser()
+    }
 
     var proposalToEdit by remember { mutableStateOf<ProposedSpot?>(null) }
     var proposalToDelete by remember { mutableStateOf<ProposedSpot?>(null) }
@@ -151,11 +160,20 @@ fun MyProposalsScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         if (filtered.isEmpty()) {
-            ProfileEmptyState(
-                emoji = "📍",
-                title = stringResource(R.string.my_proposals_empty_filter_title),
-                message = stringResource(R.string.my_proposals_empty_filter_message)
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                ProfileEmptyState(
+                    modifier = Modifier.weight(1f),
+                    emoji = "📍",
+                    title = stringResource(R.string.my_proposals_empty_filter_title),
+                    message = stringResource(R.string.my_proposals_empty_filter_message)
+                )
+                ProposeNewButton(onClick = onProposeSpot)
+            }
         } else {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
@@ -174,29 +192,7 @@ fun MyProposalsScreen(
 
                 item {
                     Spacer(modifier = Modifier.height(4.dp))
-                    Button(
-                        onClick = onProposeSpot,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(46.dp),
-                        shape = RoundedCornerShape(100.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = EjeSpotSecondary)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(17.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(R.string.my_proposals_propose_new),
-                            fontFamily = ManropeFontFamily,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp,
-                            color = Color.White
-                        )
-                    }
+                    ProposeNewButton(onClick = onProposeSpot)
                 }
             }
         }
@@ -260,6 +256,33 @@ private fun SummaryCard(value: String, label: String, modifier: Modifier = Modif
                 color = c.textSoft
             )
         }
+    }
+}
+
+@Composable
+private fun ProposeNewButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Button(
+        onClick = onClick,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(46.dp),
+        shape = RoundedCornerShape(100.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = EjeSpotSecondary)
+    ) {
+        Icon(
+            imageVector = Icons.Default.Add,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(17.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = stringResource(R.string.my_proposals_propose_new),
+            fontFamily = ManropeFontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp,
+            color = Color.White
+        )
     }
 }
 
@@ -478,7 +501,10 @@ private fun EditProposalDialog(
         },
         text = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .imePadding(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 OutlinedTextField(

@@ -57,7 +57,121 @@ class ProfileViewModel @JvmOverloads constructor(
 
     private fun currentProfile(): UserProfile = profileRepository.getProfile(currentProfileId)
 
-    private fun currentProposals() = profileRepository.getProposals(currentProfileId)
+    /**
+     * Construye las propuestas reales del usuario consultando el SpotStore
+     * (spots pendientes y aprobados) y las notificaciones de moderación (rechazos).
+     */
+    private fun getUserProposalsFromStore(): List<ProposedSpot> {
+        val allSpots = spotRepository.allSpots()
+        val pendingSpots = spotRepository.pendingSpots.value
+        // Los spots propuestos en esta sesión quedan registrados en el perfil.
+        // Se incluyen aunque el tag `addedBy` del spot no coincida con el
+        // usuario (por ejemplo, sesiones restauradas desde Data Store), para
+        // que un punto recién publicado nunca aparezca como lista vacía.
+        val recordedSpotIds = profileRepository.getProposals(currentProfileId)
+            .mapNotNull { it.spotId }
+            .toSet()
+        val userSpots = (pendingSpots + allSpots)
+            .filter { isSpotOwnedByCurrentUser(it) || it.id in recordedSpotIds }
+            .distinctBy { it.id }
+
+        val currentUserId = SessionManager.currentUser?.id ?: ""
+        val rejectNotifs = SpotStore.getNotificationsForUser(currentUserId).filter {
+            it.type == com.example.ejespot.domain.model.NotificationType.REJECTION
+        }
+
+        val result = mutableListOf<ProposedSpot>()
+
+        for (spot in userSpots) {
+            val rejectNotif = rejectNotifs.firstOrNull {
+                it.relatedSpotId == spot.id || it.message.contains(spot.name, ignoreCase = true)
+            }
+            val status = when {
+                rejectNotif != null -> ProposalStatus.REJECTED
+                spot.isPending -> ProposalStatus.PENDING
+                else -> ProposalStatus.APPROVED
+            }
+            val reason = rejectNotif?.message?.substringAfter("Motivo: ")?.trim()
+
+            result.add(
+                ProposedSpot(
+                    id = spot.id,
+                    name = spot.name,
+                    location = spot.municipality,
+                    submittedLabelRes = R.string.time_today,
+                    status = status,
+                    xpEarned = if (status == ProposalStatus.APPROVED) 100 else 0,
+                    customNote = spot.description.ifBlank { null },
+                    spotId = spot.id,
+                    rejectionReason = reason
+                )
+            )
+        }
+
+        // Incluir también propuestas rechazadas cuyo spot ya no exista en la lista activa
+        for (notif in rejectNotifs) {
+            val sid = notif.relatedSpotId
+            val already = result.any {
+                it.spotId == sid || (sid != null && it.id == sid) ||
+                        (it.name.isNotBlank() && notif.message.contains(it.name, ignoreCase = true))
+            }
+            if (!already) {
+                val spotName = notif.message.substringAfter("Tu propuesta '").substringBefore("'")
+                    .ifBlank { notif.message.substringAfter("'").substringBefore("'") }
+                    .ifBlank { "Lugar propuesto" }
+                val reason = notif.message.substringAfter("Motivo: ").trim()
+                    .ifBlank { "No cumple con las pautas comunitarias" }
+                result.add(
+                    ProposedSpot(
+                        id = sid ?: notif.id,
+                        name = spotName,
+                        location = "Eje Cafetero",
+                        submittedLabelRes = R.string.time_today,
+                        status = ProposalStatus.REJECTED,
+                        xpEarned = 0,
+                        customNote = null,
+                        spotId = sid,
+                        rejectionReason = reason
+                    )
+                )
+            }
+        }
+
+        return result
+    }
+
+    private fun currentProposals(): List<ProposedSpot> {
+        val seeded = profileRepository.getProposals(currentProfileId)
+        val fromStore = getUserProposalsFromStore()
+        val map = LinkedHashMap<String, ProposedSpot>()
+
+        // Lo que el usuario creó/editó en su perfil es la fuente principal:
+        // conserva nombre, ubicación y nota aunque el store siga con datos
+        // antiguos. Por eso los flujos de sincronización no "borran" las
+        // propuestas recién publicadas.
+        seeded.forEach { prop ->
+            val key = prop.spotId ?: prop.id
+            map[key] = prop
+        }
+
+        fromStore.forEach { prop ->
+            val key = prop.spotId ?: prop.id
+            val existing = map[key]
+            if (existing == null) {
+                map[key] = prop
+            } else if (existing.status == ProposalStatus.PENDING &&
+                prop.status != ProposalStatus.PENDING
+            ) {
+                // El store sí refleja una decisión de moderación posterior.
+                map[key] = existing.copy(
+                    status = prop.status,
+                    rejectionReason = prop.rejectionReason,
+                    xpEarned = prop.xpEarned
+                )
+            }
+        }
+        return map.values.toList()
+    }
 
     private fun currentReviews() = profileRepository.getReviews(currentProfileId)
 
@@ -119,11 +233,28 @@ class ProfileViewModel @JvmOverloads constructor(
         viewModelScope.launch {
             spotRepository.spots.collect { spots ->
                 _uiState.update { state ->
-                    val userProposals = state.proposals
+                    val userProposals = currentProposals()
+                    // Toda reseña nueva se guarda dentro de un spot, por lo que
+                    // este flujo es el que debe recalcular también las reseñas
+                    // del usuario; si no, la lista del perfil se queda vieja.
+                    val liveReviews = liveReviewsFromStore()
                     state.copy(
+                        proposals = userProposals,
+                        reviews = liveReviews,
                         activeSpotsCount = spots.count { isSpotOwnedByCurrentUser(it) && !it.isPending && !it.isFinalized }.coerceAtLeast(if (currentProfileId == "camila") 2 else 0),
                         pendingSpotsCount = userProposals.count { it.status == ProposalStatus.PENDING },
-                        finalizedSpotsCount = spots.count { isSpotOwnedByCurrentUser(it) && it.isFinalized }
+                        finalizedSpotsCount = spots.count { isSpotOwnedByCurrentUser(it) && it.isFinalized },
+                        stats = state.stats.copy(
+                            reviews = liveReviews.size,
+                            proposals = userProposals.size
+                        ),
+                        activities = state.activities.map { activity ->
+                            when (activity.id) {
+                                "reviews" -> activity.copy(valueLabel = "${liveReviews.size}")
+                                "proposals" -> activity.copy(valueLabel = "${userProposals.size}")
+                                else -> activity
+                            }
+                        }
                     )
                 }
             }
@@ -136,18 +267,20 @@ class ProfileViewModel @JvmOverloads constructor(
                     val base = ProfileSampleData.baseStatsByUser[currentProfileId]
                         ?: UserStats(visited = 0, reviews = 0, proposals = 0)
                     val liveReviews = liveReviewsFromStore()
+                    val userProposals = currentProposals()
                     state.copy(
                         stats = base.copy(
                             visited = visited.size,
                             reviews = liveReviews.size,
-                            proposals = state.proposals.size
+                            proposals = userProposals.size
                         ),
                         reviews = liveReviews,
+                        proposals = userProposals,
                         activities = state.activities.map { activity ->
                             when (activity.id) {
                                 "visited" -> activity.copy(valueLabel = "${visited.size}")
                                 "reviews" -> activity.copy(valueLabel = "${liveReviews.size}")
-                                "proposals" -> activity.copy(valueLabel = "${state.proposals.size}")
+                                "proposals" -> activity.copy(valueLabel = "${userProposals.size}")
                                 else -> activity
                             }
                         }
@@ -162,46 +295,37 @@ class ProfileViewModel @JvmOverloads constructor(
         // store (aprobada, rechazada o creada en otra sesión).
         viewModelScope.launch {
             spotRepository.pendingSpots.collect { pending ->
-                val pendingIds = pending.map { it.id }.toSet()
-                val approvedIds = spotRepository.spots.value
-                    .filter { !it.isPending }
-                    .map { it.id }
-                    .toSet()
                 _uiState.update { state ->
-                    val knownSpotIds = state.proposals.mapNotNull { it.spotId }.toSet()
-                    // Propuestas propias que están en el store pero no en la
-                    // lista local (p. ej. tras reiniciar: el spot persiste).
-                    val ownNew = pending
-                        .filter { isSpotOwnedByCurrentUser(it) && it.id !in knownSpotIds }
-                        .map { it.toProposal() }
-                    // Sincroniza el estado de las propias con la moderación.
-                    val synced = (ownNew + state.proposals).map { proposal ->
-                        val sid = proposal.spotId
-                        if (sid != null && proposal.status == ProposalStatus.PENDING && sid !in pendingIds) {
-                            if (sid in approvedIds) {
-                                proposal.copy(status = ProposalStatus.APPROVED, xpEarned = 100)
-                            } else {
-                                val rejectNotif = SpotStore.notifications.value.firstOrNull {
-                                    (it.relatedSpotId == sid || it.message.contains(proposal.name, ignoreCase = true)) &&
-                                            it.type == com.example.ejespot.domain.model.NotificationType.REJECTION
-                                }
-                                val reason = rejectNotif?.message?.substringAfter("Motivo: ")?.trim()
-                                    ?: proposal.rejectionReason
-                                    ?: "No cumple con las pautas comunitarias"
-                                proposal.copy(status = ProposalStatus.REJECTED, rejectionReason = reason)
-                            }
-                        } else {
-                            proposal
-                        }
-                    }
+                    val refreshedProposals = currentProposals()
                     state.copy(
                         moderationProposals = pending.map { it.toProposal() },
-                        proposals = synced,
-                        stats = state.stats.copy(proposals = synced.size),
-                        pendingSpotsCount = synced.count { it.status == ProposalStatus.PENDING },
+                        proposals = refreshedProposals,
+                        stats = state.stats.copy(proposals = refreshedProposals.size),
+                        pendingSpotsCount = refreshedProposals.count { it.status == ProposalStatus.PENDING },
                         activities = state.activities.map { activity ->
                             if (activity.id == "proposals") {
-                                activity.copy(valueLabel = "${synced.size}")
+                                activity.copy(valueLabel = "${refreshedProposals.size}")
+                            } else {
+                                activity
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        // Sincroniza propuestas ante notificaciones (aprobaciones o motivos de rechazo).
+        viewModelScope.launch {
+            SpotStore.notifications.collect {
+                _uiState.update { state ->
+                    val refreshedProposals = currentProposals()
+                    state.copy(
+                        proposals = refreshedProposals,
+                        stats = state.stats.copy(proposals = refreshedProposals.size),
+                        pendingSpotsCount = refreshedProposals.count { it.status == ProposalStatus.PENDING },
+                        activities = state.activities.map { activity ->
+                            if (activity.id == "proposals") {
+                                activity.copy(valueLabel = "${refreshedProposals.size}")
                             } else {
                                 activity
                             }
@@ -220,10 +344,26 @@ class ProfileViewModel @JvmOverloads constructor(
         val seeded = ProfileSampleData.reviewsFor(currentProfileId)
         val seededIds = seeded.mapNotNull { it.spotId }.toSet()
 
+        val user = SessionManager.currentUser
+        val userHandle = if (user != null) "@${SessionManager.displayName.replace(" ", "_").lowercase()}" else ""
+        val userEmailPrefix = user?.email?.substringBefore("@")?.lowercase() ?: ""
+
+        fun isReviewByCurrentUser(review: com.example.ejespot.domain.model.SpotReview): Boolean {
+            val authorId = review.authorProfileId
+            // Las reseñas del invitado no tienen authorProfileId.
+            if (authorId == null) return SessionManager.isGuest
+            return authorId == currentProfileId ||
+                    (user != null && (
+                        authorId.equals(user.id, ignoreCase = true) ||
+                        authorId.equals(user.email, ignoreCase = true) ||
+                        authorId.equals(userEmailPrefix, ignoreCase = true) ||
+                        authorId.equals(userHandle.removePrefix("@"), ignoreCase = true)
+                    ))
+        }
+
         val sessionReviews = SpotStore.allSpots()
             .flatMap { spot -> spot.reviews.map { spot to it } }
-            .filter { (_, review) -> review.authorProfileId == currentProfileId }
-            .filter { (spot, review) -> spot.id !in seededIds || review.id.startsWith("rev_1") }
+            .filter { (_, review) -> isReviewByCurrentUser(review) }
             .map { (spot, review) ->
                 com.example.ejespot.domain.model.MyReview(
                     id = review.id,
@@ -231,8 +371,8 @@ class ProfileViewModel @JvmOverloads constructor(
                     spotName = spot.name,
                     category = spot.municipality,
                     dateLabel = review.date,
-                    // Las reseñas de la demo no traen fecha: se usa "Hace 2 días" (traducido).
-                    dateLabelRes = review.dateRes ?: R.string.time_ago_2_days,
+                    dateLabelRes = review.dateRes
+                        ?: if (review.date.isBlank()) R.string.time_today else R.string.time_ago_2_days,
                     rating = review.rating.toDouble(),
                     comment = review.comment,
                     commentRes = review.commentRes,
@@ -252,16 +392,25 @@ class ProfileViewModel @JvmOverloads constructor(
     fun reloadForCurrentUser() {
         val profile = currentProfile()
         val liveReviews = liveReviewsFromStore()
+        val userProposals = currentProposals()
         _uiState.update {
             it.copy(
                 profile = profile,
-                stats = currentStats().copy(reviews = liveReviews.size),
+                stats = currentStats().copy(reviews = liveReviews.size, proposals = userProposals.size),
                 reviews = liveReviews,
-                proposals = currentProposals(),
+                proposals = userProposals,
                 moderationProposals = spotRepository.pendingSpots.value.map { it.toProposal() },
                 draft = profile.toDraft(),
                 draftError = null,
-                isModerator = SessionManager.role == com.example.ejespot.domain.model.UserRole.ADMIN
+                isModerator = SessionManager.role == com.example.ejespot.domain.model.UserRole.ADMIN,
+                pendingSpotsCount = userProposals.count { it.status == ProposalStatus.PENDING },
+                activities = it.activities.map { activity ->
+                    when (activity.id) {
+                        "reviews" -> activity.copy(valueLabel = "${liveReviews.size}")
+                        "proposals" -> activity.copy(valueLabel = "${userProposals.size}")
+                        else -> activity
+                    }
+                }
             )
         }
     }
@@ -343,6 +492,9 @@ class ProfileViewModel @JvmOverloads constructor(
             location = location,
             bio = updated.bio
         )
+        // Mantener la sesión alineada: de lo contrario los spots y reseñas
+        // nuevos se etiquetan con el nombre antiguo.
+        SessionManager.updateProfileName(name)
 
         _uiState.update {
             it.copy(
@@ -490,20 +642,38 @@ class ProfileViewModel @JvmOverloads constructor(
      */
     private fun isSpotOwnedByCurrentUser(spot: Spot): Boolean {
         if (SessionManager.isGuest) {
-            return spot.addedBy.equals("@invitado", ignoreCase = true)
+            return spot.addedBy.equals("@invitado", ignoreCase = true) ||
+                    spot.addedBy.equals("invitado", ignoreCase = true)
         }
         val user = SessionManager.currentUser ?: return false
         val userHandle = "@${SessionManager.displayName.replace(" ", "_").lowercase()}"
         val userEmailHandle = "@${user.email.substringBefore("@").lowercase()}"
         val cleanAddedBy = spot.addedBy.removePrefix("@").trim()
 
-        return spot.addedBy.equals(userHandle, ignoreCase = true) ||
+        val isDirectMatch = spot.addedBy.equals(userHandle, ignoreCase = true) ||
                 spot.addedBy.equals(userEmailHandle, ignoreCase = true) ||
                 spot.addedBy.equals(user.email, ignoreCase = true) ||
                 spot.addedBy.equals(user.id, ignoreCase = true) ||
                 spot.addedBy.equals(user.profileId, ignoreCase = true) ||
+                spot.addedBy.equals("@tu", ignoreCase = true) ||
+                spot.addedBy.equals("tú", ignoreCase = true) ||
                 cleanAddedBy.equals(SessionManager.displayName.replace(" ", "_"), ignoreCase = true) ||
-                cleanAddedBy.equals(user.email.substringBefore("@"), ignoreCase = true)
+                cleanAddedBy.equals(user.name.replace(" ", "_"), ignoreCase = true) ||
+                cleanAddedBy.equals(user.email.substringBefore("@"), ignoreCase = true) ||
+                cleanAddedBy.equals(user.id, ignoreCase = true) ||
+                cleanAddedBy.equals(user.profileId, ignoreCase = true) ||
+                cleanAddedBy.equals(currentProfileId, ignoreCase = true)
+
+        if (isDirectMatch) return true
+
+        // Coincidencia para variantes de nombres o emails (ej. "John Cardona", "johncpapaz")
+        val johnInUser = user.name.contains("john", ignoreCase = true) ||
+                user.email.contains("john", ignoreCase = true)
+        if (johnInUser && cleanAddedBy.contains("john", ignoreCase = true)) {
+            return true
+        }
+
+        return false
     }
 
     /** Convierte un spot pendiente del store en propuesta para el panel. */
@@ -525,6 +695,17 @@ class ProfileViewModel @JvmOverloads constructor(
     fun approvePendingSpotById(spotId: String) {
         approveProposalUseCase(spotId)
         ProfileSampleData.updateProposalStatus(spotId, ProposalStatus.APPROVED)
+        _uiState.update { state ->
+            val updated = state.proposals.map {
+                if (it.spotId == spotId || it.id == spotId) {
+                    it.copy(status = ProposalStatus.APPROVED, xpEarned = 100)
+                } else it
+            }
+            state.copy(
+                proposals = updated,
+                pendingSpotsCount = updated.count { it.status == ProposalStatus.PENDING }
+            )
+        }
     }
 
     /**
@@ -534,6 +715,17 @@ class ProfileViewModel @JvmOverloads constructor(
     fun rejectPendingSpotById(spotId: String, reason: String) {
         rejectProposalUseCase(spotId, reason)
         ProfileSampleData.updateProposalStatus(spotId, ProposalStatus.REJECTED, reason)
+        _uiState.update { state ->
+            val updated = state.proposals.map {
+                if (it.spotId == spotId || it.id == spotId) {
+                    it.copy(status = ProposalStatus.REJECTED, rejectionReason = reason)
+                } else it
+            }
+            state.copy(
+                proposals = updated,
+                pendingSpotsCount = updated.count { it.status == ProposalStatus.PENDING }
+            )
+        }
     }
 
     fun approveProposal(proposalId: String) {
@@ -580,26 +772,57 @@ class ProfileViewModel @JvmOverloads constructor(
     }
 
     fun editProposal(proposalId: String, newName: String, newLocation: String, newNote: String) {
-        _uiState.update { state ->
-            val updated = state.proposals.map { p ->
-                if (p.id == proposalId) {
-                    p.copy(
-                        name = newName.trim(),
-                        location = newLocation.trim(),
-                        customNote = newNote.trim(),
-                        status = ProposalStatus.PENDING
-                    )
-                } else p
+        val target = _uiState.value.proposals.firstOrNull { it.id == proposalId } ?: return
+        val edited = target.copy(
+            name = newName.trim(),
+            location = newLocation.trim(),
+            customNote = newNote.trim(),
+            status = ProposalStatus.PENDING
+        )
+        ProfileSampleData.updateProposal(currentProfileId, edited)
+        ProfileSampleData.updateProposal(currentUserSpotTag(), edited)
+        // Propagar el cambio al spot compartido para que el feed y Firestore
+        // dejen de mostrar el nombre y la nota antiguos.
+        target.spotId?.let { id ->
+            spotRepository.getSpotById(id)?.let { spot ->
+                spotRepository.updateSpot(
+                    id = id,
+                    name = edited.name,
+                    category = spot.category,
+                    municipality = edited.location,
+                    hours = spot.hours,
+                    priceRange = spot.priceRange,
+                    description = edited.customNote.orEmpty()
+                )
             }
-            state.copy(proposals = updated)
+        }
+        _uiState.update { state ->
+            val updated = state.proposals.map { if (it.id == proposalId) edited else it }
+            state.copy(
+                proposals = updated,
+                moderationProposals = state.moderationProposals.map {
+                    if (it.id == proposalId || it.spotId == target.spotId) edited else it
+                }
+            )
         }
     }
 
     fun deleteProposal(proposalId: String) {
+        val target = _uiState.value.proposals.firstOrNull { it.id == proposalId }
+        ProfileSampleData.removeProposal(currentProfileId, proposalId)
+        ProfileSampleData.removeProposal(currentUserSpotTag(), proposalId)
+        target?.spotId?.let { spotRepository.deleteSpot(it) }
         _uiState.update { state ->
-            val updated = state.proposals.filterNot { it.id == proposalId }
+            val updated = state.proposals.filterNot {
+                it.id == proposalId || (target?.spotId != null && it.spotId == target.spotId)
+            }
+            val updatedModeration = state.moderationProposals.filterNot {
+                it.id == proposalId || (target?.spotId != null && it.spotId == target.spotId)
+            }
             state.copy(
                 proposals = updated,
+                moderationProposals = updatedModeration,
+                pendingSpotsCount = updated.count { it.status == ProposalStatus.PENDING },
                 stats = state.stats.copy(proposals = updated.size),
                 activities = state.activities.map { activity ->
                     if (activity.id == "proposals") activity.copy(valueLabel = "${updated.size}") else activity
@@ -609,24 +832,23 @@ class ProfileViewModel @JvmOverloads constructor(
     }
 
     fun addProposalFromCreatedSpot(name: String, location: String, note: String, spotId: String) {
+        val newProposal = ProposedSpot(
+            id = spotId,
+            name = name,
+            location = location,
+            customSubmittedLabel = "Hoy",
+            status = ProposalStatus.PENDING,
+            xpEarned = 0,
+            customNote = note,
+            spotId = spotId
+        )
+        ProfileSampleData.addProposal(currentProfileId, newProposal)
+        val tag = currentUserSpotTag()
+        ProfileSampleData.addProposal(tag, newProposal)
+
         _uiState.update { state ->
-            val newProposal = ProposedSpot(
-                id = spotId,
-                name = name,
-                location = location,
-                customSubmittedLabel = "Hoy",
-                status = ProposalStatus.PENDING,
-                xpEarned = 0,
-                customNote = note,
-                spotId = spotId
-            )
-            ProfileSampleData.addProposal(currentProfileId, newProposal)
-            val updated: List<ProposedSpot> = listOf(newProposal) + state.proposals
-            val updatedModeration = if (state.moderationProposals.none { it.id == spotId || it.spotId == spotId }) {
-                listOf(newProposal) + state.moderationProposals
-            } else {
-                state.moderationProposals
-            }
+            val updated = (listOf(newProposal) + state.proposals).distinctBy { it.spotId ?: it.id }
+            val updatedModeration = (listOf(newProposal) + state.moderationProposals).distinctBy { it.spotId ?: it.id }
             state.copy(
                 proposals = updated,
                 moderationProposals = updatedModeration,

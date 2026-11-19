@@ -28,18 +28,24 @@ class EjeSpotApplication : Application() {
         // Idioma elegido por el usuario (guía 14 + guía 13).
         AppLanguageController.init(applicationContext)
 
+        // Modo oscuro persistido (Configuración).
+        com.example.ejespot.core.session.AppearanceSettings.init(applicationContext)
+
         // Sesión persistida (Data Store): se restaura de forma asíncrona.
         SessionManager.init(applicationContext)
         SessionManager.restore()
 
+        // Firebase debe existir antes de crear FirestoreSpotRepository dentro
+        // de SpotStore.init(); si no, el repositorio remoto queda inutilizable.
+        try {
+            if (com.google.firebase.FirebaseApp.getApps(this).isEmpty()) {
+                com.google.firebase.FirebaseApp.initializeApp(this)
+            }
+        } catch (_: Exception) {
+            // Google Services puede haberlo inicializado automáticamente.
+        }
+
         // Persistencia local de puntos de interés, notificaciones y votos
         com.example.ejespot.core.data.SpotStore.init(applicationContext)
-
-        // Inicialización segura de Firebase
-        try {
-            com.google.firebase.FirebaseApp.initializeApp(this)
-        } catch (_: Exception) {
-            // Firebase inicializado automáticamente por Google Services o en modo offline
-        }
     }
 }

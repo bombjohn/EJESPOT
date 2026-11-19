@@ -170,6 +170,22 @@ object ProfileSampleData {
         list.add(0, proposal)
     }
 
+    /** Actualiza una propuesta guardada para que ediciones y estados sobrevivan a las sincronizaciones. */
+    fun updateProposal(profileId: String, proposal: ProposedSpot) {
+        val list = dynamicProposalsByUser.getOrPut(profileId) { mutableListOf() }
+        val index = list.indexOfFirst {
+            it.id == proposal.id || (proposal.spotId != null && it.spotId == proposal.spotId)
+        }
+        if (index >= 0) list[index] = proposal else list.add(0, proposal)
+    }
+
+    /** Elimina una propuesta guardada para que no reaparezca en la siguiente sincronización. */
+    fun removeProposal(profileId: String, proposalId: String) {
+        dynamicProposalsByUser[profileId]?.removeAll {
+            it.id == proposalId || it.spotId == proposalId
+        }
+    }
+
     fun updateProposalStatus(spotId: String, status: com.example.ejespot.domain.model.ProposalStatus, reason: String? = null) {
         dynamicProposalsByUser.values.forEach { list ->
             for (i in list.indices) {

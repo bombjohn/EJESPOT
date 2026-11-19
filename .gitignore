@@ -14,6 +14,9 @@
 .cxx
 local.properties
 
+# Caches locales de Kotlin/Gradle (no son código fuente)
+.kotlin/
+
 # Archivos pesados / compilados
 *.dex
 map-clean-base64.txt

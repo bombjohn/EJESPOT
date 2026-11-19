@@ -64,6 +64,9 @@ fun AiAssistantScreen(
             .fillMaxSize()
             .background(EjeSpotBackground)
             .padding(top = padding.calculateTopPadding(), bottom = padding.calculateBottomPadding())
+            // Con edge-to-edge, el teclado tapa el campo de texto si no se
+            // reserva su altura (targetSdk 37).
+            .imePadding()
     ) {
         // --- Top Bar: Botón Volver + Título + Badge de IA ---
         Surface(
@@ -245,6 +248,17 @@ fun AiAssistantScreen(
                     )
                 }
             }
+        }
+
+        // Mostrar fallos de red/API en vez de dejar al usuario sin respuesta.
+        uiState.errorMessage?.let { error ->
+            Text(
+                text = error,
+                fontFamily = ManropeFontFamily,
+                fontSize = 11.5.sp,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
+            )
         }
 
         // --- Input de Texto y Botón Enviar ---

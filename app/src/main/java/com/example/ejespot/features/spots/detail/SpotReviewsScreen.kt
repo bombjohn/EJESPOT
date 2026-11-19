@@ -189,7 +189,7 @@ fun SpotReviewsScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 contentPadding = PaddingValues(bottom = 20.dp)
             ) {
-                items(allReviews) { review ->
+                items(allReviews, key = { it.id }) { review ->
                     Surface(
                         shape = RoundedCornerShape(16.dp),
                         color = c.surface,

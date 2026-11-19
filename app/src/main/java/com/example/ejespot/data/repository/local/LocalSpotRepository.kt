@@ -40,6 +40,8 @@ class LocalSpotRepository : SpotRepository {
         description: String
     ) = SpotStore.updateSpot(id, name, category, municipality, hours, priceRange, description)
 
+    override fun updateSpotImage(id: String, imageUrl: String) = SpotStore.updateSpotImage(id, imageUrl)
+
     override fun finalizeSpot(id: String, finalized: Boolean) = SpotStore.finalizeSpot(id, finalized)
     override fun deleteSpot(id: String) = SpotStore.deleteSpot(id)
     override fun clearUserData(profileId: String) = SpotStore.clearUserData(profileId)

@@ -39,6 +39,11 @@ fun MyReviewsScreen(
     val uiState by viewModel.uiState.collectAsState()
     var selectedFilter by remember { mutableStateOf("Todas") }
 
+    // Refresca al abrir la pantalla para mostrar reseñas recién publicadas.
+    LaunchedEffect(Unit) {
+        viewModel.reloadForCurrentUser()
+    }
+
     val filtered = remember(uiState.reviews, selectedFilter) {
         when (selectedFilter) {
             "5 estrellas" -> uiState.reviews.filter { it.rating >= 5.0 }

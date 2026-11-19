@@ -56,6 +56,12 @@ fun ProfileScreen(
     var showModerationDialog by remember { mutableStateOf(false) }
     val c = ejeSpotColors()
 
+    // Las reseñas/propuestas pueden haber cambiado en otra pantalla (detalle
+    // de spot, creación, etc.), así que se sincronizan al entrar al perfil.
+    LaunchedEffect(Unit) {
+        viewModel.reloadForCurrentUser()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

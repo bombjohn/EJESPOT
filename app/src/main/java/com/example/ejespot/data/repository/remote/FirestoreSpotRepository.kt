@@ -74,7 +74,18 @@ class FirestoreSpotRepository {
         db ?: return emptyList()
         return try {
             val snapshot = db.collection("spots").get().await()
-            snapshot.documents.mapNotNull { doc -> mapDocToSpot(doc) }
+            snapshot.documents.mapNotNull { doc ->
+                val spot = mapDocToSpot(doc) ?: return@mapNotNull null
+                val reviews = loadReviews(spot.id)
+                if (reviews.isEmpty()) {
+                    spot
+                } else {
+                    spot.copy(
+                        reviews = reviews,
+                        reviewCount = maxOf(spot.reviewCount, reviews.size)
+                    )
+                }
+            }
         } catch (_: Exception) {
             emptyList()
         }
@@ -152,6 +163,28 @@ class FirestoreSpotRepository {
     // -------------------------------------------------------------------------
     // REVIEWS (sub-colección)
     // -------------------------------------------------------------------------
+
+    /** Carga las reseñas guardadas en la sub-colección de un spot. */
+    suspend fun loadReviews(spotId: String): List<SpotReview> {
+        val db = db ?: return emptyList()
+        return try {
+            db.collection("spots").document(spotId)
+                .collection("reviews").get().await().documents.mapNotNull { doc ->
+                    SpotReview(
+                        id = doc.getString("id") ?: doc.id,
+                        authorName = doc.getString("authorName") ?: "",
+                        authorBadge = doc.getString("authorBadge") ?: "",
+                        avatarInitials = doc.getString("avatarInitials") ?: "EX",
+                        rating = (doc.getLong("rating") ?: 5L).toInt(),
+                        comment = doc.getString("comment") ?: "",
+                        date = doc.getString("date") ?: "",
+                        authorProfileId = doc.getString("authorProfileId")?.ifBlank { null }
+                    )
+                }
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
 
     /** Agrega una reseña al spot en Firestore. */
     suspend fun addReview(spotId: String, review: SpotReview) {

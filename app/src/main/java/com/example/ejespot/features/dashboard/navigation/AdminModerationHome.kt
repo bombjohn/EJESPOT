@@ -4,7 +4,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -606,6 +608,8 @@ private fun ResolveReportDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
+                    .verticalScroll(rememberScrollState())
+                    .imePadding()
             ) {
                 // Tarjeta de contexto del reporte
                 Surface(
@@ -857,25 +861,38 @@ private fun RejectProposalDialog(
     onConfirm: (reason: String) -> Unit
 ) {
     val c = ejeSpotColors()
-    var selectedReason by remember { mutableStateOf("Información incompleta o no verificable") }
-    var customDetails by remember { mutableStateOf("") }
-
+    val otherReasonStr = stringResource(R.string.admin_reject_reason_other)
     val presetReasons = listOf(
-        "Información incompleta o no verificable",
-        "Lugar duplicado en el catálogo",
-        "El lugar ya no opera comercialmente",
-        "Ubicación fuera del Paisaje Cultural Cafetero",
-        "Otro motivo específico"
+        stringResource(R.string.admin_reject_reason_incomplete),
+        stringResource(R.string.admin_reject_reason_duplicate),
+        stringResource(R.string.admin_reject_reason_closed),
+        stringResource(R.string.admin_reject_reason_out_of_region),
+        otherReasonStr
     )
+    var selectedReason by remember { mutableStateOf(presetReasons.first()) }
+    var customDetails by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(text = "❌", fontSize = 20.sp)
-                Spacer(modifier = Modifier.width(8.dp))
+                Surface(
+                    shape = RoundedCornerShape(100.dp),
+                    color = Color(0xFFFDE8E8),
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = null,
+                            tint = Color(0xFF9E382B),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "Desestimar Propuesta",
+                    text = stringResource(R.string.admin_reject_dialog_title),
                     fontFamily = FrauncesFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
@@ -884,9 +901,14 @@ private fun RejectProposalDialog(
             }
         },
         text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState())
+                    .imePadding()
+            ) {
                 Text(
-                    text = "Indica el motivo por el cual no se publicará '${proposal.name}':",
+                    text = stringResource(R.string.admin_reject_dialog_message, proposal.name),
                     fontFamily = ManropeFontFamily,
                     fontSize = 12.5.sp,
                     color = c.textSoft
@@ -914,12 +936,12 @@ private fun RejectProposalDialog(
                         )
                     }
                 }
-                if (selectedReason == "Otro motivo especÃ­fico") {
+                if (selectedReason == otherReasonStr) {
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
                         value = customDetails,
                         onValueChange = { customDetails = it },
-                        placeholder = { Text("Escribe el motivo detallado...", fontSize = 11.5.sp) },
+                        placeholder = { Text(stringResource(R.string.admin_reject_custom_placeholder), fontSize = 11.5.sp) },
                         modifier = Modifier.fillMaxWidth(),
                         maxLines = 3
                     )
@@ -929,7 +951,7 @@ private fun RejectProposalDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val finalReason = if (selectedReason == "Otro motivo especÃ­fico" && customDetails.isNotBlank()) {
+                    val finalReason = if (selectedReason == otherReasonStr && customDetails.isNotBlank()) {
                         customDetails.trim()
                     } else {
                         selectedReason
@@ -939,7 +961,7 @@ private fun RejectProposalDialog(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9E382B))
             ) {
                 Text(
-                    text = "Confirmar Rechazo",
+                    text = stringResource(R.string.admin_reject_confirm),
                     fontFamily = ManropeFontFamily,
                     fontWeight = FontWeight.Bold,
                     fontSize = 12.sp,
@@ -950,7 +972,7 @@ private fun RejectProposalDialog(
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(
-                    text = "Cancelar",
+                    text = stringResource(R.string.admin_reject_cancel),
                     fontFamily = ManropeFontFamily,
                     color = c.textSoft,
                     fontSize = 12.sp

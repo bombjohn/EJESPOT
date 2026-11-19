@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.ejespot.domain.model.UserRole
 import com.example.ejespot.features.dashboard.component.BottomNavigationBar
 import com.example.ejespot.features.dashboard.navigation.DashboardDestination
+import com.example.ejespot.features.dashboard.navigation.DashboardRoutes
 import com.example.ejespot.features.dashboard.navigation.DashboardNavigation
 
 @Composable
@@ -32,9 +33,22 @@ fun MainScreen(
     val currentDestination = navBackStackEntry?.destination
 
     // Mostrar barra inferior solo en destinos principales del Dashboard
-    val showBottomBar = currentDestination == null || items.any { destination ->
-        currentDestination.hierarchy.any { it.hasRoute(destination.route::class) }
-    }
+    val mainTabs = listOf(
+        DashboardRoutes.HomeUser::class,
+        DashboardRoutes.Map::class,
+        DashboardRoutes.Visited::class,
+        DashboardRoutes.Profile::class,
+        DashboardRoutes.HomeAdmin::class
+    )
+    val showBottomBar = currentDestination == null ||
+        items.any { destination ->
+            currentDestination.hierarchy.any { it.hasRoute(destination.route::class) }
+        } ||
+        // Un ADMIN puede abrir Mapa/Visitados/Explorar desde su perfil:
+        // aunque no sean ítems de su barra, debe poder volver a sus pestañas.
+        mainTabs.any { route ->
+            currentDestination.hierarchy.any { it.hasRoute(route) }
+        }
 
     // SnackbarHost compartido para todo el dashboard
     val snackbarHostState = remember { SnackbarHostState() }

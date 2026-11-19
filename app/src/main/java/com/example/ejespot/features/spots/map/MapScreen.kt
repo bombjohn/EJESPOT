@@ -723,6 +723,15 @@ private fun MapView.centerOnMyLocation() {
     }
     overlay.enableFollowLocation()
     overlay.myLocation?.let { controller.animateTo(it, 15.0, 800L) }
+        ?: run {
+            // La primera vez el fix aún no existe: esperar al primer dato y
+            // centrar entonces, en el hilo de la UI.
+            overlay.runOnFirstFix {
+                overlay.myLocation?.let { location ->
+                    post { controller.animateTo(location, 15.0, 800L) }
+                }
+            }
+        }
     invalidate()
 }
 

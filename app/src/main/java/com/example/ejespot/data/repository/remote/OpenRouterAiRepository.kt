@@ -19,23 +19,13 @@ import java.net.URL
  * Cuenta con fallback local inteligente en caso de falta de conectividad.
  */
 class OpenRouterAiRepository(
-    private var apiKey: String = DEFAULT_API_KEY
+    private var apiKey: String = com.example.ejespot.BuildConfig.OPENROUTER_API_KEY
 ) : AiAssistantRepository {
 
     companion object {
         private const val OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
         // Modelo gratuito conversacional activo en OpenRouter (devuelve content no nulo)
         private const val MODEL_NAME = "liquid/lfm-3-1.7b:free"
-
-        // Clave activa de OpenRouter para consultas en vivo de IA (decodificada de forma segura)
-        private val DEFAULT_API_KEY: String by lazy {
-            try {
-                val b64 = "c2stb3ItdjEtY2IyZTdhNTRlYmQyNGQ3MWNkYjQ0YmViNzMxNGJkOGIwYTlhNmVmM2ZkZjljYmZiMjEzOTI5NDNjMzNmZGY3Yg=="
-                String(android.util.Base64.decode(b64, android.util.Base64.DEFAULT), Charsets.UTF_8).trim()
-            } catch (_: Exception) {
-                ""
-            }
-        }
     }
 
     fun updateApiKey(newKey: String) {

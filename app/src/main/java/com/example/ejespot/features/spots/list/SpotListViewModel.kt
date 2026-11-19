@@ -55,7 +55,10 @@ class SpotListViewModel(
         val all = spotRepository.allSpots()
         _uiState.update { state ->
             state.copy(
-                spots = applyFilters(all, state),
+                // El feed de verificados no debe incluir pendientes: si no,
+                // el mismo spot aparecedos veces (verificados y pendientes)
+                // y se duplican marcadores en el mapa.
+                spots = applyFilters(all.filterNot { it.isPending }, state),
                 pendingSpots = all.filter { it.isPending }
             )
         }

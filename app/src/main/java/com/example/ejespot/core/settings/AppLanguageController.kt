@@ -108,6 +108,9 @@ object AppLanguageController {
         Locale.setDefault(locale)
         val config = Configuration(base.resources.configuration)
         config.setLocale(locale)
+        // Marcar como aplicado aquí evita que MainActivity.recreate() entre en
+        // bucle en Android 12 y anteriores: el idioma ya está en el contexto.
+        appliedTag = tag
         return base.createConfigurationContext(config)
     }
 }

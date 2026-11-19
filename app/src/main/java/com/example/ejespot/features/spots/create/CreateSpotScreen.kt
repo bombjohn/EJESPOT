@@ -65,6 +65,7 @@ fun CreateSpotScreen(
     padding: PaddingValues = PaddingValues(),
     snackbarHostState: SnackbarHostState,
     onNavigateBack: () -> Unit,
+    onBackToHome: (() -> Unit)? = null,
     onSpotCreated: ((Spot) -> Unit)? = null,
     onViewProposedSpots: (() -> Unit)? = null,
     viewModel: CreateSpotViewModel = viewModel()
@@ -94,13 +95,17 @@ fun CreateSpotScreen(
             padding = padding,
             onBackToHome = {
                 viewModel.resetState()
-                onNavigateBack()
+                if (onBackToHome != null) onBackToHome() else onNavigateBack()
             },
             onViewProposedSpots = {
-                viewModel.resetState()
+                // No reiniciar el formulario antes de navegar: eso vuelve a
+                // mostrar el formulario durante la transición y hace parecer
+                // que el botón "saca" de la pantalla. El destino se encarga de
+                // limpiar el estado al volver a Crear lugar.
                 if (onViewProposedSpots != null) {
                     onViewProposedSpots()
                 } else {
+                    viewModel.resetState()
                     onNavigateBack()
                 }
             }
@@ -140,6 +145,14 @@ fun CreateSpotScreen(
                 // marcador aparezca en el lugar correcto del mapa real.
                 val (lat, lng) = coordinatesFor(loc)
                 val currentUriString = imageUri?.toString()
+                val userTag = when {
+                    SessionManager.isGuest -> "@invitado"
+                    SessionManager.displayName.isNotBlank() && !SessionManager.displayName.equals("invitado", ignoreCase = true) ->
+                        "@${SessionManager.displayName.replace(" ", "_").lowercase()}"
+                    SessionManager.currentUser?.email?.isNotBlank() == true ->
+                        "@${SessionManager.currentUser?.email?.substringBefore("@")?.lowercase()}"
+                    else -> "@usuario"
+                }
                 val newSpot = Spot(
                     id = "spot_${System.currentTimeMillis()}",
                     name = name,
@@ -153,10 +166,12 @@ fun CreateSpotScreen(
                     hours = hours,
                     priceRange = price,
                     description = desc,
-                    addedBy = if (SessionManager.isGuest) "@invitado" else "@${SessionManager.displayName.replace(" ", "_").lowercase()}",
+                    addedBy = userTag,
                     imageResId = if (currentUriString == null) R.drawable.spot_cascada_frailes else null,
                     imageUri = currentUriString,
-                    imageUrl = currentUriString,
+                    // Un content:// no es válido fuera de esta sesión: imageUrl
+                    // solo se rellena con la URL pública de Firebase Storage.
+                    imageUrl = null,
                     location = Location(lat, lng),
                     isPending = true
                 )
@@ -169,15 +184,9 @@ fun CreateSpotScreen(
                         runCatching {
                             val cloudUrl = com.example.ejespot.data.repository.remote.CloudImageStorageService.uploadImage(context, pickedUri)
                             if (cloudUrl.startsWith("http")) {
-                                SpotStore.updateSpot(
-                                    id = newSpot.id,
-                                    name = newSpot.name,
-                                    category = newSpot.category,
-                                    municipality = newSpot.municipality,
-                                    hours = newSpot.hours,
-                                    priceRange = newSpot.priceRange,
-                                    description = newSpot.description
-                                )
+                                // Persistir la URL pública (local + Firestore) para que
+                                // la foto se vea en todos los dispositivos y tras reiniciar.
+                                SpotStore.updateSpotImage(newSpot.id, cloudUrl)
                             }
                         }
                     }

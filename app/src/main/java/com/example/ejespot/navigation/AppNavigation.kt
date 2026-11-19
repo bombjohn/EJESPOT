@@ -1,6 +1,7 @@
 package com.example.ejespot.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -33,7 +34,10 @@ fun AppNavigation(
     // El Surface toma el color de fondo del tema, así las pantallas se ven
     // bien en modo claro y oscuro.
     Surface(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            // Evita que el teclado tapes campos y botones en formularios y chat.
+            .imePadding()
     ) {
         NavHost(
             navController = navController,

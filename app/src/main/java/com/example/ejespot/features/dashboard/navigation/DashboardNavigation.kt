@@ -4,8 +4,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -21,7 +25,6 @@ import com.example.ejespot.features.dashboard.profile.LegalDocument
 import com.example.ejespot.features.dashboard.profile.LegalScreen
 import com.example.ejespot.features.dashboard.profile.MyProposalsScreen
 import com.example.ejespot.features.dashboard.profile.MyReviewsScreen
-import com.example.ejespot.features.dashboard.profile.NotificationsScreen
 import com.example.ejespot.features.dashboard.profile.PermissionsScreen
 import com.example.ejespot.features.dashboard.profile.ProfileScreen
 import com.example.ejespot.features.dashboard.profile.ProfileViewModel
@@ -67,6 +70,27 @@ fun DashboardNavigation(
             }
             launchSingleTop = true
             restoreState = true
+        }
+    }
+
+    /**
+     * Abre "Mis propuestas" de forma segura desde cualquier pantalla del
+     * dashboard (perfil o Pantalla 5.2 de éxito al crear un spot).
+     *
+     * Se sincroniza el perfil justo antes de navegar para que la lista muestre
+     * los puntos recién publicados, y se retira CreateSpot de la pila sin
+     * vaciar el grafo: así el botón nunca "saca" de la app ni deja una pantalla
+     * en blanco al pulsar Atrás.
+     */
+    fun openMyProposals() {
+        profileViewModel.reloadForCurrentUser()
+        val leavingCreateSpot = navController.currentBackStackEntry
+            ?.destination?.hasRoute<DashboardRoutes.CreateSpot>() == true
+        if (leavingCreateSpot) {
+            navController.popBackStack<DashboardRoutes.CreateSpot>(inclusive = true)
+        }
+        navController.navigate(DashboardRoutes.MyProposals) {
+            launchSingleTop = true
         }
     }
 
@@ -142,10 +166,10 @@ fun DashboardNavigation(
                     navController.navigate(DashboardRoutes.MyReviews)
                 },
                 onMyProposals = {
-                    navController.navigate(DashboardRoutes.MyProposals)
+                    openMyProposals()
                 },
                 onNavigateToVisited = { navigateToTab(DashboardRoutes.Visited) },
-                onNavigateToAdmin = { navController.navigate(DashboardRoutes.HomeAdmin) },
+                onNavigateToAdmin = { navigateToTab(DashboardRoutes.HomeAdmin) },
                 onLogout = onLogout
             )
         }
@@ -156,10 +180,9 @@ fun DashboardNavigation(
                 padding = padding,
                 snackbarHostState = snackbarHostState,
                 onNavigateBack = { navController.popBackStack() },
+                onBackToHome = { navigateToTab(DashboardRoutes.HomeUser) },
                 onViewProposedSpots = {
-                    navController.navigate(DashboardRoutes.MyProposals) {
-                        popUpTo(DashboardRoutes.CreateSpot) { inclusive = true }
-                    }
+                    openMyProposals()
                 },
                 onSpotCreated = { newSpot ->
                     spotListViewModel.addPendingSpot(newSpot)
@@ -179,7 +202,12 @@ fun DashboardNavigation(
         // Pantalla Detalle de Spot
         composable<DashboardRoutes.SpotDetail> { backStackEntry ->
             val route = backStackEntry.toRoute<DashboardRoutes.SpotDetail>()
-            val spot = spotListViewModel.getSpotById(route.spotId)
+            val feedState by spotListViewModel.uiState.collectAsState()
+            // Observar el repositorio para que una reseña recién publicada
+            // aparezca en el detalle sin salir y volver a entrar.
+            val spot = remember(feedState.spots, feedState.pendingSpots, route.spotId) {
+                (feedState.spots + feedState.pendingSpots).firstOrNull { it.id == route.spotId }
+            }
             SpotDetailScreen(
                 spot = spot,
                 padding = padding,

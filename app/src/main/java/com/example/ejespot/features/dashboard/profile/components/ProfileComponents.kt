@@ -150,13 +150,14 @@ fun ProfileMenuRow(
     badgeColor: Color = Color(0xFF2C5640),
     badgeBackground: Color = Color(0xFFD7E8DC),
     titleColor: Color = Color(0xFF1F1A15),
-    showChevron: Boolean = true
+    showChevron: Boolean = true,
+    enabled: Boolean = true
 ) {
     val c = ejeSpotColors()
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

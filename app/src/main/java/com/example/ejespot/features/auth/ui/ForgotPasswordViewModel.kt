@@ -38,18 +38,41 @@ class ForgotPasswordViewModel : ViewModel() {
         _uiState.update { it.copy(isLoading = true, errorMessage = null) }
 
         viewModelScope.launch {
-            authRepo.sendPasswordResetEmail(email)
-            _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+            val result = authRepo.sendPasswordResetEmail(email)
+            _uiState.update {
+                if (result.isSuccess) {
+                    it.copy(isLoading = false, isSuccess = true, errorMessage = null)
+                } else {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = resources.getString(errorMessageFor(result.exceptionOrNull()))
+                    )
+                }
+            }
         }
     }
 
     fun onResendEmail() {
         val email = _uiState.value.email.trim()
-        _uiState.update { it.copy(isLoading = true) }
+        _uiState.update { it.copy(isLoading = true, errorMessage = null) }
         viewModelScope.launch {
-            authRepo.sendPasswordResetEmail(email)
-            _uiState.update { it.copy(isLoading = false, isSuccess = true) }
+            val result = authRepo.sendPasswordResetEmail(email)
+            _uiState.update {
+                if (result.isSuccess) {
+                    it.copy(isLoading = false, isSuccess = true, errorMessage = null)
+                } else {
+                    it.copy(
+                        isLoading = false,
+                        errorMessage = resources.getString(errorMessageFor(result.exceptionOrNull()))
+                    )
+                }
+            }
         }
+    }
+
+    private fun errorMessageFor(error: Throwable?): Int = when (error) {
+        is com.google.firebase.auth.FirebaseAuthInvalidUserException -> R.string.forgot_email_not_found
+        else -> R.string.forgot_send_error
     }
 
     fun resetState() {

@@ -274,7 +274,7 @@ fun SpotListScreen(
                 )
             }
 
-            items(uiState.spots) { spot ->
+            items(uiState.spots, key = { it.id }) { spot ->
                 SpotCard(
                     spot = spot,
                     isVisited = spot.id in visitedIds,
@@ -295,7 +295,7 @@ fun SpotListScreen(
                     )
                 }
 
-                items(uiState.pendingSpots) { spot ->
+                items(uiState.pendingSpots, key = { it.id }) { spot ->
                     SpotCard(
                         spot = spot,
                         isVisited = spot.id in visitedIds,

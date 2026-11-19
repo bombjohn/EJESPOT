@@ -47,8 +47,8 @@ import com.example.ejespot.features.spots.list.SpotListViewModel
 import com.example.ejespot.ui.theme.*
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
-import com.example.ejespot.features.spots.create.CartoDark
-import com.example.ejespot.features.spots.create.CartoVoyager
+import com.example.ejespot.features.spots.create.EjeSpotDarkTiles
+import com.example.ejespot.features.spots.create.EjeSpotLightTiles
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -281,7 +281,7 @@ fun MapScreen(
                         color = c.primaryContainer
                     ) {
                         Text(
-                            text = "OSM · CARTO",
+                            text = "OSM · HOT",
                             fontFamily = ManropeFontFamily,
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 9.sp,
@@ -683,7 +683,7 @@ private fun rememberMapViewWithLifecycle(context: Context, darkTheme: Boolean): 
             java.io.File(context.cacheDir, "osmdroid/tiles")
 
         MapView(context).apply {
-            setTileSource(if (darkTheme) CartoDark else CartoVoyager)
+            setTileSource(if (darkTheme) EjeSpotDarkTiles else EjeSpotLightTiles)
             setMultiTouchControls(true)
             controller.setZoom(DEFAULT_ZOOM)
             controller.setCenter(EJE_CAFETERO_CENTER)
@@ -706,10 +706,27 @@ private fun rememberMapViewWithLifecycle(context: Context, darkTheme: Boolean): 
         }
     }
 
-    // Mosaicos dedicados para claro/oscuro: se ven mucho mejor que invertir
-    // los colores del mapa con un filtro.
+    // Mapa claro HOT de OSM (sin API key). En modo oscuro se atenúa Mapnik
+    // con un filtro suave para mantener legibles las calles y etiquetas.
     LaunchedEffect(darkTheme) {
-        mapView.setTileSource(if (darkTheme) CartoDark else CartoVoyager)
+        mapView.setTileSource(if (darkTheme) EjeSpotDarkTiles else EjeSpotLightTiles)
+        @Suppress("DEPRECATION")
+        mapView.overlayManager.tilesOverlay.setColorFilter(
+            if (darkTheme) {
+                android.graphics.ColorMatrixColorFilter(
+                    android.graphics.ColorMatrix(
+                        floatArrayOf(
+                            0.62f, 0f, 0f, 0f, 0f,
+                            0f, 0.68f, 0f, 0f, 8f,
+                            0f, 0f, 0.62f, 0f, 4f,
+                            0f, 0f, 0f, 1f, 0f
+                        )
+                    )
+                )
+            } else {
+                null
+            }
+        )
         mapView.invalidate()
     }
 

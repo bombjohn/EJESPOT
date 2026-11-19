@@ -39,26 +39,23 @@ private val EJE_CENTER = GeoPoint(4.8087, -75.6903)
 private const val PICKER_USER_AGENT =
     "EjeSpot/1.0 (Android; com.example.ejespot; selector de ubicación)"
 
-/** Mapa base claro tipo Voyager (más legible y bonito que el Mapnik clásico). */
-internal val CartoVoyager = XYTileSource(
-    "CartoVoyager", 0, 19, 256, ".png",
+/**
+ * Mapa base Humanitarian (HOT) de OpenStreetMap: es gratuito, no pide API key
+ * y se ve mucho mejor que el Mapnik clásico. CARTO dejó de servir mosaicos sin
+ * clave y mostraba "API KEY REQUIRED" en todo el mapa.
+ */
+internal val EjeSpotLightTiles = XYTileSource(
+    "OSM-HOT", 0, 19, 256, ".png",
     arrayOf(
-        "https://a.basemaps.cartocdn.com/rastertiles/voyager/",
-        "https://b.basemaps.cartocdn.com/rastertiles/voyager/",
-        "https://c.basemaps.cartocdn.com/rastertiles/voyager/"
+        "https://a.tile.openstreetmap.fr/hot/",
+        "https://b.tile.openstreetmap.fr/hot/",
+        "https://c.tile.openstreetmap.fr/hot/"
     ),
-    "© OpenStreetMap contributors © CARTO"
+    "© OpenStreetMap contributors, HOT"
 )
 
-internal val CartoDark = XYTileSource(
-    "CartoDark", 0, 19, 256, ".png",
-    arrayOf(
-        "https://a.basemaps.cartocdn.com/dark_all/",
-        "https://b.basemaps.cartocdn.com/dark_all/",
-        "https://c.basemaps.cartocdn.com/dark_all/"
-    ),
-    "© OpenStreetMap contributors © CARTO"
-)
+/** Base para modo oscuro: Mapnik se atenúa con un filtro en MapScreen. */
+internal val EjeSpotDarkTiles = TileSourceFactory.MAPNIK
 
 /**
  * Selector de ubicación real: el usuario toca el mapa y coloca el marcador
@@ -87,7 +84,7 @@ fun LocationPickerDialog(
         Configuration.getInstance().osmdroidTileCache =
             java.io.File(context.cacheDir, "osmdroid/tiles")
         MapView(context).apply {
-            setTileSource(if (c.isDark) CartoDark else CartoVoyager)
+            setTileSource(if (c.isDark) EjeSpotDarkTiles else EjeSpotLightTiles)
             setMultiTouchControls(true)
             controller.setZoom(if (picked != null) 15.0 else 11.0)
             controller.setCenter(picked ?: EJE_CENTER)
